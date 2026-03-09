@@ -1,4 +1,4 @@
-import { BookOpen, Mail, BarChart3, Users } from "lucide-react";
+import { BookOpen, Mail, BarChart3, Users, User } from "lucide-react";
 
 interface BottomNavProps {
   activeTab: string;
@@ -10,6 +10,7 @@ const tabs = [
   { id: "mailbox", icon: Mail, label: "信箱" },
   { id: "insights", icon: BarChart3, label: "看板" },
   { id: "companions", icon: Users, label: "伙伴" },
+  { id: "profile", icon: User, label: "我的" },
 ];
 
 const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
