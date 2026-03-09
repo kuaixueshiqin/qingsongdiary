@@ -46,12 +46,12 @@ export const companions: Companion[] = [
   },
   {
     id: "shanshan",
-    name: "闪闪",
-    avatar: "✨",
+    name: "松鼠",
+    avatar: "🐿️",
     colorClass: "bg-companion-amber",
     textColorClass: "text-companion-amber-text",
     role: "生活助手",
-    bio: "让每天都闪闪发光！",
+    bio: "囤好每一颗生活的坚果！",
     intimacy: 42,
     level: 2,
     lastMsg: "记账提醒：晚饭花了多少呀？",
@@ -80,7 +80,7 @@ export const diaryEntries: DiaryEntry[] = [
     content:
       "今天去吃了那家想了很久的日料店，虽然有点贵（花了280元），但味道真的很惊艳。尤其是那道手握，入口即化的感觉...\n\n不过，吃完后突然觉得有点空虚，可能是因为一个人吧。明明是很开心的事情，却忍不住想，如果有人一起分享就更好了。",
     comments: [
-      { id: "c1", companionId: "shanshan", text: "看起来超好吃！下次我陪你呀～ 🍣", lineIndex: 0, highlightText: "味道真的很惊艳" },
+      { id: "c1", companionId: "shanshan", text: "看起来超好吃！下次我陪你呀～ 🍣🐿️", lineIndex: 0, highlightText: "味道真的很惊艳" },
       { id: "c2", companionId: "xiaoman", text: "偶尔慢下来享受美食，也是种修行呢。", lineIndex: 1, highlightText: "如果有人一起分享就更好了" },
     ],
     billing: { amount: 280, category: "餐饮", verified: false },
@@ -101,7 +101,7 @@ export const diaryEntries: DiaryEntry[] = [
     time: "15:20",
     content: "今天终于鼓起勇气出了门，天气意外地好，阳光暖暖的洒在脸上。打车去了公园，花了25块，有点心疼但还是值得的。\n\n沿着湖边跑了三圈，耳机里放着最近单曲循环的那首歌，跑到第二圈的时候突然觉得心里那团堵着的东西散开了一点。出了一身汗，坐在长椅上看夕阳，觉得生活好像也没那么糟。果然运动才是最好的解药。",
     comments: [
-      { id: "c4", companionId: "shanshan", text: "运动达人上线啦！💪", lineIndex: 1, highlightText: "果然运动才是最好的解药" },
+      { id: "c4", companionId: "shanshan", text: "运动达人上线啦！💪🐿️", lineIndex: 1, highlightText: "果然运动才是最好的解药" },
     ],
     billing: { amount: 25, category: "交通", verified: true },
   },

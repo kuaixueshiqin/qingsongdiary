@@ -43,7 +43,7 @@ const CompanionsView = () => {
     setMyCompanions((prev) => [...prev, comp]);
     setShowCreate(false);
     setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
-    toast.success(`${comp.name} 已创建并加入密友列表！`);
+    toast.success(`${comp.name} 已创建并加入伙伴列表！`);
   };
 
   const handleToggleCompanion = (id: string, enabled: boolean) => {
@@ -70,7 +70,7 @@ const CompanionsView = () => {
       delay: "随机",
     };
     setMyCompanions((prev) => [...prev, newComp]);
-    toast.success(`${agent.name} 已加入你的密友列表！`);
+    toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
 
   // Settings panel
@@ -183,7 +183,7 @@ const CompanionsView = () => {
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-black text-foreground">密友</h1>
+          <h1 className="text-2xl font-black text-foreground">伙伴</h1>
           <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-[0.2em] font-semibold">
             {view === "my" ? "My Companions" : "Agents Square"}
           </p>
@@ -210,7 +210,7 @@ const CompanionsView = () => {
                       <span className="text-[10px] font-bold text-muted-foreground/30">Lv.{comp.level}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{comp.role}</p>
-                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时延: {comp.delay}</p>
+                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时长: {comp.delay}</p>
                   </div>
                 </div>
                 <div className="space-y-1">
