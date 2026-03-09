@@ -17,8 +17,34 @@ const CompanionsView = () => {
   const [myCompanions, setMyCompanions] = useState<Companion[]>(initialCompanions);
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newRole, setNewRole] = useState("");
+  const [newBio, setNewBio] = useState("");
+  const [newAvatar, setNewAvatar] = useState("🤖");
+  const [newColor, setNewColor] = useState("bg-companion-green");
 
-  const handleToggleCompanion = (id: string, enabled: boolean) => {
+  const handleCreateCompanion = () => {
+    if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
+    if (!newRole.trim()) { toast.error("请输入伙伴角色"); return; }
+    const comp: Companion = {
+      id: `custom-${Date.now()}`,
+      name: newName.trim(),
+      avatar: newAvatar,
+      colorClass: newColor,
+      textColorClass: "text-foreground",
+      role: newRole.trim(),
+      bio: newBio.trim() || "自定义伙伴",
+      intimacy: 0,
+      level: 1,
+      lastMsg: "你好呀，很高兴认识你！",
+      delay: "随机",
+    };
+    setMyCompanions((prev) => [...prev, comp]);
+    setShowCreate(false);
+    setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
+    toast.success(`${comp.name} 已创建并加入密友列表！`);
+  };
     toast.success(enabled ? "已启用该伙伴的互动" : "已暂停该伙伴的互动");
   };
 
