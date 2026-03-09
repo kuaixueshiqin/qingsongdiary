@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check } from "lucide-react";
-import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment } from "@/lib/data";
+import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const DiaryView = () => {
   const [entries, setEntries] = useState<DiaryEntry[]>(initialEntries);
@@ -14,6 +15,7 @@ const DiaryView = () => {
   const [editingBilling, setEditingBilling] = useState(false);
   const [billingAmount, setBillingAmount] = useState("");
   const [billingCategory, setBillingCategory] = useState("");
+  const [loadingReply, setLoadingReply] = useState<string | null>(null);
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
@@ -29,12 +31,73 @@ const DiaryView = () => {
     toast.success("评论已删除");
   };
 
-  const handleReply = (entryId: number, comment: DiaryComment) => {
-    if (!replyText.trim()) return;
+  const addReplyToComment = (entryId: number, commentId: string, reply: CommentReply) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === entryId
+          ? {
+              ...e,
+              comments: e.comments.map((c) =>
+                c.id === commentId ? { ...c, replies: [...c.replies, reply] } : c
+              ),
+            }
+          : e
+      )
+    );
+  };
+
+  const handleReply = async (entryId: number, comment: DiaryComment) => {
+    if (!replyText.trim() || loadingReply) return;
     const comp = companions.find((c) => c.id === comment.companionId);
-    toast.success(`已回复${comp?.name ?? "AI伙伴"}：${replyText}`);
+    if (!comp) return;
+
+    const now = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+    const userReply: CommentReply = {
+      id: `ur-${Date.now()}`,
+      role: "user",
+      companionId: comment.companionId,
+      text: replyText.trim(),
+      time: now,
+    };
+
+    addReplyToComment(entryId, comment.id, userReply);
+    const savedReplyText = replyText.trim();
     setReplyText("");
     setReplyingTo(null);
+    setLoadingReply(comment.id);
+
+    // Build conversation context for AI
+    const chatMessages = [
+      { role: "assistant" as const, content: comment.text },
+      ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
+      { role: "user" as const, content: savedReplyText },
+    ];
+
+    try {
+      const { data, error } = await supabase.functions.invoke("companion-chat", {
+        body: {
+          companionId: comment.companionId,
+          messages: chatMessages,
+        },
+      });
+
+      if (error) throw error;
+
+      const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+      const aiReply: CommentReply = {
+        id: `ar-${Date.now()}`,
+        role: "assistant",
+        companionId: comment.companionId,
+        text: data.reply || "...",
+        time: replyTime,
+      };
+      addReplyToComment(entryId, comment.id, aiReply);
+    } catch (e: any) {
+      console.error("Reply error:", e);
+      toast.error(e?.message || "AI回复失败，请稍后再试");
+    } finally {
+      setLoadingReply(null);
+    }
   };
 
   const handleSaveDiary = () => {
@@ -131,8 +194,10 @@ const DiaryView = () => {
                       if (!comp) return null;
                       const isActive = activeCommentId === comment.id;
                       const isReplying = replyingTo === comment.id;
+                      const isLoading = loadingReply === comment.id;
                       return (
-                        <div key={comment.id} className="space-y-1.5">
+                        <div key={comment.id} className="space-y-1">
+                          {/* Original AI comment */}
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => setActiveCommentId(isActive ? null : comment.id)}
@@ -153,9 +218,52 @@ const DiaryView = () => {
                               </div>
                             )}
                           </div>
+
+                          {/* Reply thread */}
+                          {comment.replies.length > 0 && (
+                            <div className="pl-5 border-l-2 border-border ml-3 space-y-1.5">
+                              {comment.replies.map((reply) => {
+                                const replyComp = companions.find((c) => c.id === reply.companionId);
+                                return (
+                                  <div key={reply.id} className="flex items-start gap-2 animate-in fade-in duration-300">
+                                    {reply.role === "user" ? (
+                                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-primary/10 text-foreground max-w-[80%]">
+                                        <span className="flex-shrink-0">🧑</span>
+                                        <span className="font-medium flex-shrink-0">我</span>
+                                        <span className="opacity-70">{reply.text}</span>
+                                        <span className="text-[9px] text-muted-foreground/40 ml-1 flex-shrink-0">{reply.time}</span>
+                                      </div>
+                                    ) : (
+                                      <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"} max-w-[80%]`}>
+                                        <span className="flex-shrink-0">{replyComp?.avatar ?? "🤖"}</span>
+                                        <span className="font-medium flex-shrink-0">{replyComp?.name ?? "AI"}</span>
+                                        <span className="opacity-70">{reply.text}</span>
+                                        <span className="text-[9px] opacity-40 ml-1 flex-shrink-0">{reply.time}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Loading indicator for AI reply */}
+                          {isLoading && (
+                            <div className="pl-5 border-l-2 border-border ml-3">
+                              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${comp.colorClass}`}>
+                                <span>{comp.avatar}</span>
+                                <div className="flex gap-1">
+                                  <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                                  <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                                  <div className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Reply input */}
                           {isReplying && (
-                            <div className="flex gap-2 pl-4 animate-in slide-in-from-top-2 duration-200">
+                            <div className="flex gap-2 pl-5 ml-3 animate-in slide-in-from-top-2 duration-200">
                               <input
                                 autoFocus
                                 value={replyText}
@@ -164,7 +272,7 @@ const DiaryView = () => {
                                 placeholder={`回复 ${comp.name}...`}
                                 className="flex-1 bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground placeholder:text-muted-foreground/30"
                               />
-                              <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim()} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30">
+                              <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30">
                                 <Send size={12} />
                               </button>
                             </div>
