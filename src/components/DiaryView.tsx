@@ -129,58 +129,82 @@ const DiaryDetail = ({ entry, onBack, activeCommentId, onCommentClick }: DiaryDe
         </div>
       </div>
 
-      <div className="px-6 space-y-8">
+      <div className="px-6 space-y-6">
         {paragraphs.map((para, pIdx) => {
           const lineComments = entry.comments.filter((c) => c.lineIndex === pIdx);
+          
+          // Build paragraph with inline underlines for highlighted phrases
+          const renderParagraph = () => {
+            if (lineComments.length === 0) return para;
+
+            // Collect all highlight texts and their comment data
+            const highlights = lineComments
+              .filter((c) => c.highlightText && para.includes(c.highlightText))
+              .sort((a, b) => para.indexOf(a.highlightText) - para.indexOf(b.highlightText));
+
+            if (highlights.length === 0) return para;
+
+            const parts: React.ReactNode[] = [];
+            let lastIndex = 0;
+
+            highlights.forEach((comment) => {
+              const idx = para.indexOf(comment.highlightText, lastIndex);
+              if (idx === -1) return;
+
+              // Text before the highlight
+              if (idx > lastIndex) {
+                parts.push(para.slice(lastIndex, idx));
+              }
+
+              // Highlighted text with underline
+              parts.push(
+                <span
+                  key={comment.id}
+                  className="underline decoration-accent decoration-2 underline-offset-4 cursor-pointer"
+                  onClick={() => onCommentClick(activeCommentId === comment.id ? null : comment.id)}
+                >
+                  {comment.highlightText}
+                </span>
+              );
+
+              lastIndex = idx + comment.highlightText.length;
+            });
+
+            // Remaining text
+            if (lastIndex < para.length) {
+              parts.push(para.slice(lastIndex));
+            }
+
+            return parts;
+          };
+
           return (
             <div key={pIdx} className="relative">
-              {/* AI comments above the paragraph */}
-              {lineComments.length > 0 && (
-                <div className="mb-2 space-y-1.5">
-                  {lineComments.map((comment) => {
-                    const comp = companions.find((c) => c.id === comment.companionId);
-                    if (!comp) return null;
-                    const isActive = activeCommentId === comment.id;
-                    return (
-                      <div key={comment.id} className="flex items-center gap-2">
-                        <button
-                          onClick={() => onCommentClick(isActive ? null : comment.id)}
-                          className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs transition-all ${
-                            isActive
-                              ? "bg-foreground text-primary-foreground scale-105"
-                              : `${comp.colorClass} ${comp.textColorClass}`
-                          }`}
-                        >
-                          <span>{comp.avatar}</span>
-                          <span className="font-medium">{comp.name}</span>
-                          <span className={isActive ? "text-primary-foreground/80" : "opacity-70"}>
-                            {comment.text}
-                          </span>
-                        </button>
-                        {/* Action buttons */}
-                        {isActive && (
-                          <div className="flex gap-1 animate-in slide-in-from-left-2 duration-200">
-                            <button className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground">
-                              <Reply size={14} />
-                            </button>
-                            <button className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              {/* AI comments shown when active */}
+              {lineComments.map((comment) => {
+                const comp = companions.find((c) => c.id === comment.companionId);
+                if (!comp || activeCommentId !== comment.id) return null;
+                return (
+                  <div key={comment.id} className="mb-2 flex items-center gap-2 animate-in fade-in duration-200">
+                    <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs bg-foreground text-primary-foreground`}>
+                      <span>{comp.avatar}</span>
+                      <span className="font-medium">{comp.name}</span>
+                      <span className="text-primary-foreground/80">{comment.text}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      <button className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground">
+                        <Reply size={14} />
+                      </button>
+                      <button className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+
               <p className="text-foreground/85 text-[15px] leading-[1.8]">
-                {lineComments.length > 0 ? (
-                  <span className="underline decoration-accent decoration-2 underline-offset-4">
-                    {para}
-                  </span>
-                ) : (
-                  para
-                )}
+                {renderParagraph()}
               </p>
             </div>
           );
