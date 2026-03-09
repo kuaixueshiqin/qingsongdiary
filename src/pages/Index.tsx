@@ -5,6 +5,7 @@ import DiaryView from "@/components/DiaryView";
 import MailboxView from "@/components/MailboxView";
 import InsightsView from "@/components/InsightsView";
 import CompanionsView from "@/components/CompanionsView";
+import ProfileView from "@/components/ProfileView";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("diary");
@@ -19,6 +20,8 @@ const Index = () => {
         return <InsightsView />;
       case "companions":
         return <CompanionsView />;
+      case "profile":
+        return <ProfileView />;
       default:
         return <DiaryView />;
     }
