@@ -109,7 +109,7 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
     chip.dataset.mentionId = companion.id;
     chip.dataset.mentionName = companion.name;
     chip.dataset.mentionAvatar = companion.avatar;
-    chip.className = "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-primary/15 text-primary text-[11px] font-medium mx-0.5 cursor-pointer select-none";
+    chip.className = "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[11px] font-medium mx-0.5 cursor-pointer select-none";
     chip.innerHTML = `<span>${companion.avatar}</span><span>@${companion.name}</span>`;
     chip.onclick = () => {
       // Re-open dropdown on click
