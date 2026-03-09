@@ -232,7 +232,7 @@ const DiaryView = () => {
                             </button>
                             {isActive && (
                               <div className="flex gap-1 animate-in slide-in-from-left-2 duration-200">
-                                <button onClick={() => { setReplyingTo(isReplying ? null : comment.id); setReplyText(""); }} className={`p-1.5 rounded-lg ${isReplying ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+                                <button onClick={() => { setReplyingTo(isReplying ? null : comment.id); setReplyText(""); setReplyMentions([]); }} className={`p-1.5 rounded-lg ${isReplying ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
                                   <Reply size={14} />
                                 </button>
                                 <button onClick={() => handleDeleteComment(selectedEntry.id, comment.id)} className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
