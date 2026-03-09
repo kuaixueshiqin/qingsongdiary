@@ -101,7 +101,7 @@ export const diaryEntries: DiaryEntry[] = [
     time: "15:20",
     content: "今天终于鼓起勇气出了门，天气意外地好，阳光暖暖的洒在脸上。打车去了公园，花了25块，有点心疼但还是值得的。\n\n沿着湖边跑了三圈，耳机里放着最近单曲循环的那首歌，跑到第二圈的时候突然觉得心里那团堵着的东西散开了一点。出了一身汗，坐在长椅上看夕阳，觉得生活好像也没那么糟。果然运动才是最好的解药。",
     comments: [
-      { id: "c4", companionId: "shanshan", text: "运动达人上线啦！💪", lineIndex: 0 },
+      { id: "c4", companionId: "shanshan", text: "运动达人上线啦！💪", lineIndex: 1, highlightText: "果然运动才是最好的解药" },
     ],
     billing: { amount: 25, category: "交通", verified: true },
   },
