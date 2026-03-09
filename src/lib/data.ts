@@ -12,6 +12,14 @@ export interface Companion {
   delay: string;
 }
 
+export interface CommentReply {
+  id: string;
+  role: "user" | "assistant";
+  companionId: string;
+  text: string;
+  time: string;
+}
+
 export interface DiaryComment {
   id: string;
   companionId: string;
@@ -19,6 +27,7 @@ export interface DiaryComment {
   lineIndex: number;
   /** The exact sentence/phrase the AI highlights */
   highlightText: string;
+  replies: CommentReply[];
 }
 
 export interface DiaryEntry {
