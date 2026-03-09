@@ -70,7 +70,7 @@ const CompanionsView = () => {
       delay: "随机",
     };
     setMyCompanions((prev) => [...prev, newComp]);
-    toast.success(`${agent.name} 已加入你的密友列表！`);
+    toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
 
   // Settings panel
