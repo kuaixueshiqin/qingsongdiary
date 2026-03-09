@@ -465,9 +465,17 @@ const DiaryView = () => {
         <div className="absolute inset-0 bg-card z-[100] p-6 pt-16 flex flex-col animate-in slide-in-from-bottom duration-300">
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm font-bold text-muted-foreground">新日志 · 5月21日</span>
-            <button onClick={() => { setIsWriting(false); setNewContent(""); }} className="text-muted-foreground"><X size={20} /></button>
+            <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground"><X size={20} /></button>
           </div>
-          <textarea autoFocus value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder="今天发生了什么..." className="flex-1 text-lg leading-relaxed focus:outline-none resize-none bg-transparent text-foreground placeholder:text-muted-foreground/30" />
+          <MentionInput
+            autoFocus
+            value={newContent}
+            mentions={newMentions}
+            onChange={(text, mentions) => { setNewContent(text); setNewMentions(mentions); }}
+            onSubmit={handleSaveDiary}
+            placeholder="今天发生了什么... 输入@可呼叫伙伴评论"
+            className="flex-1 !min-h-0 !max-h-none text-lg leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0"
+          />
           <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="mt-4 bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold self-end disabled:opacity-30">保存记录</button>
         </div>
       )}
