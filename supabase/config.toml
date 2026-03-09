@@ -1,0 +1,4 @@
+project_id = "sloahecvuwtimwtnbxme"
+
+[functions.generate-board]
+verify_jwt = false
