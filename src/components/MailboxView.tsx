@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2 } from "lucide-react";
-import { companions, type Companion } from "@/lib/data";
+import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2, PenLine, X } from "lucide-react";
+import { companions, squareAgents, type Companion } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
