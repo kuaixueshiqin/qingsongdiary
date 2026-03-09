@@ -17,6 +17,8 @@ export interface DiaryComment {
   companionId: string;
   text: string;
   lineIndex: number;
+  /** The exact sentence/phrase the AI highlights */
+  highlightText: string;
 }
 
 export interface DiaryEntry {
