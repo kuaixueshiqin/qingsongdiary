@@ -2,3 +2,6 @@ project_id = "sloahecvuwtimwtnbxme"
 
 [functions.generate-board]
 verify_jwt = false
+
+[functions.companion-chat]
+verify_jwt = false

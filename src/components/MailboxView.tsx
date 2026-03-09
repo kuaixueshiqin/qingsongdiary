@@ -139,23 +139,36 @@ const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () =>
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isTyping) return;
     const now = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
     const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: input.trim(), time: now };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
 
-    const delay = companion.id === "shanshan" ? 1500 : companion.id === "xiaoman" ? 4000 : 3000;
-    const replies = aiReplies[companion.id] || ["谢谢你的来信，我会认真思考的。"];
-    const reply = replies[Math.floor(Math.random() * replies.length)];
+    try {
+      const { data, error } = await supabase.functions.invoke("companion-chat", {
+        body: {
+          companionId: companion.id,
+          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+        },
+      });
 
-    setTimeout(() => {
+      if (error) throw error;
+
       const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      setMessages((prev) => [...prev, { id: `a-${Date.now()}`, role: "assistant", content: reply, time: replyTime }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: `a-${Date.now()}`, role: "assistant", content: data.reply || "...", time: replyTime },
+      ]);
+    } catch (e: any) {
+      console.error("Chat error:", e);
+      toast.error(e?.message || "回复失败，请稍后再试");
+    } finally {
       setIsTyping(false);
-    }, delay);
+    }
   };
 
   return (
