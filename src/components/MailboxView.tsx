@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2 } from "lucide-react";
 import { companions, type Companion } from "@/lib/data";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -28,24 +29,6 @@ const initialMessages: Record<string, Message[]> = {
   ],
   moshu: [
     { id: "m5", role: "assistant", content: "夜深了，读到一段话想与你分享：\n\n\"人生就像一本书，有些章节很无聊，有些章节很精彩，但如果你不翻页，你永远不会知道下一章有什么。\"\n\n愿你在每一个深夜都能找到属于自己的光。\n\n— 墨叔", time: "23:50" },
-  ],
-};
-
-const aiReplies: Record<string, string[]> = {
-  xiaoman: [
-    "嗯...让我慢慢想想...你说得很有道理呢，有时候慢下来反而能看到更多风景 🐢",
-    "我虽然回复慢，但一直在认真读你的每一句话。你的心情，我都记着呢。",
-    "时间会治愈很多事情的，就像我爬到树顶，虽然慢，但终归会到的 🌿",
-  ],
-  shanshan: [
-    "哇！收到你的回信好开心！🐿️ 我们继续聊聊呀～",
-    "太棒了！你说的我都记下了，下次有什么好玩的事也告诉我嘛 🎉",
-    "你今天心情看起来不错呢！保持这样就好啦～ 💛",
-  ],
-  moshu: [
-    "你的文字里有一种很特别的力量。继续写下去，不要停。",
-    "\"所有的不期而遇，都是久别重逢。\" 谢谢你的回信。",
-    "深夜的对话总是格外真诚。你的想法让我想到了很多...",
   ],
 };
 
@@ -156,23 +139,36 @@ const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () =>
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isTyping) return;
     const now = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
     const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: input.trim(), time: now };
-    setMessages((prev) => [...prev, userMsg]);
+    const updatedMessages = [...messages, userMsg];
+    setMessages(updatedMessages);
     setInput("");
     setIsTyping(true);
 
-    const delay = companion.id === "shanshan" ? 1500 : companion.id === "xiaoman" ? 4000 : 3000;
-    const replies = aiReplies[companion.id] || ["谢谢你的来信，我会认真思考的。"];
-    const reply = replies[Math.floor(Math.random() * replies.length)];
+    try {
+      const { data, error } = await supabase.functions.invoke("companion-chat", {
+        body: {
+          companionId: companion.id,
+          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
+        },
+      });
 
-    setTimeout(() => {
+      if (error) throw error;
+
       const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      setMessages((prev) => [...prev, { id: `a-${Date.now()}`, role: "assistant", content: reply, time: replyTime }]);
+      setMessages((prev) => [
+        ...prev,
+        { id: `a-${Date.now()}`, role: "assistant", content: data.reply || "...", time: replyTime },
+      ]);
+    } catch (e: any) {
+      console.error("Chat error:", e);
+      toast.error(e?.message || "回复失败，请稍后再试");
+    } finally {
       setIsTyping(false);
-    }, delay);
+    }
   };
 
   return (
