@@ -173,12 +173,14 @@ const DiaryDetail = ({ entry, onBack, activeCommentId, onCommentClick }: DiaryDe
                   })}
                 </div>
               )}
-              <p
-                className={`text-foreground/85 text-[15px] leading-[1.8] ${
-                  lineComments.length > 0 ? "border-l-2 border-highlight pl-3 text-highlight rounded-sm bg-highlight/20 py-1" : ""
-                }`}
-              >
-                {para}
+              <p className="text-foreground/85 text-[15px] leading-[1.8]">
+                {lineComments.length > 0 ? (
+                  <span className="underline decoration-accent decoration-2 underline-offset-4">
+                    {para}
+                  </span>
+                ) : (
+                  para
+                )}
               </p>
             </div>
           );
