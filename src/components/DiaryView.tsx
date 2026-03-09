@@ -65,11 +65,17 @@ const DiaryView = () => {
 
     addReplyToComment(entryId, comment.id, userReply);
     const savedReplyText = replyText.trim();
+    const savedMentions = [...replyMentions];
     setReplyText("");
+    setReplyMentions([]);
     setReplyingTo(null);
     setLoadingReply(comment.id);
 
-    // Build conversation context for AI
+    // Determine which companions should reply: the comment's companion + any @mentioned ones
+    const respondingIds = new Set<string>([comment.companionId]);
+    savedMentions.forEach((m) => respondingIds.add(m.id));
+
+    // Build conversation context
     const chatMessages = [
       { role: "assistant" as const, content: comment.text },
       ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
@@ -77,24 +83,22 @@ const DiaryView = () => {
     ];
 
     try {
-      const { data, error } = await supabase.functions.invoke("companion-chat", {
-        body: {
-          companionId: comment.companionId,
-          messages: chatMessages,
-        },
-      });
+      for (const compId of respondingIds) {
+        const { data, error } = await supabase.functions.invoke("companion-chat", {
+          body: { companionId: compId, messages: chatMessages },
+        });
+        if (error) throw error;
 
-      if (error) throw error;
-
-      const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      const aiReply: CommentReply = {
-        id: `ar-${Date.now()}`,
-        role: "assistant",
-        companionId: comment.companionId,
-        text: data.reply || "...",
-        time: replyTime,
-      };
-      addReplyToComment(entryId, comment.id, aiReply);
+        const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+        const aiReply: CommentReply = {
+          id: `ar-${Date.now()}-${compId}`,
+          role: "assistant",
+          companionId: compId,
+          text: data.reply || "...",
+          time: replyTime,
+        };
+        addReplyToComment(entryId, comment.id, aiReply);
+      }
     } catch (e: any) {
       console.error("Reply error:", e);
       toast.error(e?.message || "AI回复失败，请稍后再试");
