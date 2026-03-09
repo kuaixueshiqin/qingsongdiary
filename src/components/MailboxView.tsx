@@ -81,7 +81,7 @@ const MailboxView = () => {
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4">
         <h1 className="text-2xl font-black text-foreground">信箱</h1>
-        <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-[0.2em] font-semibold">Messages</p>
+        
       </div>
       <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         {chatList.map((item, idx) => (
