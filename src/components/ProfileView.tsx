@@ -28,7 +28,7 @@ const ProfileView = () => {
       {/* Header */}
       <div className="px-6 pt-14 pb-2">
         <h1 className="text-2xl font-black text-foreground">我的</h1>
-        <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-[0.2em] font-semibold">Profile</p>
+        
       </div>
 
       <div className="px-4 space-y-3">
