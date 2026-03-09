@@ -89,8 +89,8 @@ export const diaryEntries: DiaryEntry[] = [
     content:
       "今天去吃了那家想了很久的日料店，虽然有点贵（花了280元），但味道真的很惊艳。尤其是那道手握，入口即化的感觉...\n\n不过，吃完后突然觉得有点空虚，可能是因为一个人吧。明明是很开心的事情，却忍不住想，如果有人一起分享就更好了。",
     comments: [
-      { id: "c1", companionId: "shanshan", text: "看起来超好吃！下次我陪你呀～ 🍣🐿️", lineIndex: 0, highlightText: "味道真的很惊艳" },
-      { id: "c2", companionId: "xiaoman", text: "偶尔慢下来享受美食，也是种修行呢。", lineIndex: 1, highlightText: "如果有人一起分享就更好了" },
+      { id: "c1", companionId: "shanshan", text: "看起来超好吃！下次我陪你呀～ 🍣🐿️", lineIndex: 0, highlightText: "味道真的很惊艳", replies: [] },
+      { id: "c2", companionId: "xiaoman", text: "偶尔慢下来享受美食，也是种修行呢。", lineIndex: 1, highlightText: "如果有人一起分享就更好了", replies: [] },
     ],
     billing: { amount: 280, category: "餐饮", verified: false },
   },
