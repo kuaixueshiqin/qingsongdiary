@@ -10,6 +10,7 @@ const DiaryView = () => {
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const [isWriting, setIsWriting] = useState(false);
   const [newContent, setNewContent] = useState("");
+  const [newMentions, setNewMentions] = useState<MentionTag[]>([]);
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
