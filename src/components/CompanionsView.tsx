@@ -210,7 +210,7 @@ const CompanionsView = () => {
                       <span className="text-[10px] font-bold text-muted-foreground/30">Lv.{comp.level}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{comp.role}</p>
-                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时延: {comp.delay}</p>
+                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时长: {comp.delay}</p>
                   </div>
                 </div>
                 <div className="space-y-1">
