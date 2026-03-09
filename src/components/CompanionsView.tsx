@@ -45,6 +45,8 @@ const CompanionsView = () => {
     setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
     toast.success(`${comp.name} 已创建并加入密友列表！`);
   };
+
+  const handleToggleCompanion = (id: string, enabled: boolean) => {
     toast.success(enabled ? "已启用该伙伴的互动" : "已暂停该伙伴的互动");
   };
 
