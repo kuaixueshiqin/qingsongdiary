@@ -43,7 +43,7 @@ const CompanionsView = () => {
     setMyCompanions((prev) => [...prev, comp]);
     setShowCreate(false);
     setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
-    toast.success(`${comp.name} 已创建并加入密友列表！`);
+    toast.success(`${comp.name} 已创建并加入伙伴列表！`);
   };
 
   const handleToggleCompanion = (id: string, enabled: boolean) => {
