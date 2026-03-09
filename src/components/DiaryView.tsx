@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ const DiaryView = () => {
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const [isWriting, setIsWriting] = useState(false);
   const [newContent, setNewContent] = useState("");
+  const [newMentions, setNewMentions] = useState<MentionTag[]>([]);
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
@@ -19,6 +20,8 @@ const DiaryView = () => {
   const [billingAmount, setBillingAmount] = useState("");
   const [billingCategory, setBillingCategory] = useState("");
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
@@ -107,7 +110,7 @@ const DiaryView = () => {
     }
   };
 
-  const handleSaveDiary = () => {
+  const handleSaveDiary = async () => {
     if (!newContent.trim()) return;
     const newEntry: DiaryEntry = {
       id: Date.now(),
@@ -117,9 +120,41 @@ const DiaryView = () => {
       comments: [],
     };
     setEntries((prev) => [newEntry, ...prev]);
+    const mentionedIds = newMentions.map((m) => m.id);
     setNewContent("");
+    setNewMentions([]);
     setIsWriting(false);
     toast.success("日记已保存！AI伙伴稍后会来评论哦~");
+
+    // Trigger comments from @mentioned companions
+    if (mentionedIds.length > 0) {
+      for (const compId of mentionedIds) {
+        try {
+          const { data, error } = await supabase.functions.invoke("companion-chat", {
+            body: { companionId: compId, messages: [{ role: "user", content: newEntry.content }] },
+          });
+          if (error) throw error;
+          const aiComment: DiaryComment = {
+            id: `mc-${Date.now()}-${compId}`,
+            companionId: compId,
+            text: data.reply || "...",
+            lineIndex: 0,
+            highlightText: "",
+            replies: [],
+          };
+          setEntries((prev) => prev.map((e) => e.id === newEntry.id ? { ...e, comments: [...e.comments, aiComment] } : e));
+        } catch (e: any) {
+          console.error("Mention comment error:", e);
+        }
+      }
+    }
+  };
+
+  const handleSaveEdit = (entryId: number) => {
+    if (!editContent.trim()) return;
+    setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: editContent } : e));
+    setEditingEntryId(null);
+    toast.success("日记已更新");
   };
 
   const handleEditBilling = (entryId: number) => {
@@ -154,17 +189,35 @@ const DiaryView = () => {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
-          <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
+          <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); setEditingEntryId(null); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
           </button>
-          <div>
+          <div className="flex-1">
             <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
             <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
           </div>
+          {editingEntryId === selectedEntry.id ? (
+            <div className="flex gap-1.5">
+              <button onClick={() => setEditingEntryId(null)} className="text-xs bg-card border border-border px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
+              <button onClick={() => handleSaveEdit(selectedEntry.id)} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold">保存</button>
+            </div>
+          ) : (
+            <button onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+              <Pencil size={16} />
+            </button>
+          )}
         </div>
 
         <div className="px-6 space-y-6">
-          {selectedEntry.content.split("\n").filter(Boolean).map((para, pIdx) => {
+          {editingEntryId === selectedEntry.id ? (
+            <textarea
+              autoFocus
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full min-h-[200px] text-[15px] leading-[1.8] text-foreground/85 bg-transparent border border-border rounded-xl p-4 focus:outline-none focus:border-muted-foreground/40 resize-none"
+            />
+          ) : (
+          selectedEntry.content.split("\n").filter(Boolean).map((para, pIdx) => {
             const lineComments = selectedEntry.comments.filter((c) => c.lineIndex === pIdx);
 
             const renderParagraph = () => {
@@ -309,7 +362,10 @@ const DiaryView = () => {
                 )}
               </div>
             );
-          })}
+          })
+          )}
+
+
 
           {/* Billing card */}
           {selectedEntry.billing && !editingBilling && (
@@ -409,9 +465,17 @@ const DiaryView = () => {
         <div className="absolute inset-0 bg-card z-[100] p-6 pt-16 flex flex-col animate-in slide-in-from-bottom duration-300">
           <div className="flex justify-between items-center mb-6">
             <span className="text-sm font-bold text-muted-foreground">新日志 · 5月21日</span>
-            <button onClick={() => { setIsWriting(false); setNewContent(""); }} className="text-muted-foreground"><X size={20} /></button>
+            <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground"><X size={20} /></button>
           </div>
-          <textarea autoFocus value={newContent} onChange={(e) => setNewContent(e.target.value)} placeholder="今天发生了什么..." className="flex-1 text-lg leading-relaxed focus:outline-none resize-none bg-transparent text-foreground placeholder:text-muted-foreground/30" />
+          <MentionInput
+            autoFocus
+            value={newContent}
+            mentions={newMentions}
+            onChange={(text, mentions) => { setNewContent(text); setNewMentions(mentions); }}
+            onSubmit={handleSaveDiary}
+            placeholder="今天发生了什么... 输入@可呼叫伙伴评论"
+            className="flex-1 !min-h-0 !max-h-none text-lg leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0"
+          />
           <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="mt-4 bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold self-end disabled:opacity-30">保存记录</button>
         </div>
       )}
