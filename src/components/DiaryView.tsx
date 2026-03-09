@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check } from "lucide-react";
+import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +12,7 @@ const DiaryView = () => {
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [collapsedComments, setCollapsedComments] = useState<Set<number>>(new Set());
   const [editingBilling, setEditingBilling] = useState(false);
   const [billingAmount, setBillingAmount] = useState("");
   const [billingCategory, setBillingCategory] = useState("");
@@ -188,7 +189,23 @@ const DiaryView = () => {
               <div key={pIdx}>
                 <p className="text-foreground/85 text-[15px] leading-[1.8]">{renderParagraph()}</p>
                 {lineComments.length > 0 && (
-                  <div className="mt-2 space-y-1.5 pl-2">
+                  <div className="mt-2 pl-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] text-muted-foreground/50">{lineComments.length} 条评论</span>
+                      <button
+                        onClick={() => setCollapsedComments(prev => {
+                          const next = new Set(prev);
+                          if (next.has(pIdx)) next.delete(pIdx);
+                          else next.add(pIdx);
+                          return next;
+                        })}
+                        className="p-1 rounded-md text-muted-foreground/50 hover:text-muted-foreground hover:bg-secondary transition-colors"
+                      >
+                        {collapsedComments.has(pIdx) ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                      </button>
+                    </div>
+                    {!collapsedComments.has(pIdx) && (
+                    <div className="space-y-1.5">
                     {lineComments.map((comment) => {
                       const comp = companions.find((c) => c.id === comment.companionId);
                       if (!comp) return null;
@@ -280,6 +297,8 @@ const DiaryView = () => {
                         </div>
                       );
                     })}
+                    </div>
+                    )}
                   </div>
                 )}
               </div>
