@@ -110,7 +110,7 @@ const DiaryView = () => {
     }
   };
 
-  const handleSaveDiary = () => {
+  const handleSaveDiary = async () => {
     if (!newContent.trim()) return;
     const newEntry: DiaryEntry = {
       id: Date.now(),
@@ -120,9 +120,41 @@ const DiaryView = () => {
       comments: [],
     };
     setEntries((prev) => [newEntry, ...prev]);
+    const mentionedIds = newMentions.map((m) => m.id);
     setNewContent("");
+    setNewMentions([]);
     setIsWriting(false);
     toast.success("日记已保存！AI伙伴稍后会来评论哦~");
+
+    // Trigger comments from @mentioned companions
+    if (mentionedIds.length > 0) {
+      for (const compId of mentionedIds) {
+        try {
+          const { data, error } = await supabase.functions.invoke("companion-chat", {
+            body: { companionId: compId, messages: [{ role: "user", content: newEntry.content }] },
+          });
+          if (error) throw error;
+          const aiComment: DiaryComment = {
+            id: `mc-${Date.now()}-${compId}`,
+            companionId: compId,
+            text: data.reply || "...",
+            lineIndex: 0,
+            highlightText: "",
+            replies: [],
+          };
+          setEntries((prev) => prev.map((e) => e.id === newEntry.id ? { ...e, comments: [...e.comments, aiComment] } : e));
+        } catch (e: any) {
+          console.error("Mention comment error:", e);
+        }
+      }
+    }
+  };
+
+  const handleSaveEdit = (entryId: number) => {
+    if (!editContent.trim()) return;
+    setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: editContent } : e));
+    setEditingEntryId(null);
+    toast.success("日记已更新");
   };
 
   const handleEditBilling = (entryId: number) => {
