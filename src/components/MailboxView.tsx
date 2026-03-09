@@ -73,15 +73,43 @@ const MailboxView = () => {
     return () => window.removeEventListener("click", dismiss);
   }, [contextMenu]);
 
+  const [showNewChat, setShowNewChat] = useState(false);
+
+  // All companions not already in chatList
+  const availableCompanions: Companion[] = [
+    ...companions,
+    ...squareAgents.map((a) => ({
+      id: a.id,
+      name: a.name,
+      avatar: a.avatar,
+      colorClass: "bg-secondary",
+      textColorClass: "text-foreground",
+      role: a.role,
+      bio: "",
+      intimacy: 0,
+      level: 1,
+      lastMsg: "还没有对话",
+      delay: "随机",
+    })),
+  ].filter((c) => !chatList.some((item) => item.companion.id === c.id));
+
+  const handleStartNewChat = (comp: Companion) => {
+    setChatList((prev) => [{ companion: comp, pinned: false, lastTime: "刚刚", unread: false }, ...prev]);
+    setShowNewChat(false);
+    setSelectedChat(comp);
+  };
+
   if (selectedChat) {
     return <ChatDetail companion={selectedChat} onBack={() => setSelectedChat(null)} />;
   }
 
   return (
     <div className="pb-4">
-      <div className="px-6 pt-14 pb-4">
+      <div className="px-6 pt-14 pb-4 flex justify-between items-end">
         <h1 className="text-2xl font-black text-foreground">信箱</h1>
-        
+        <button onClick={() => setShowNewChat(true)} className="bg-primary text-primary-foreground px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
+          <PenLine size={14} /><span className="text-xs font-bold">写信</span>
+        </button>
       </div>
       <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         {chatList.map((item, idx) => (
