@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2 } from "lucide-react";
-import { companions, type Companion } from "@/lib/data";
+import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2, PenLine, X } from "lucide-react";
+import { companions, squareAgents, type Companion } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -73,15 +73,43 @@ const MailboxView = () => {
     return () => window.removeEventListener("click", dismiss);
   }, [contextMenu]);
 
+  const [showNewChat, setShowNewChat] = useState(false);
+
+  // All companions not already in chatList
+  const availableCompanions: Companion[] = [
+    ...companions,
+    ...squareAgents.map((a) => ({
+      id: a.id,
+      name: a.name,
+      avatar: a.avatar,
+      colorClass: "bg-secondary",
+      textColorClass: "text-foreground",
+      role: a.role,
+      bio: "",
+      intimacy: 0,
+      level: 1,
+      lastMsg: "还没有对话",
+      delay: "随机",
+    })),
+  ].filter((c) => !chatList.some((item) => item.companion.id === c.id));
+
+  const handleStartNewChat = (comp: Companion) => {
+    setChatList((prev) => [{ companion: comp, pinned: false, lastTime: "刚刚", unread: false }, ...prev]);
+    setShowNewChat(false);
+    setSelectedChat(comp);
+  };
+
   if (selectedChat) {
     return <ChatDetail companion={selectedChat} onBack={() => setSelectedChat(null)} />;
   }
 
   return (
     <div className="pb-4">
-      <div className="px-6 pt-14 pb-4">
+      <div className="px-6 pt-14 pb-4 flex justify-between items-end">
         <h1 className="text-2xl font-black text-foreground">信箱</h1>
-        
+        <button onClick={() => setShowNewChat(true)} className="bg-primary text-primary-foreground px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
+          <PenLine size={14} /><span className="text-xs font-bold">写信</span>
+        </button>
       </div>
       <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         {chatList.map((item, idx) => (
@@ -123,6 +151,31 @@ const MailboxView = () => {
             <Trash2 size={14} />
             删除
           </button>
+        </div>
+      )}
+      {showNewChat && (
+        <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm z-[110] flex items-end">
+          <div className="bg-card w-full rounded-t-[32px] p-6 animate-in slide-in-from-bottom duration-300 max-h-[70%] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-black text-foreground">选择伙伴写信</h3>
+              <button onClick={() => setShowNewChat(false)} className="text-muted-foreground"><X size={20} /></button>
+            </div>
+            <div className="overflow-y-auto space-y-2 scrollbar-hide">
+              {availableCompanions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">所有伙伴都已在信箱中</p>
+              ) : (
+                availableCompanions.map((comp) => (
+                  <button key={comp.id} onClick={() => handleStartNewChat(comp)} className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-secondary/60 active:bg-secondary transition-colors text-left">
+                    <div className={`w-10 h-10 ${comp.colorClass} rounded-xl flex items-center justify-center text-xl flex-shrink-0`}>{comp.avatar}</div>
+                    <div>
+                      <span className="font-bold text-foreground text-sm">{comp.name}</span>
+                      <span className="text-[10px] text-muted-foreground ml-2">{comp.role}</span>
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
