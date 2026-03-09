@@ -121,6 +121,64 @@ const CompanionsView = () => {
     );
   }
 
+  // Create companion panel
+  if (showCreate) {
+    return (
+      <div className="pb-4 animate-in slide-in-from-right duration-300">
+        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+          <button onClick={() => setShowCreate(false)} className="text-muted-foreground"><ChevronLeft size={24} /></button>
+          <span className="text-sm font-bold text-foreground">自定义伙伴</span>
+        </div>
+        <div className="px-4 space-y-4">
+          {/* Avatar picker */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
+            <div className={`w-20 h-20 ${newColor} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{newAvatar}</div>
+            <p className="text-[10px] text-muted-foreground/40 mb-2">选择头像</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {AVATAR_OPTIONS.map((a) => (
+                <button key={a} onClick={() => setNewAvatar(a)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${newAvatar === a ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
+                >{a}</button>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground/40 mt-4 mb-2">选择颜色</p>
+            <div className="flex justify-center gap-2">
+              {COLOR_OPTIONS.map((c) => (
+                <button key={c.colorClass} onClick={() => setNewColor(c.colorClass)}
+                  className={`w-8 h-8 ${c.colorClass} rounded-full transition-all ${newColor === c.colorClass ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Form fields */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
+            <div>
+              <label className="text-xs font-bold text-foreground">名称 *</label>
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="给TA起个名字"
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-foreground">角色定位 *</label>
+              <input value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="如：健身教练、读书伙伴、理财顾问"
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-foreground">个性签名</label>
+              <input value={newBio} onChange={(e) => setNewBio(e.target.value)} placeholder="描述TA的性格或口头禅"
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+            </div>
+          </div>
+
+          <button onClick={handleCreateCompanion}
+            className="w-full bg-primary text-primary-foreground rounded-2xl py-3 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+            <Sparkles size={16} /> 创建伙伴
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-center">
