@@ -236,22 +236,22 @@ const InsightsView = () => {
       </div>
 
       {isCreating && (
-        <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm z-[110] flex items-end">
-          <div className="bg-card w-full rounded-t-[32px] p-6 animate-in slide-in-from-bottom duration-300">
-            <div className="flex justify-between items-center mb-5">
+        <div className="px-4 mt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+            <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="text-lg font-black text-foreground">AI 自动生成看板</h3>
+                <h3 className="text-sm font-black text-foreground">AI 自动生成看板</h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">输入话题，AI 将从日记中提取生成</p>
               </div>
-              <button onClick={() => { setIsCreating(false); setTopicInput(""); }} className="text-muted-foreground"><X size={20} /></button>
+              <button onClick={() => { setIsCreating(false); setTopicInput(""); }} className="text-muted-foreground"><X size={18} /></button>
             </div>
-            <input type="text" placeholder="输入话题，如：电影、游戏、美食..." className="w-full bg-secondary border border-border rounded-2xl py-3.5 px-5 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-muted-foreground/40 mb-3" value={topicInput} onChange={(e) => setTopicInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleGenerate()} maxLength={20} autoFocus />
-            <div className="flex flex-wrap gap-2 mb-5">
+            <input type="text" placeholder="输入话题，如：电影、游戏、美食..." className="w-full bg-secondary border border-border rounded-2xl py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-muted-foreground/40 mb-3" value={topicInput} onChange={(e) => setTopicInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleGenerate()} maxLength={20} autoFocus />
+            <div className="flex flex-wrap gap-2 mb-4">
               {["电影", "游戏", "运动", "美食", "阅读", "音乐"].map((tag) => (
                 <button key={tag} onClick={() => setTopicInput(tag)} className="text-[11px] bg-secondary text-muted-foreground px-3 py-1.5 rounded-full font-medium hover:bg-muted-foreground/10 transition-colors">{tag}</button>
               ))}
             </div>
-            <button onClick={handleGenerate} disabled={!topicInput.trim() || isGenerating} className="w-full bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] transition-transform">
+            <button onClick={handleGenerate} disabled={!topicInput.trim() || isGenerating} className="w-full bg-primary text-primary-foreground py-3 rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] transition-transform text-sm">
               {isGenerating ? (<><Loader2 size={16} className="animate-spin" />AI 正在分析日记...</>) : (<><Sparkles size={16} />生成看板</>)}
             </button>
           </div>

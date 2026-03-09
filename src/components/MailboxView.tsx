@@ -153,115 +153,31 @@ const MailboxView = () => {
           </button>
         </div>
       )}
-    </div>
-  );
-};
-
-const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () => void }) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages[companion.id] || []);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, isTyping]);
-
-  const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
-    const now = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-    const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: input.trim(), time: now };
-    const updatedMessages = [...messages, userMsg];
-    setMessages(updatedMessages);
-    setInput("");
-    setIsTyping(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("companion-chat", {
-        body: {
-          companionId: companion.id,
-          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-        },
-      });
-
-      if (error) throw error;
-
-      const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      setMessages((prev) => [
-        ...prev,
-        { id: `a-${Date.now()}`, role: "assistant", content: data.reply || "...", time: replyTime },
-      ]);
-    } catch (e: any) {
-      console.error("Chat error:", e);
-      toast.error(e?.message || "回复失败，请稍后再试");
-    } finally {
-      setIsTyping(false);
-    }
-  };
-
-  return (
-    <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
-      <div className="px-4 pt-14 pb-3 flex items-center justify-between border-b border-border">
-        <div className="flex items-center gap-2">
-          <button onClick={onBack} className="text-muted-foreground"><ChevronLeft size={22} /></button>
-          <div className={`w-8 h-8 ${companion.colorClass} rounded-lg flex items-center justify-center text-lg`}>{companion.avatar}</div>
-          <div>
-            <span className="font-bold text-foreground text-sm">{companion.name}</span>
-            <span className={`text-[10px] ml-2 ${companion.textColorClass} bg-secondary px-1.5 py-0.5 rounded-full`}>{companion.role}</span>
-          </div>
-        </div>
-        <MoreHorizontal size={18} className="text-muted-foreground" />
-      </div>
-
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
-        <div className="text-center text-[10px] text-muted-foreground/30 tracking-widest uppercase mb-4">2024年5月18日</div>
-
-        {messages.map((msg) =>
-          msg.role === "assistant" ? (
-            <div key={msg.id} className="flex gap-3">
-              <div className={`w-8 h-8 ${companion.colorClass} rounded-lg flex-shrink-0 flex items-center justify-center text-lg`}>{companion.avatar}</div>
-              <div>
-                <div className="bg-secondary/60 border border-border p-4 rounded-2xl rounded-tl-md text-foreground/80 text-sm leading-relaxed max-w-[85%] whitespace-pre-line">{msg.content}</div>
-                <span className="text-[9px] text-muted-foreground/30 mt-1 block pl-1">{msg.time}</span>
-              </div>
+      {showNewChat && (
+        <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm z-[110] flex items-end">
+          <div className="bg-card w-full rounded-t-[32px] p-6 animate-in slide-in-from-bottom duration-300 max-h-[70%] flex flex-col">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-black text-foreground">选择伙伴写信</h3>
+              <button onClick={() => setShowNewChat(false)} className="text-muted-foreground"><X size={20} /></button>
             </div>
-          ) : (
-            <div key={msg.id} className="flex flex-col items-end">
-              <div className="bg-primary text-primary-foreground p-3.5 rounded-2xl rounded-tr-md text-sm leading-relaxed max-w-[80%]">{msg.content}</div>
-              <span className="text-[9px] text-muted-foreground/30 mt-1 pr-1">{msg.time}</span>
-            </div>
-          )
-        )}
-
-        {isTyping && (
-          <div className="flex gap-3">
-            <div className={`w-8 h-8 ${companion.colorClass} rounded-lg flex-shrink-0 flex items-center justify-center text-lg`}>{companion.avatar}</div>
-            <div className="bg-secondary/60 border border-border px-4 py-3 rounded-2xl rounded-tl-md">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-muted-foreground/30 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 bg-muted-foreground/30 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 bg-muted-foreground/30 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-              </div>
+            <div className="overflow-y-auto space-y-2 scrollbar-hide">
+              {availableCompanions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">所有伙伴都已在信箱中</p>
+              ) : (
+                availableCompanions.map((comp) => (
+                  <button key={comp.id} onClick={() => handleStartNewChat(comp)} className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-secondary/60 active:bg-secondary transition-colors text-left">
+                    <div className={`w-10 h-10 ${comp.colorClass} rounded-xl flex items-center justify-center text-xl flex-shrink-0`}>{comp.avatar}</div>
+                    <div>
+                      <span className="font-bold text-foreground text-sm">{comp.name}</span>
+                      <span className="text-[10px] text-muted-foreground ml-2">{comp.role}</span>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           </div>
-        )}
-      </div>
-
-      <div className="p-4 pb-2 border-t border-border">
-        <div className="relative flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder={`给 ${companion.name} 回信...`}
-            className="flex-1 bg-secondary border border-border rounded-full py-2.5 px-5 focus:outline-none focus:border-muted-foreground/40 text-sm text-foreground placeholder:text-muted-foreground/30"
-          />
-          <button onClick={handleSend} disabled={!input.trim()} className="p-2.5 bg-primary text-primary-foreground rounded-full disabled:opacity-30 transition-opacity">
-            <Send size={16} />
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };
