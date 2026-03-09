@@ -20,6 +20,8 @@ const DiaryView = () => {
   const [billingAmount, setBillingAmount] = useState("");
   const [billingCategory, setBillingCategory] = useState("");
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
+  const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
