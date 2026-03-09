@@ -1,12 +1,20 @@
-import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, Send, MoreHorizontal } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2 } from "lucide-react";
 import { companions, type Companion } from "@/lib/data";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   time: string;
+}
+
+interface ChatItem {
+  companion: Companion;
+  pinned: boolean;
+  lastTime: string;
+  unread: boolean;
 }
 
 const initialMessages: Record<string, Message[]> = {
@@ -43,6 +51,44 @@ const aiReplies: Record<string, string[]> = {
 
 const MailboxView = () => {
   const [selectedChat, setSelectedChat] = useState<Companion | null>(null);
+  const [chatList, setChatList] = useState<ChatItem[]>(
+    companions.map((c, i) => ({ companion: c, pinned: false, lastTime: i === 0 ? "14:20" : i === 1 ? "10:05" : "昨天", unread: i === 0 }))
+  );
+  const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTouchStart = useCallback((id: string, e: React.TouchEvent | React.MouseEvent) => {
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    longPressTimer.current = setTimeout(() => {
+      setContextMenu({ id, x: clientX, y: clientY });
+    }, 600);
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+  }, []);
+
+  const handlePin = (id: string) => {
+    setChatList((prev) => {
+      const updated = prev.map((c) => c.companion.id === id ? { ...c, pinned: !c.pinned } : c);
+      return [...updated.filter((c) => c.pinned), ...updated.filter((c) => !c.pinned)];
+    });
+    setContextMenu(null);
+    toast.success("已更新");
+  };
+
+  const handleDelete = (id: string) => {
+    setChatList((prev) => prev.filter((c) => c.companion.id !== id));
+    setContextMenu(null);
+    toast.success("已删除对话");
+  };
+
+  useEffect(() => {
+    const dismiss = () => setContextMenu(null);
+    if (contextMenu) window.addEventListener("click", dismiss);
+    return () => window.removeEventListener("click", dismiss);
+  }, [contextMenu]);
 
   if (selectedChat) {
     return <ChatDetail companion={selectedChat} onBack={() => setSelectedChat(null)} />;
@@ -54,21 +100,48 @@ const MailboxView = () => {
         <h1 className="text-2xl font-black text-foreground">信箱</h1>
         <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-[0.2em] font-semibold">Messages</p>
       </div>
-      <div className="px-4 space-y-2">
-        {companions.map((comp) => (
-          <div key={comp.id} onClick={() => setSelectedChat(comp)} className="bg-card border border-border p-4 rounded-2xl flex items-center gap-3 shadow-sm active:bg-secondary transition-colors cursor-pointer">
-            <div className={`w-12 h-12 ${comp.colorClass} rounded-2xl flex items-center justify-center text-2xl`}>{comp.avatar}</div>
+      <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        {chatList.map((item, idx) => (
+          <div
+            key={item.companion.id}
+            onClick={() => { if (!contextMenu) setSelectedChat(item.companion); }}
+            onTouchStart={(e) => handleTouchStart(item.companion.id, e)}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={(e) => handleTouchStart(item.companion.id, e)}
+            onMouseUp={handleTouchEnd}
+            onMouseLeave={handleTouchEnd}
+            className={`flex items-center gap-3 px-4 py-3 active:bg-secondary/60 transition-colors cursor-pointer select-none ${item.pinned ? "bg-secondary/30" : ""} ${idx < chatList.length - 1 ? "border-b border-border" : ""}`}
+          >
+            <div className={`w-11 h-11 ${item.companion.colorClass} rounded-xl flex items-center justify-center text-2xl flex-shrink-0`}>{item.companion.avatar}</div>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">
-                <span className="font-bold text-foreground text-sm">{comp.name}</span>
-                <span className="text-[10px] text-muted-foreground/40">14:20</span>
+                <span className="font-bold text-foreground text-sm">{item.companion.name}</span>
+                <span className="text-[10px] text-muted-foreground/40">{item.lastTime}</span>
               </div>
-              <p className="text-xs text-muted-foreground truncate">{comp.lastMsg}</p>
+              <p className="text-xs text-muted-foreground truncate">{item.companion.lastMsg}</p>
             </div>
-            {comp.id === "xiaoman" && <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0" />}
+            {item.unread && <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0" />}
           </div>
         ))}
       </div>
+
+      {contextMenu && (
+        <div
+          className="fixed z-[200] bg-card border border-border rounded-xl shadow-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          style={{ left: Math.min(contextMenu.x, window.innerWidth - 140), top: contextMenu.y - 10 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button onClick={() => handlePin(contextMenu.id)} className="flex items-center gap-2.5 px-4 py-3 text-sm text-foreground hover:bg-secondary w-full text-left">
+            <Pin size={14} />
+            {chatList.find((c) => c.companion.id === contextMenu.id)?.pinned ? "取消置顶" : "置顶"}
+          </button>
+          <div className="border-t border-border" />
+          <button onClick={() => handleDelete(contextMenu.id)} className="flex items-center gap-2.5 px-4 py-3 text-sm text-destructive hover:bg-secondary w-full text-left">
+            <Trash2 size={14} />
+            删除
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -91,7 +164,6 @@ const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () =>
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI reply with delay based on companion personality
     const delay = companion.id === "shanshan" ? 1500 : companion.id === "xiaoman" ? 4000 : 3000;
     const replies = aiReplies[companion.id] || ["谢谢你的来信，我会认真思考的。"];
     const reply = replies[Math.floor(Math.random() * replies.length)];
