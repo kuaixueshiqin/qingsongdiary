@@ -183,7 +183,7 @@ const CompanionsView = () => {
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-black text-foreground">密友</h1>
+          <h1 className="text-2xl font-black text-foreground">伙伴</h1>
           <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-[0.2em] font-semibold">
             {view === "my" ? "My Companions" : "Agents Square"}
           </p>
