@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
+import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ const DiaryView = () => {
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [replyMentions, setReplyMentions] = useState<MentionTag[]>([]);
   const [collapsedComments, setCollapsedComments] = useState<Set<number>>(new Set());
   const [editingBilling, setEditingBilling] = useState(false);
   const [billingAmount, setBillingAmount] = useState("");
@@ -63,11 +65,17 @@ const DiaryView = () => {
 
     addReplyToComment(entryId, comment.id, userReply);
     const savedReplyText = replyText.trim();
+    const savedMentions = [...replyMentions];
     setReplyText("");
+    setReplyMentions([]);
     setReplyingTo(null);
     setLoadingReply(comment.id);
 
-    // Build conversation context for AI
+    // Determine which companions should reply: the comment's companion + any @mentioned ones
+    const respondingIds = new Set<string>([comment.companionId]);
+    savedMentions.forEach((m) => respondingIds.add(m.id));
+
+    // Build conversation context
     const chatMessages = [
       { role: "assistant" as const, content: comment.text },
       ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
@@ -75,24 +83,22 @@ const DiaryView = () => {
     ];
 
     try {
-      const { data, error } = await supabase.functions.invoke("companion-chat", {
-        body: {
-          companionId: comment.companionId,
-          messages: chatMessages,
-        },
-      });
+      for (const compId of respondingIds) {
+        const { data, error } = await supabase.functions.invoke("companion-chat", {
+          body: { companionId: compId, messages: chatMessages },
+        });
+        if (error) throw error;
 
-      if (error) throw error;
-
-      const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      const aiReply: CommentReply = {
-        id: `ar-${Date.now()}`,
-        role: "assistant",
-        companionId: comment.companionId,
-        text: data.reply || "...",
-        time: replyTime,
-      };
-      addReplyToComment(entryId, comment.id, aiReply);
+        const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+        const aiReply: CommentReply = {
+          id: `ar-${Date.now()}-${compId}`,
+          role: "assistant",
+          companionId: compId,
+          text: data.reply || "...",
+          time: replyTime,
+        };
+        addReplyToComment(entryId, comment.id, aiReply);
+      }
     } catch (e: any) {
       console.error("Reply error:", e);
       toast.error(e?.message || "AI回复失败，请稍后再试");
@@ -226,7 +232,7 @@ const DiaryView = () => {
                             </button>
                             {isActive && (
                               <div className="flex gap-1 animate-in slide-in-from-left-2 duration-200">
-                                <button onClick={() => { setReplyingTo(isReplying ? null : comment.id); setReplyText(""); }} className={`p-1.5 rounded-lg ${isReplying ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+                                <button onClick={() => { setReplyingTo(isReplying ? null : comment.id); setReplyText(""); setReplyMentions([]); }} className={`p-1.5 rounded-lg ${isReplying ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
                                   <Reply size={14} />
                                 </button>
                                 <button onClick={() => handleDeleteComment(selectedEntry.id, comment.id)} className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
@@ -281,15 +287,15 @@ const DiaryView = () => {
                           {/* Reply input */}
                           {isReplying && (
                             <div className="flex gap-2 pl-5 ml-3 animate-in slide-in-from-top-2 duration-200">
-                              <input
+                              <MentionInput
                                 autoFocus
                                 value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleReply(selectedEntry.id, comment)}
-                                placeholder={`回复 ${comp.name}...`}
-                                className="flex-1 bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground placeholder:text-muted-foreground/30"
+                                mentions={replyMentions}
+                                onChange={(text, mentions) => { setReplyText(text); setReplyMentions(mentions); }}
+                                onSubmit={() => handleReply(selectedEntry.id, comment)}
+                                placeholder={`回复 ${comp.name}... 输入@可呼叫伙伴`}
                               />
-                              <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30">
+                              <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30 self-end">
                                 <Send size={12} />
                               </button>
                             </div>
