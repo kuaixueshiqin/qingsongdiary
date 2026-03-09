@@ -1,13 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import MobileShell from "@/components/MobileShell";
+import BottomNav from "@/components/BottomNav";
+import DiaryView from "@/components/DiaryView";
+import MailboxView from "@/components/MailboxView";
+import InsightsView from "@/components/InsightsView";
+import CompanionsView from "@/components/CompanionsView";
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState("diary");
+
+  const renderView = () => {
+    switch (activeTab) {
+      case "diary":
+        return <DiaryView />;
+      case "mailbox":
+        return <MailboxView />;
+      case "insights":
+        return <InsightsView />;
+      case "companions":
+        return <CompanionsView />;
+      default:
+        return <DiaryView />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <MobileShell>
+      <main className="flex-1 overflow-y-auto scrollbar-hide relative">
+        {renderView()}
+      </main>
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+    </MobileShell>
   );
 };
 
