@@ -47,6 +47,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        warm: "hsl(var(--surface-warm))",
+        highlight: "hsl(var(--highlight))",
+        intimacy: "hsl(var(--intimacy))",
+        companion: {
+          green: "hsl(var(--companion-green))",
+          "green-text": "hsl(var(--companion-green-text))",
+          amber: "hsl(var(--companion-amber))",
+          "amber-text": "hsl(var(--companion-amber-text))",
+          indigo: "hsl(var(--companion-indigo))",
+          "indigo-text": "hsl(var(--companion-indigo-text))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
