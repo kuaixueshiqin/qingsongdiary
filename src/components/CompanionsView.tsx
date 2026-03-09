@@ -1,13 +1,50 @@
 import { useState } from "react";
-import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check } from "lucide-react";
+import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles } from "lucide-react";
 import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
 import { toast } from "sonner";
+
+const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀", "⚡"];
+const COLOR_OPTIONS = [
+  { colorClass: "bg-companion-green", label: "绿" },
+  { colorClass: "bg-companion-indigo", label: "靛" },
+  { colorClass: "bg-companion-pink", label: "粉" },
+  { colorClass: "bg-accent", label: "橙" },
+  { colorClass: "bg-secondary", label: "灰" },
+];
 
 const CompanionsView = () => {
   const [view, setView] = useState<"my" | "square">("my");
   const [myCompanions, setMyCompanions] = useState<Companion[]>(initialCompanions);
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newRole, setNewRole] = useState("");
+  const [newBio, setNewBio] = useState("");
+  const [newAvatar, setNewAvatar] = useState("🤖");
+  const [newColor, setNewColor] = useState("bg-companion-green");
+
+  const handleCreateCompanion = () => {
+    if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
+    if (!newRole.trim()) { toast.error("请输入伙伴角色"); return; }
+    const comp: Companion = {
+      id: `custom-${Date.now()}`,
+      name: newName.trim(),
+      avatar: newAvatar,
+      colorClass: newColor,
+      textColorClass: "text-foreground",
+      role: newRole.trim(),
+      bio: newBio.trim() || "自定义伙伴",
+      intimacy: 0,
+      level: 1,
+      lastMsg: "你好呀，很高兴认识你！",
+      delay: "随机",
+    };
+    setMyCompanions((prev) => [...prev, comp]);
+    setShowCreate(false);
+    setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
+    toast.success(`${comp.name} 已创建并加入密友列表！`);
+  };
 
   const handleToggleCompanion = (id: string, enabled: boolean) => {
     toast.success(enabled ? "已启用该伙伴的互动" : "已暂停该伙伴的互动");
@@ -84,6 +121,64 @@ const CompanionsView = () => {
     );
   }
 
+  // Create companion panel
+  if (showCreate) {
+    return (
+      <div className="pb-4 animate-in slide-in-from-right duration-300">
+        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+          <button onClick={() => setShowCreate(false)} className="text-muted-foreground"><ChevronLeft size={24} /></button>
+          <span className="text-sm font-bold text-foreground">自定义伙伴</span>
+        </div>
+        <div className="px-4 space-y-4">
+          {/* Avatar picker */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
+            <div className={`w-20 h-20 ${newColor} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{newAvatar}</div>
+            <p className="text-[10px] text-muted-foreground/40 mb-2">选择头像</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              {AVATAR_OPTIONS.map((a) => (
+                <button key={a} onClick={() => setNewAvatar(a)}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${newAvatar === a ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
+                >{a}</button>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground/40 mt-4 mb-2">选择颜色</p>
+            <div className="flex justify-center gap-2">
+              {COLOR_OPTIONS.map((c) => (
+                <button key={c.colorClass} onClick={() => setNewColor(c.colorClass)}
+                  className={`w-8 h-8 ${c.colorClass} rounded-full transition-all ${newColor === c.colorClass ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Form fields */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
+            <div>
+              <label className="text-xs font-bold text-foreground">名称 *</label>
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="给TA起个名字"
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-foreground">角色定位 *</label>
+              <input value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="如：健身教练、读书伙伴、理财顾问"
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-foreground">个性签名</label>
+              <input value={newBio} onChange={(e) => setNewBio(e.target.value)} placeholder="描述TA的性格或口头禅"
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+            </div>
+          </div>
+
+          <button onClick={handleCreateCompanion}
+            className="w-full bg-primary text-primary-foreground rounded-2xl py-3 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition-all">
+            <Sparkles size={16} /> 创建伙伴
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-center">
@@ -104,33 +199,41 @@ const CompanionsView = () => {
 
       <div className="px-4 space-y-3">
         {view === "my" ? (
-          myCompanions.map((comp) => (
-            <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl`}>{comp.avatar}</div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-foreground">{comp.name}</span>
-                    <span className="text-[10px] font-bold text-muted-foreground/30">Lv.{comp.level}</span>
+          <>
+            {myCompanions.map((comp) => (
+              <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl`}>{comp.avatar}</div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-foreground">{comp.name}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground/30">Lv.{comp.level}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{comp.role}</p>
+                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时延: {comp.delay}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{comp.role}</p>
-                  <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时延: {comp.delay}</p>
                 </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-[10px] font-bold">
+                    <div className="flex items-center gap-1 text-intimacy"><Heart size={10} fill="currentColor" /> 亲密度</div>
+                    <span className="text-muted-foreground/40">{comp.intimacy}/100</span>
+                  </div>
+                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                    <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
+                  </div>
+                </div>
+                <button onClick={() => setSettingsFor(comp)} className="absolute top-4 right-4 text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
+                  <Settings size={14} />
+                </button>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between items-center text-[10px] font-bold">
-                  <div className="flex items-center gap-1 text-intimacy"><Heart size={10} fill="currentColor" /> 亲密度</div>
-                  <span className="text-muted-foreground/40">{comp.intimacy}/100</span>
-                </div>
-                <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
-                </div>
-              </div>
-              <button onClick={() => setSettingsFor(comp)} className="absolute top-4 right-4 text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
-                <Settings size={14} />
-              </button>
-            </div>
-          ))
+            ))}
+            {/* Create custom companion card */}
+            <button onClick={() => setShowCreate(true)}
+              className="w-full border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-muted-foreground/40 hover:text-muted-foreground hover:border-muted-foreground/40 active:scale-[0.98] transition-all">
+              <Plus size={24} />
+              <span className="text-xs font-bold">自定义伙伴</span>
+            </button>
+          </>
         ) : (
           <>
             <div className="relative mb-1">
