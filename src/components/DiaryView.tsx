@@ -179,33 +179,49 @@ const DiaryDetail = ({ entry, onBack, activeCommentId, onCommentClick }: DiaryDe
           };
 
           return (
-            <div key={pIdx} className="relative">
-              {/* AI comments shown when active */}
-              {lineComments.map((comment) => {
-                const comp = companions.find((c) => c.id === comment.companionId);
-                if (!comp || activeCommentId !== comment.id) return null;
-                return (
-                  <div key={comment.id} className="mb-2 flex items-center gap-2 animate-in fade-in duration-200">
-                    <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs bg-foreground text-primary-foreground`}>
-                      <span>{comp.avatar}</span>
-                      <span className="font-medium">{comp.name}</span>
-                      <span className="text-primary-foreground/80">{comment.text}</span>
-                    </div>
-                    <div className="flex gap-1">
-                      <button className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground">
-                        <Reply size={14} />
-                      </button>
-                      <button className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-
+            <div key={pIdx}>
               <p className="text-foreground/85 text-[15px] leading-[1.8]">
                 {renderParagraph()}
               </p>
+
+              {/* AI comment bubbles below the paragraph */}
+              {lineComments.length > 0 && (
+                <div className="mt-2 space-y-1.5 pl-2">
+                  {lineComments.map((comment) => {
+                    const comp = companions.find((c) => c.id === comment.companionId);
+                    if (!comp) return null;
+                    const isActive = activeCommentId === comment.id;
+                    return (
+                      <div key={comment.id} className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => onCommentClick(isActive ? null : comment.id)}
+                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all max-w-[85%] ${
+                            isActive
+                              ? "bg-foreground text-primary-foreground"
+                              : `${comp.colorClass} ${comp.textColorClass}`
+                          }`}
+                        >
+                          <span className="flex-shrink-0">{comp.avatar}</span>
+                          <span className="font-medium flex-shrink-0">{comp.name}</span>
+                          <span className={`truncate ${isActive ? "text-primary-foreground/80" : "opacity-70"}`}>
+                            {comment.text}
+                          </span>
+                        </button>
+                        {isActive && (
+                          <div className="flex gap-1 animate-in slide-in-from-left-2 duration-200">
+                            <button className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground">
+                              <Reply size={14} />
+                            </button>
+                            <button className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
