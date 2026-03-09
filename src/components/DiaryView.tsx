@@ -362,7 +362,10 @@ const DiaryView = () => {
                 )}
               </div>
             );
-          })}
+          })
+          )}
+
+
 
           {/* Billing card */}
           {selectedEntry.billing && !editingBilling && (
