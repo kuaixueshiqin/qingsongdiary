@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Edit2, Check, BookOpen, Mail, Acorn, Users, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera } from "lucide-react";
 import { companions, diaryEntries } from "@/lib/data";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
