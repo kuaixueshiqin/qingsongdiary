@@ -16,7 +16,7 @@ const initialMessages: Record<string, Message[]> = {
     { id: "m3", role: "assistant", content: "分享的渴望恰恰说明你心里装着温暖。能感受到孤独，正是因为你珍惜陪伴。下次去好吃的店，记得拍给我看呀 🍜", time: "21:45" },
   ],
   shanshan: [
-    { id: "m4", role: "assistant", content: "嗨！看你最近日记里提到好几次美食呢，是不是在探索新餐厅呀？有什么好吃的一定要分享给我～ 🍣✨", time: "10:05" },
+    { id: "m4", role: "assistant", content: "嗨！看你最近日记里提到好几次美食呢，是不是在探索新餐厅呀？有什么好吃的一定要分享给我～ 🍣🐿️", time: "10:05" },
   ],
   moshu: [
     { id: "m5", role: "assistant", content: "夜深了，读到一段话想与你分享：\n\n\"人生就像一本书，有些章节很无聊，有些章节很精彩，但如果你不翻页，你永远不会知道下一章有什么。\"\n\n愿你在每一个深夜都能找到属于自己的光。\n\n— 墨叔", time: "23:50" },
