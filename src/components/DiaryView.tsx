@@ -189,17 +189,35 @@ const DiaryView = () => {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
-          <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
+          <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); setEditingEntryId(null); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
           </button>
-          <div>
+          <div className="flex-1">
             <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
             <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
           </div>
+          {editingEntryId === selectedEntry.id ? (
+            <div className="flex gap-1.5">
+              <button onClick={() => setEditingEntryId(null)} className="text-xs bg-card border border-border px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
+              <button onClick={() => handleSaveEdit(selectedEntry.id)} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold">保存</button>
+            </div>
+          ) : (
+            <button onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+              <Pencil size={16} />
+            </button>
+          )}
         </div>
 
         <div className="px-6 space-y-6">
-          {selectedEntry.content.split("\n").filter(Boolean).map((para, pIdx) => {
+          {editingEntryId === selectedEntry.id ? (
+            <textarea
+              autoFocus
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              className="w-full min-h-[200px] text-[15px] leading-[1.8] text-foreground/85 bg-transparent border border-border rounded-xl p-4 focus:outline-none focus:border-muted-foreground/40 resize-none"
+            />
+          ) : (
+          selectedEntry.content.split("\n").filter(Boolean).map((para, pIdx) => {
             const lineComments = selectedEntry.comments.filter((c) => c.lineIndex === pIdx);
 
             const renderParagraph = () => {
