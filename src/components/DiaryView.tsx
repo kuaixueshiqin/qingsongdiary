@@ -12,6 +12,7 @@ const DiaryView = () => {
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [collapsedComments, setCollapsedComments] = useState<Set<number>>(new Set());
   const [editingBilling, setEditingBilling] = useState(false);
   const [billingAmount, setBillingAmount] = useState("");
   const [billingCategory, setBillingCategory] = useState("");
