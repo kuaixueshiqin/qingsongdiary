@@ -1,7 +1,16 @@
 import { useState } from "react";
-import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check } from "lucide-react";
+import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles } from "lucide-react";
 import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
 import { toast } from "sonner";
+
+const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀", "⚡"];
+const COLOR_OPTIONS = [
+  { colorClass: "bg-companion-green", label: "绿" },
+  { colorClass: "bg-companion-indigo", label: "靛" },
+  { colorClass: "bg-companion-pink", label: "粉" },
+  { colorClass: "bg-accent", label: "橙" },
+  { colorClass: "bg-secondary", label: "灰" },
+];
 
 const CompanionsView = () => {
   const [view, setView] = useState<"my" | "square">("my");
