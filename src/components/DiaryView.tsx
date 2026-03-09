@@ -287,15 +287,15 @@ const DiaryView = () => {
                           {/* Reply input */}
                           {isReplying && (
                             <div className="flex gap-2 pl-5 ml-3 animate-in slide-in-from-top-2 duration-200">
-                              <input
+                              <MentionInput
                                 autoFocus
                                 value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleReply(selectedEntry.id, comment)}
-                                placeholder={`回复 ${comp.name}...`}
-                                className="flex-1 bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground placeholder:text-muted-foreground/30"
+                                mentions={replyMentions}
+                                onChange={(text, mentions) => { setReplyText(text); setReplyMentions(mentions); }}
+                                onSubmit={() => handleReply(selectedEntry.id, comment)}
+                                placeholder={`回复 ${comp.name}... 输入@可呼叫伙伴`}
                               />
-                              <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30">
+                              <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30 self-end">
                                 <Send size={12} />
                               </button>
                             </div>
