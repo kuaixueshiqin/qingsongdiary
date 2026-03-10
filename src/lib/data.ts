@@ -144,8 +144,8 @@ export const diaryEntries: DiaryEntry[] = [
 ];
 
 export const squareAgents = [
-  { id: "coffee", name: "咖咖", avatar: "☕", creator: "用户9527", likes: "1.2k", role: "职场导师" },
-  { id: "nana", name: "那那", avatar: "🐱", creator: "猫奴小王", likes: "3.5k", role: "傲娇萌宠" },
-  { id: "pixel", name: "像素", avatar: "👾", creator: "极客阿强", likes: "890", role: "复古游戏迷" },
-  { id: "starry", name: "星星", avatar: "🌟", creator: "文艺小青", likes: "2.1k", role: "占星师" },
+  { id: "coffee", name: "咖咖", avatar: "☕", creator: "用户9527", likes: "1.2k", role: "职场导师", bio: "在职场摸爬滚打十年，最擅长帮你理清思路、化解焦虑。无论是升职加薪还是人际关系，都可以聊聊。", pinecones: 80 },
+  { id: "nana", name: "那那", avatar: "🐱", creator: "猫奴小王", likes: "3.5k", role: "傲娇萌宠", bio: "哼，才不是因为喜欢你才来陪你的呢！只是...偶尔听你说说话也不是不可以啦。", pinecones: 60 },
+  { id: "pixel", name: "像素", avatar: "👾", creator: "极客阿强", likes: "890", role: "复古游戏迷", bio: "8-bit 是永恒的浪漫！从红白机到街机，从马里奥到魂斗罗，和我一起重温像素时代的感动吧。", pinecones: 95 },
+  { id: "starry", name: "星星", avatar: "🌟", creator: "文艺小青", likes: "2.1k", role: "占星师", bio: "星辰大海里藏着你的命运密码。让我用星座和塔罗，帮你看清前方的路。", pinecones: 75 },
 ];

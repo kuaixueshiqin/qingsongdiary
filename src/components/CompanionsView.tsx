@@ -27,6 +27,12 @@ const CompanionsView = () => {
   const [editName, setEditName] = useState("");
   const [editRole, setEditRole] = useState("");
   const [editBio, setEditBio] = useState("");
+  const [likedAgents, setLikedAgents] = useState<string[]>([]);
+  const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
+
+  const handleToggleLike = (agentId: string) => {
+    setLikedAgents((prev) => prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]);
+  };
 
   const handleCreateCompanion = () => {
     if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
