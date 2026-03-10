@@ -423,9 +423,6 @@ const DiaryView = () => {
           )}
         </div>
 
-        <div className="px-6 mt-8 pt-4 border-t border-border">
-          <p className="text-sm text-muted-foreground/30 italic">点击此处追加记录...</p>
-        </div>
       </div>
     );
   }
