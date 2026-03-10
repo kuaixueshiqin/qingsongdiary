@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { Wallet, Smile, Film, MapPin, BookOpen, Sparkles, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
+import { useState, useRef } from "react";
+import { Wallet, Smile, Film, Sparkles, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
 import { diaryEntries } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import movieDune2 from "@/assets/movie-dune2.jpg";
+import movieZhouchuchusanhai from "@/assets/movie-zhouchuchusanhai.jpg";
+import movieGhibli from "@/assets/movie-ghibli.jpg";
 
 interface CustomBoard {
   id: string;
@@ -21,7 +24,11 @@ interface BillingItem {
   verified: boolean;
 }
 
-const InsightsView = () => {
+interface InsightsViewProps {
+  onNavigateToDiary?: (entryId: number) => void;
+}
+
+const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
   const moodData = [40, 60, 30, 80, 45, 90, 70, 50, 65, 85, 55, 75];
   const moodLabels = ["好奇", "开心", "低落", "愉快", "平静", "兴奋", "满足", "空虚", "温暖", "期待", "疲惫", "释然"];
 
@@ -236,24 +243,31 @@ const InsightsView = () => {
           </div>
         </div>
 
-        {/* Life footprints */}
+        {/* 电影看板 */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">生活足迹</span>
-          <div className="grid grid-cols-3 gap-4 mt-4">
-            <div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground/40 font-bold mb-2"><Film size={10} /> 电影</div>
-              <ul className="space-y-1 text-xs text-foreground/70"><li>《沙丘 2》</li><li>《周处除三害》</li></ul>
-            </div>
-            <div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground/40 font-bold mb-2"><MapPin size={10} /> 地点</div>
-              <ul className="space-y-1 text-xs text-foreground/70"><li>静安公园</li><li>日料店</li></ul>
-            </div>
-            <div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground/40 font-bold mb-2"><BookOpen size={10} /> 关键词</div>
-              <div className="flex flex-wrap gap-1">
-                {["加班", "日料", "成长", "失眠"].map((w) => (<span key={w} className="bg-secondary text-muted-foreground px-1.5 py-0.5 rounded text-[9px] font-medium">{w}</span>))}
+          <div className="flex items-center gap-2 mb-4">
+            <Film size={16} className="text-accent" />
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">电影</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 -mx-1 px-1" style={{ scrollSnapType: "x mandatory" }}>
+            {[
+              { id: 4, title: "沙丘 2", image: movieDune2, excerpt: "视觉效果真的太震撼了，沙虫出场那一幕直接起鸡皮疙瘩…" },
+              { id: 5, title: "周处除三害", image: movieZhouchuchusanhai, excerpt: "被阮经天的演技惊到了，邪教戏份拍得太好了…" },
+              { id: 6, title: "你想活出怎样的人生", image: movieGhibli, excerpt: "宫崎骏最后的作品，画面美得像梦境…" },
+            ].map((movie) => (
+              <div
+                key={movie.id}
+                onClick={() => onNavigateToDiary?.(movie.id)}
+                className="flex-shrink-0 w-36 cursor-pointer active:scale-95 transition-transform"
+                style={{ scrollSnapAlign: "start" }}
+              >
+                <div className="rounded-xl overflow-hidden aspect-[3/4] mb-2">
+                  <img src={movie.image} alt={movie.title} className="w-full h-full object-cover" />
+                </div>
+                <h4 className="text-xs font-bold text-foreground mb-0.5 truncate">《{movie.title}》</h4>
+                <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{movie.excerpt}</p>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
