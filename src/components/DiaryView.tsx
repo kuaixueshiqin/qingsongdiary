@@ -20,8 +20,6 @@ const DiaryView = () => {
   const [billingAmount, setBillingAmount] = useState("");
   const [billingCategory, setBillingCategory] = useState("");
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
-  const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
-  const [editContent, setEditContent] = useState("");
   const [collapsedReplies, setCollapsedReplies] = useState<Set<string>>(new Set());
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
@@ -156,11 +154,10 @@ const DiaryView = () => {
     }
   };
 
-  const handleSaveEdit = (entryId: number) => {
-    if (!editContent.trim()) return;
-    setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: editContent } : e));
-    setEditingEntryId(null);
-    toast.success("日记已更新");
+  const handleContentBlur = (entryId: number, newContent: string) => {
+    if (newContent.trim()) {
+      setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: newContent } : e));
+    }
   };
 
   const handleEditBilling = (entryId: number) => {
@@ -195,31 +192,17 @@ const DiaryView = () => {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
-          <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); setEditingEntryId(null); }} className="text-muted-foreground">
+          <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
           </button>
           <div className="flex-1">
             <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
             <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
           </div>
-          {editingEntryId === selectedEntry.id && (
-            <div className="flex gap-1.5">
-              <button onClick={() => setEditingEntryId(null)} className="text-xs bg-card border border-border px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
-              <button onClick={() => handleSaveEdit(selectedEntry.id)} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold">保存</button>
-            </div>
-          )}
         </div>
 
         <div className="px-6 space-y-6">
-          {editingEntryId === selectedEntry.id ? (
-            <textarea
-              autoFocus
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-              className="w-full min-h-[200px] text-[15px] leading-[1.8] text-foreground/85 bg-transparent border border-border rounded-xl p-4 focus:outline-none focus:border-muted-foreground/40 resize-none"
-            />
-          ) : (
-          selectedEntry.content.split("\n").filter(Boolean).map((para, pIdx) => {
+          {selectedEntry.content.split("\n").filter(Boolean).map((para, pIdx) => {
             const lineComments = selectedEntry.comments.filter((c) => c.lineIndex === pIdx);
 
             const renderParagraph = () => {
@@ -248,7 +231,16 @@ const DiaryView = () => {
 
             return (
               <div key={pIdx}>
-                <p className="text-foreground/85 text-[15px] leading-[1.8] cursor-pointer hover:bg-secondary/50 rounded-lg px-1 -mx-1 transition-colors" onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }}>{renderParagraph()}</p>
+                <p
+                  className="text-foreground/85 text-[15px] leading-[1.8] rounded-lg px-1 -mx-1 focus:outline-none focus:bg-secondary/30 transition-colors"
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const allParas = selectedEntry.content.split("\n").filter(Boolean);
+                    allParas[pIdx] = e.currentTarget.textContent || "";
+                    handleContentBlur(selectedEntry.id, allParas.join("\n"));
+                  }}
+                >{para}</p>
                 {lineComments.length > 0 && (
                   <div className="mt-2 pl-2">
                     <div className="flex items-center justify-between mb-1">
@@ -382,11 +374,7 @@ const DiaryView = () => {
                 )}
               </div>
             );
-          })
-          )}
-
-
-
+          })}
           {/* Billing card */}
           {selectedEntry.billing && !editingBilling && (
             <div className="bg-secondary/50 border border-border rounded-2xl p-4 flex items-center gap-3">
