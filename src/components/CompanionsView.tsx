@@ -87,11 +87,44 @@ const CompanionsView = () => {
         </div>
         <div className="px-4 space-y-4">
           {/* Profile card */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center relative">
             <div className={`w-20 h-20 ${settingsFor.colorClass} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{settingsFor.avatar}</div>
-            <h3 className="text-lg font-black text-foreground">{settingsFor.name}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{settingsFor.role}</p>
-            <p className="text-[10px] text-muted-foreground/40 mt-0.5">{settingsFor.bio}</p>
+            {editingProfile ? (
+              <div className="space-y-3 text-left">
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1">名称</label>
+                  <input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full bg-secondary rounded-xl py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1">角色</label>
+                  <input value={editRole} onChange={(e) => setEditRole(e.target.value)} className="w-full bg-secondary rounded-xl py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1">人设描述</label>
+                  <textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={2} className="w-full bg-secondary rounded-xl py-2 px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none" />
+                </div>
+                <div className="flex gap-2 justify-center">
+                  <button onClick={() => setEditingProfile(false)} className="text-xs bg-secondary px-4 py-1.5 rounded-lg text-muted-foreground">取消</button>
+                  <button onClick={() => {
+                    if (!editName.trim()) { toast.error("名称不能为空"); return; }
+                    const updated = { ...settingsFor, name: editName.trim(), role: editRole.trim(), bio: editBio.trim() };
+                    setMyCompanions((prev) => prev.map((c) => c.id === settingsFor.id ? updated : c));
+                    setSettingsFor(updated);
+                    setEditingProfile(false);
+                    toast.success("人设已保存");
+                  }} className="text-xs bg-primary text-primary-foreground px-4 py-1.5 rounded-lg font-bold">保存</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-black text-foreground">{settingsFor.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{settingsFor.role}</p>
+                <p className="text-[10px] text-muted-foreground/40 mt-0.5">{settingsFor.bio}</p>
+                <button onClick={() => { setEditingProfile(true); setEditName(settingsFor.name); setEditRole(settingsFor.role); setEditBio(settingsFor.bio); }} className="absolute top-4 right-4 text-muted-foreground/30 hover:text-muted-foreground transition-colors">
+                  <Pencil size={14} />
+                </button>
+              </>
+            )}
             <div className="mt-4 flex justify-center gap-4 text-[10px]">
               <div className="text-center">
                 <span className="font-black text-foreground text-lg">Lv.{settingsFor.level}</span>
