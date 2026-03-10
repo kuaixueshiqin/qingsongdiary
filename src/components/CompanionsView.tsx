@@ -99,16 +99,18 @@ const CompanionsView = () => {
             <h3 className="text-lg font-black text-foreground">{viewingAgent.name}</h3>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-companion-indigo text-companion-indigo-text">{viewingAgent.role}</span>
             <p className="text-[10px] text-muted-foreground/40 mt-1">by {viewingAgent.creator}</p>
-            <div className="flex justify-center gap-4 mt-4 text-[10px]">
-              <div className="text-center">
-                <button onClick={() => handleToggleLike(viewingAgent.id)} className="transition-transform active:scale-90">
-                  <Heart size={18} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+            <div className="flex justify-center gap-6 mt-4 text-[10px]">
+              <div className="flex flex-col items-center gap-1">
+                <button onClick={() => handleToggleLike(viewingAgent.id)} className="flex items-center gap-1 transition-transform active:scale-90">
+                  <Heart size={16} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                  <span className="text-muted-foreground/40 font-medium">{viewingAgent.likes}</span>
                 </button>
-                <p className="text-muted-foreground/40 mt-0.5">{viewingAgent.likes}</p>
               </div>
-              <div className="text-center">
-                <span className="text-xl">🌰</span>
-                <p className="text-muted-foreground/40 mt-0.5">{viewingAgent.pinecones} 松果</p>
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-base">🌰</span>
+                  <span className="text-muted-foreground/40 font-medium">{viewingAgent.pinecones} 松果</span>
+                </div>
               </div>
             </div>
           </div>
