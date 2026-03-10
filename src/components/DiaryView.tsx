@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
@@ -75,8 +75,8 @@ const DiaryView = () => {
     setReplyingTo(null);
     setLoadingReply(comment.id);
 
-    // Determine which companions should reply: the comment's companion + any @mentioned ones
-    const respondingIds = new Set<string>([comment.companionId]);
+    // Only @mentioned companions reply (not the comment's companion by default)
+    const respondingIds = new Set<string>();
     savedMentions.forEach((m) => respondingIds.add(m.id));
 
     // Build conversation context
@@ -85,6 +85,11 @@ const DiaryView = () => {
       ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
       { role: "user" as const, content: savedReplyText },
     ];
+
+    if (respondingIds.size === 0) {
+      setLoadingReply(null);
+      return;
+    }
 
     try {
       for (const compId of respondingIds) {
@@ -197,15 +202,11 @@ const DiaryView = () => {
             <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
             <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
           </div>
-          {editingEntryId === selectedEntry.id ? (
+          {editingEntryId === selectedEntry.id && (
             <div className="flex gap-1.5">
               <button onClick={() => setEditingEntryId(null)} className="text-xs bg-card border border-border px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
               <button onClick={() => handleSaveEdit(selectedEntry.id)} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold">保存</button>
             </div>
-          ) : (
-            <button onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-              <Pencil size={16} />
-            </button>
           )}
         </div>
 
@@ -247,7 +248,7 @@ const DiaryView = () => {
 
             return (
               <div key={pIdx}>
-                <p className="text-foreground/85 text-[15px] leading-[1.8]">{renderParagraph()}</p>
+                <p className="text-foreground/85 text-[15px] leading-[1.8] cursor-pointer hover:bg-secondary/50 rounded-lg px-1 -mx-1 transition-colors" onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }}>{renderParagraph()}</p>
                 {lineComments.length > 0 && (
                   <div className="mt-2 pl-2">
                     <div className="flex items-center justify-between mb-1">
