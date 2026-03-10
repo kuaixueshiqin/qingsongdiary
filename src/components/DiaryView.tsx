@@ -366,7 +366,6 @@ const DiaryView = () => {
               </div>
             );
           })
-          )}
 
 
 
