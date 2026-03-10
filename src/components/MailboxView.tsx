@@ -127,11 +127,17 @@ const MailboxView = () => {
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-0.5">
                 <span className="font-bold text-foreground text-sm">{item.companion.name}</span>
-                <span className="text-[10px] text-muted-foreground/40">{item.lastTime}</span>
+                <span className="text-[10px] text-muted-foreground/40 text-right">{item.lastTime}</span>
               </div>
-              <p className="text-xs text-muted-foreground truncate">{item.companion.lastMsg}</p>
+              <div className="flex justify-between items-center">
+                <p className="text-xs text-muted-foreground truncate">{item.companion.lastMsg}</p>
+                {item.unread && (
+                  <span className="flex-shrink-0 ml-2 text-sm pinecone-sparkle">
+                    🌰
+                  </span>
+                )}
+              </div>
             </div>
-            {item.unread && <div className="w-2 h-2 bg-accent rounded-full flex-shrink-0" />}
           </div>
         ))}
       </div>
