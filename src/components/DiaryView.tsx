@@ -22,6 +22,7 @@ const DiaryView = () => {
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [collapsedReplies, setCollapsedReplies] = useState<Set<string>>(new Set());
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
