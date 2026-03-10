@@ -39,6 +39,9 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
   const [showDetail, setShowDetail] = useState(false);
   const [billingItems, setBillingItems] = useState<BillingItem[]>([
     { id: 1, date: "5月20日", amount: 280, category: "餐饮", source: "日料店", verified: false },
+    { id: 9, date: "5月21日", amount: 0, category: "娱乐", source: "沙丘2·电影", verified: false },
+    { id: 10, date: "5月16日", amount: 0, category: "娱乐", source: "周处除三害·电影", verified: false },
+    { id: 11, date: "5月11日", amount: 0, category: "娱乐", source: "你想活出怎样的人生·电影", verified: false },
     { id: 2, date: "5月17日", amount: 25, category: "交通", source: "打车去公园", verified: true },
     { id: 3, date: "5月15日", amount: 89, category: "购物", source: "超市采购", verified: true },
     { id: 4, date: "5月14日", amount: 35, category: "餐饮", source: "咖啡", verified: false },
