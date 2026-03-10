@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles } from "lucide-react";
+import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil } from "lucide-react";
 import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
 import { toast } from "sonner";
 
