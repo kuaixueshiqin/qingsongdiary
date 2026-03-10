@@ -27,6 +27,12 @@ const CompanionsView = () => {
   const [editName, setEditName] = useState("");
   const [editRole, setEditRole] = useState("");
   const [editBio, setEditBio] = useState("");
+  const [likedAgents, setLikedAgents] = useState<string[]>([]);
+  const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
+
+  const handleToggleLike = (agentId: string) => {
+    setLikedAgents((prev) => prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]);
+  };
 
   const handleCreateCompanion = () => {
     if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
@@ -76,6 +82,51 @@ const CompanionsView = () => {
     setMyCompanions((prev) => [...prev, newComp]);
     toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
+
+  // Agent detail view
+  if (viewingAgent) {
+    const isAdded = addedAgents.includes(viewingAgent.id);
+    const isLiked = likedAgents.includes(viewingAgent.id);
+    return (
+      <div className="pb-4 animate-in slide-in-from-right duration-300">
+        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+          <button onClick={() => setViewingAgent(null)} className="text-muted-foreground"><ChevronLeft size={24} /></button>
+          <span className="text-sm font-bold text-foreground">伙伴详情</span>
+        </div>
+        <div className="px-4 space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center">
+            <div className="w-20 h-20 bg-secondary rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3">{viewingAgent.avatar}</div>
+            <h3 className="text-lg font-black text-foreground">{viewingAgent.name}</h3>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-companion-indigo text-companion-indigo-text">{viewingAgent.role}</span>
+            <p className="text-[10px] text-muted-foreground/40 mt-1">by {viewingAgent.creator}</p>
+            <div className="flex justify-center gap-4 mt-4 text-[10px]">
+              <div className="text-center">
+                <button onClick={() => handleToggleLike(viewingAgent.id)} className="transition-transform active:scale-90">
+                  <Heart size={18} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                </button>
+                <p className="text-muted-foreground/40 mt-0.5">{viewingAgent.likes}</p>
+              </div>
+              <div className="text-center">
+                <span className="text-xl">🌰</span>
+                <p className="text-muted-foreground/40 mt-0.5">{viewingAgent.pinecones} 松果</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+            <h4 className="text-xs font-bold text-foreground mb-2">人设介绍</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">{viewingAgent.bio}</p>
+          </div>
+          <button
+            onClick={() => { handleAddAgent(viewingAgent); }}
+            disabled={isAdded}
+            className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground"}`}
+          >
+            {isAdded ? <><Check size={16} />已添加</> : <>🌰 花 {viewingAgent.pinecones} 松果带TA回家</>}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Settings panel
   if (settingsFor) {
@@ -279,8 +330,9 @@ const CompanionsView = () => {
             </div>
             {squareAgents.map((agent) => {
               const isAdded = addedAgents.includes(agent.id);
+              const isLiked = likedAgents.includes(agent.id);
               return (
-                <div key={agent.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+                <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm cursor-pointer active:scale-[0.98] transition-transform">
                   <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center text-2xl">{agent.avatar}</div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
@@ -288,12 +340,17 @@ const CompanionsView = () => {
                         <h4 className="font-bold text-sm text-foreground">{agent.name}</h4>
                         <p className="text-[10px] text-muted-foreground/40">by {agent.creator}</p>
                       </div>
-                      <div className="flex items-center gap-1 text-intimacy font-bold text-[10px]"><Heart size={10} fill="currentColor" />{agent.likes}</div>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleLike(agent.id); }} className="transition-transform active:scale-90">
+                          <Heart size={14} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                        </button>
+                        <span className="text-[9px] text-muted-foreground/40 flex items-center gap-0.5">🌰{agent.pinecones}</span>
+                      </div>
                     </div>
                     <div className="mt-2 flex items-center gap-2">
                       <span className="text-[9px] bg-companion-indigo text-companion-indigo-text px-2 py-0.5 rounded-full font-bold">{agent.role}</span>
                       <button
-                        onClick={() => handleAddAgent(agent)}
+                        onClick={(e) => { e.stopPropagation(); handleAddAgent(agent); }}
                         disabled={isAdded}
                         className={`ml-auto text-[10px] px-3 py-1 rounded-lg font-bold transition-all ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
                       >
