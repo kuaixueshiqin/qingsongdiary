@@ -202,15 +202,11 @@ const DiaryView = () => {
             <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
             <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
           </div>
-          {editingEntryId === selectedEntry.id ? (
+          {editingEntryId === selectedEntry.id && (
             <div className="flex gap-1.5">
               <button onClick={() => setEditingEntryId(null)} className="text-xs bg-card border border-border px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
               <button onClick={() => handleSaveEdit(selectedEntry.id)} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold">保存</button>
             </div>
-          ) : (
-            <button onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-              <Pencil size={16} />
-            </button>
           )}
         </div>
 
