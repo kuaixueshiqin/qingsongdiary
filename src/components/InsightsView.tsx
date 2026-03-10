@@ -79,10 +79,15 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
     toast.success("账单已更新");
   };
 
-  const handleConfirmItem = (itemId: number) => {
-    setBillingItems((prev) => prev.map((i) => i.id === itemId ? { ...i, verified: true } : i));
-    toast.success("已确认");
+  const handleDeleteItem = (itemId: number) => {
+    setBillingItems((prev) => prev.filter((i) => i.id !== itemId));
+    toast.success("已删除");
   };
+
+  const sortedBillingItems = [...billingItems].sort((a, b) => {
+    if (a.verified === b.verified) return 0;
+    return a.verified ? 1 : -1;
+  });
 
   const totalAmount = billingItems.reduce((sum, i) => sum + i.amount, 0);
 
