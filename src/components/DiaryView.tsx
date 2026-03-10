@@ -24,6 +24,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [newContent, setNewContent] = useState("");
   const [newMentions, setNewMentions] = useState<MentionTag[]>([]);
   const [activeCommentId, setActiveCommentId] = useState<string | null>(null);
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [replyMentions, setReplyMentions] = useState<MentionTag[]>([]);
@@ -295,11 +296,14 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                                   setReplyMentions([]);
                                 }
                               }}
-                              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all max-w-[75%] ${isReplying ? "bg-foreground text-primary-foreground" : `${comp.colorClass} ${comp.textColorClass}`}`}
+                              className={`flex items-start gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all ${isReplying ? "bg-foreground text-primary-foreground" : `${comp.colorClass} ${comp.textColorClass}`} ${expandedComments.has(comment.id) ? "max-w-[90%]" : "max-w-[75%]"}`}
                             >
-                              <span className="flex-shrink-0">{comp.avatar}</span>
-                              <span className="font-medium flex-shrink-0">{comp.name}</span>
-                              <span className={`truncate ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}>{comment.text}</span>
+                              <span className="flex-shrink-0 mt-0.5">{comp.avatar}</span>
+                              <span className="font-medium flex-shrink-0 mt-0.5">{comp.name}</span>
+                              <span
+                                className={`${expandedComments.has(comment.id) ? "whitespace-pre-wrap" : "truncate"} ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}
+                                onClick={(e) => { e.stopPropagation(); setExpandedComments(prev => { const next = new Set(prev); if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id); return next; }); }}
+                              >{comment.text}</span>
                             </button>
                             {isReplying && (
                               <button onClick={(e) => { e.stopPropagation(); handleDeleteComment(selectedEntry.id, comment.id); }} className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200">
