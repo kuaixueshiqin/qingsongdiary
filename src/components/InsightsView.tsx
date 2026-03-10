@@ -24,7 +24,11 @@ interface BillingItem {
   verified: boolean;
 }
 
-const InsightsView = () => {
+interface InsightsViewProps {
+  onNavigateToDiary?: (entryId: number) => void;
+}
+
+const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
   const moodData = [40, 60, 30, 80, 45, 90, 70, 50, 65, 85, 55, 75];
   const moodLabels = ["好奇", "开心", "低落", "愉快", "平静", "兴奋", "满足", "空虚", "温暖", "期待", "疲惫", "释然"];
 
