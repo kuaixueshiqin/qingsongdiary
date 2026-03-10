@@ -75,8 +75,8 @@ const DiaryView = () => {
     setReplyingTo(null);
     setLoadingReply(comment.id);
 
-    // Determine which companions should reply: the comment's companion + any @mentioned ones
-    const respondingIds = new Set<string>([comment.companionId]);
+    // Only @mentioned companions reply (not the comment's companion by default)
+    const respondingIds = new Set<string>();
     savedMentions.forEach((m) => respondingIds.add(m.id));
 
     // Build conversation context
