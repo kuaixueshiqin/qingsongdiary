@@ -330,8 +330,9 @@ const CompanionsView = () => {
             </div>
             {squareAgents.map((agent) => {
               const isAdded = addedAgents.includes(agent.id);
+              const isLiked = likedAgents.includes(agent.id);
               return (
-                <div key={agent.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+                <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm cursor-pointer active:scale-[0.98] transition-transform">
                   <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center text-2xl">{agent.avatar}</div>
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
@@ -339,12 +340,17 @@ const CompanionsView = () => {
                         <h4 className="font-bold text-sm text-foreground">{agent.name}</h4>
                         <p className="text-[10px] text-muted-foreground/40">by {agent.creator}</p>
                       </div>
-                      <div className="flex items-center gap-1 text-intimacy font-bold text-[10px]"><Heart size={10} fill="currentColor" />{agent.likes}</div>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleLike(agent.id); }} className="transition-transform active:scale-90">
+                          <Heart size={14} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                        </button>
+                        <span className="text-[9px] text-muted-foreground/40 flex items-center gap-0.5">🌰{agent.pinecones}</span>
+                      </div>
                     </div>
                     <div className="mt-2 flex items-center gap-2">
                       <span className="text-[9px] bg-companion-indigo text-companion-indigo-text px-2 py-0.5 rounded-full font-bold">{agent.role}</span>
                       <button
-                        onClick={() => handleAddAgent(agent)}
+                        onClick={(e) => { e.stopPropagation(); handleAddAgent(agent); }}
                         disabled={isAdded}
                         className={`ml-auto text-[10px] px-3 py-1 rounded-lg font-bold transition-all ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
                       >
