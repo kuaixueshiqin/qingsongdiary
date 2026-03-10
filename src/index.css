@@ -87,3 +87,12 @@
     display: none;
   }
 }
+
+@keyframes pinecone-glow {
+  0%, 100% { text-shadow: -6px 0 4px rgba(255,200,0,0), 6px 0 4px rgba(255,200,0,0); }
+  50% { text-shadow: -6px 0 6px rgba(255,200,0,0.6), 6px 0 6px rgba(255,200,0,0.6), -10px 0 2px rgba(255,180,0,0.3), 10px 0 2px rgba(255,180,0,0.3); }
+}
+
+.pinecone-sparkle {
+  animation: pinecone-glow 1.5s ease-in-out infinite;
+}
