@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
