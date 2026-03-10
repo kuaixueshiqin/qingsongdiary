@@ -154,7 +154,7 @@ const InsightsView = () => {
                 <h3 className="text-sm font-black text-foreground">AI 自动生成看板</h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">输入话题，AI 将从日记中提取生成</p>
               </div>
-              <button onClick={() => { setIsCreating(false); setTopicInput(""); }} className="text-muted-foreground"><X size={18} /></button>
+              
             </div>
             <input type="text" placeholder="输入话题，如：电影、游戏、美食..." className="w-full bg-secondary border border-border rounded-2xl py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-muted-foreground/40 mb-3" value={topicInput} onChange={(e) => setTopicInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleGenerate()} maxLength={20} autoFocus />
             <div className="flex flex-wrap gap-2 mb-4">
