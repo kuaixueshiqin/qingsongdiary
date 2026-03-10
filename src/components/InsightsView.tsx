@@ -103,7 +103,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
           </div>
         </div>
         <div className="px-4 space-y-2">
-          {billingItems.map((item) => (
+          {sortedBillingItems.map((item) => (
             <div key={item.id} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
               {editingItemId === item.id ? (
                 <div className="space-y-3 animate-in fade-in duration-200">
@@ -128,17 +128,21 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-sm font-bold text-foreground">¥{item.amount}</span>
+                      {item.amount > 0 ? (
+                        <span className="text-sm font-bold text-foreground">¥{item.amount}</span>
+                      ) : (
+                        <span className="text-sm font-bold text-muted-foreground/40">待填写</span>
+                      )}
                       <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{item.category}</span>
                       {!item.verified && <span className="text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded font-bold">AI待确认</span>}
                     </div>
                     <p className="text-[10px] text-muted-foreground">{item.date} · {item.source}</p>
                   </div>
                   <div className="flex gap-1">
+                    <button onClick={() => { setEditingItemId(item.id); setEditAmount(item.amount > 0 ? String(item.amount) : ""); setEditCategory(item.category); }} className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground"><Pencil size={14} /></button>
                     {!item.verified && (
-                      <button onClick={() => handleConfirmItem(item.id)} className="p-1.5 bg-companion-green rounded-lg text-companion-green-text"><Check size={14} /></button>
+                      <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 bg-destructive/10 rounded-lg text-destructive"><X size={14} /></button>
                     )}
-                    <button onClick={() => { setEditingItemId(item.id); setEditAmount(String(item.amount)); setEditCategory(item.category); }} className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground"><Pencil size={14} /></button>
                   </div>
                 </div>
               )}
