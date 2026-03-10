@@ -86,6 +86,11 @@ const DiaryView = () => {
       { role: "user" as const, content: savedReplyText },
     ];
 
+    if (respondingIds.size === 0) {
+      setLoadingReply(null);
+      return;
+    }
+
     try {
       for (const compId of respondingIds) {
         const { data, error } = await supabase.functions.invoke("companion-chat", {
