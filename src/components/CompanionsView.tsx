@@ -340,11 +340,12 @@ const CompanionsView = () => {
                         <h4 className="font-bold text-sm text-foreground">{agent.name}</h4>
                         <p className="text-[10px] text-muted-foreground/40">by {agent.creator}</p>
                       </div>
-                      <div className="flex flex-col items-center gap-0.5">
-                        <button onClick={(e) => { e.stopPropagation(); handleToggleLike(agent.id); }} className="transition-transform active:scale-90">
-                          <Heart size={14} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                      <div className="flex flex-col items-end gap-1">
+                        <button onClick={(e) => { e.stopPropagation(); handleToggleLike(agent.id); }} className="flex items-center gap-1 transition-transform active:scale-90">
+                          <Heart size={12} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                          <span className="text-[10px] text-muted-foreground/40 font-medium">{agent.likes}</span>
                         </button>
-                        <span className="text-[9px] text-muted-foreground/40 flex items-center gap-0.5">🌰{agent.pinecones}</span>
+                        <span className="text-[10px] text-muted-foreground/40 flex items-center gap-0.5">🌰 {agent.pinecones}</span>
                       </div>
                     </div>
                     <div className="mt-2 flex items-center gap-2">
