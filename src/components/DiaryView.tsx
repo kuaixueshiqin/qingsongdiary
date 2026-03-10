@@ -1,13 +1,25 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus, ChevronLeft, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-const DiaryView = () => {
+interface DiaryViewProps {
+  initialEntryId?: number | null;
+  onEntryViewed?: () => void;
+}
+
+const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [entries, setEntries] = useState<DiaryEntry[]>(initialEntries);
-  const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
+  const [selectedEntryId, setSelectedEntryId] = useState<number | null>(initialEntryId ?? null);
+
+  useEffect(() => {
+    if (initialEntryId != null) {
+      setSelectedEntryId(initialEntryId);
+      onEntryViewed?.();
+    }
+  }, [initialEntryId]);
   const [isWriting, setIsWriting] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [newMentions, setNewMentions] = useState<MentionTag[]>([]);

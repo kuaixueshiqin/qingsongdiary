@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { Wallet, Smile, Film, MapPin, BookOpen, Sparkles, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
+import { useState, useRef } from "react";
+import { Wallet, Smile, Film, Sparkles, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
 import { diaryEntries } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import movieDune2 from "@/assets/movie-dune2.jpg";
+import movieZhouchuchusanhai from "@/assets/movie-zhouchuchusanhai.jpg";
+import movieGhibli from "@/assets/movie-ghibli.jpg";
 
 interface CustomBoard {
   id: string;
