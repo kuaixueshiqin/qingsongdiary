@@ -23,6 +23,10 @@ const CompanionsView = () => {
   const [newBio, setNewBio] = useState("");
   const [newAvatar, setNewAvatar] = useState("🤖");
   const [newColor, setNewColor] = useState("bg-companion-green");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editRole, setEditRole] = useState("");
+  const [editBio, setEditBio] = useState("");
 
   const handleCreateCompanion = () => {
     if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
