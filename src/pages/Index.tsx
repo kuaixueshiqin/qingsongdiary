@@ -9,15 +9,21 @@ import ProfileView from "@/components/ProfileView";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("diary");
+  const [targetDiaryId, setTargetDiaryId] = useState<number | null>(null);
+
+  const handleNavigateToDiary = (entryId: number) => {
+    setTargetDiaryId(entryId);
+    setActiveTab("diary");
+  };
 
   const renderView = () => {
     switch (activeTab) {
       case "diary":
-        return <DiaryView />;
+        return <DiaryView initialEntryId={targetDiaryId} onEntryViewed={() => setTargetDiaryId(null)} />;
       case "mailbox":
         return <MailboxView />;
       case "insights":
-        return <InsightsView />;
+        return <InsightsView onNavigateToDiary={handleNavigateToDiary} />;
       case "companions":
         return <CompanionsView />;
       case "profile":
