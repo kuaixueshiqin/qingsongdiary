@@ -298,6 +298,22 @@ const DiaryView = () => {
 
                           {/* Reply thread */}
                           {comment.replies.length > 0 && (
+                            <div className="relative">
+                              <div className="flex items-center justify-between pl-5 ml-3">
+                                <span className="text-[9px] text-muted-foreground/40">{comment.replies.length} 条回复</span>
+                                <button
+                                  onClick={() => setCollapsedReplies(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(comment.id)) next.delete(comment.id);
+                                    else next.add(comment.id);
+                                    return next;
+                                  })}
+                                  className="p-1 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-secondary transition-colors"
+                                >
+                                  {collapsedReplies.has(comment.id) ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
+                                </button>
+                              </div>
+                              {!collapsedReplies.has(comment.id) && (
                             <div className="pl-5 border-l-2 border-border ml-3 space-y-1.5">
                               {comment.replies.map((reply) => {
                                 const replyComp = companions.find((c) => c.id === reply.companionId);
@@ -321,6 +337,8 @@ const DiaryView = () => {
                                   </div>
                                 );
                               })}
+                            </div>
+                              )}
                             </div>
                           )}
 
