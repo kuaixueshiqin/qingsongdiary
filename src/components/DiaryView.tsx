@@ -231,7 +231,16 @@ const DiaryView = () => {
 
             return (
               <div key={pIdx}>
-                <p className="text-foreground/85 text-[15px] leading-[1.8] cursor-pointer hover:bg-secondary/50 rounded-lg px-1 -mx-1 transition-colors" onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }}>{renderParagraph()}</p>
+                <p
+                  className="text-foreground/85 text-[15px] leading-[1.8] rounded-lg px-1 -mx-1 focus:outline-none focus:bg-secondary/30 transition-colors"
+                  contentEditable
+                  suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const allParas = selectedEntry.content.split("\n").filter(Boolean);
+                    allParas[pIdx] = e.currentTarget.textContent || "";
+                    handleContentBlur(selectedEntry.id, allParas.join("\n"));
+                  }}
+                >{para}</p>
                 {lineComments.length > 0 && (
                   <div className="mt-2 pl-2">
                     <div className="flex items-center justify-between mb-1">
