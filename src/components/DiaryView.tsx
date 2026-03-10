@@ -248,7 +248,7 @@ const DiaryView = () => {
 
             return (
               <div key={pIdx}>
-                <p className="text-foreground/85 text-[15px] leading-[1.8]">{renderParagraph()}</p>
+                <p className="text-foreground/85 text-[15px] leading-[1.8] cursor-pointer hover:bg-secondary/50 rounded-lg px-1 -mx-1 transition-colors" onClick={() => { setEditingEntryId(selectedEntry.id); setEditContent(selectedEntry.content); }}>{renderParagraph()}</p>
                 {lineComments.length > 0 && (
                   <div className="mt-2 pl-2">
                     <div className="flex items-center justify-between mb-1">
