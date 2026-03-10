@@ -289,6 +289,11 @@ const DiaryView = () => {
                               <span className="font-medium flex-shrink-0">{comp.name}</span>
                               <span className={`truncate ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}>{comment.text}</span>
                             </button>
+                            {isReplying && (
+                              <button onClick={(e) => { e.stopPropagation(); handleDeleteComment(selectedEntry.id, comment.id); }} className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200">
+                                <Trash2 size={14} />
+                              </button>
+                            )}
                           </div>
 
                           {/* Reply thread */}
