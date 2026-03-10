@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Wallet, Smile, Film, Sparkles, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
+import { Wallet, Smile, Film, Sparkles, Loader2, Trash2, ChevronLeft, X, Pencil } from "lucide-react";
 import { diaryEntries } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
