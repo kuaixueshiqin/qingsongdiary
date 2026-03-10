@@ -199,15 +199,18 @@ const CompanionsView = () => {
           <>
             {myCompanions.map((comp) => (
               <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl`}>{comp.avatar}</div>
-                  <div className="flex-1">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0`}>{comp.avatar}</div>
+                  <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-foreground">{comp.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-foreground">{comp.name}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${comp.colorClass} ${comp.textColorClass}`}>{comp.role}</span>
+                      </div>
                       <span className="text-[10px] font-bold text-muted-foreground/30">Lv.{comp.level}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{comp.role}</p>
-                    <p className="text-[10px] text-muted-foreground/40 mt-0.5">回复时长: {comp.delay}</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">{comp.bio}</p>
+                    <p className="text-[10px] text-muted-foreground/30 mt-0.5">回复时长: {comp.delay}</p>
                   </div>
                 </div>
                 <div className="space-y-1">
