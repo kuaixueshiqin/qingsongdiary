@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus, ChevronLeft, Reply, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, ChevronLeft, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
@@ -267,26 +267,28 @@ const DiaryView = () => {
                       const isLoading = loadingReply === comment.id;
                       return (
                         <div key={comment.id} className="space-y-1">
-                          {/* Original AI comment */}
+                          {/* Original AI comment - click to toggle reply */}
                           <div className="flex items-center gap-1.5">
                             <button
-                              onClick={() => setActiveCommentId(isActive ? null : comment.id)}
-                              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all max-w-[75%] ${isActive ? "bg-foreground text-primary-foreground" : `${comp.colorClass} ${comp.textColorClass}`}`}
+                              onClick={() => {
+                                if (isReplying) {
+                                  setReplyingTo(null);
+                                  setReplyText("");
+                                  setReplyMentions([]);
+                                  setActiveCommentId(null);
+                                } else {
+                                  setActiveCommentId(comment.id);
+                                  setReplyingTo(comment.id);
+                                  setReplyText("");
+                                  setReplyMentions([]);
+                                }
+                              }}
+                              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all max-w-[75%] ${isReplying ? "bg-foreground text-primary-foreground" : `${comp.colorClass} ${comp.textColorClass}`}`}
                             >
                               <span className="flex-shrink-0">{comp.avatar}</span>
                               <span className="font-medium flex-shrink-0">{comp.name}</span>
-                              <span className={`truncate ${isActive ? "text-primary-foreground/80" : "opacity-70"}`}>{comment.text}</span>
+                              <span className={`truncate ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}>{comment.text}</span>
                             </button>
-                            {isActive && (
-                              <div className="flex gap-1 animate-in slide-in-from-left-2 duration-200">
-                                <button onClick={() => { setReplyingTo(isReplying ? null : comment.id); setReplyText(""); setReplyMentions([]); }} className={`p-1.5 rounded-lg ${isReplying ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
-                                  <Reply size={14} />
-                                </button>
-                                <button onClick={() => handleDeleteComment(selectedEntry.id, comment.id)} className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive">
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            )}
                           </div>
 
                           {/* Reply thread */}

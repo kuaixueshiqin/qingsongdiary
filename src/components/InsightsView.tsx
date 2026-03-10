@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Wallet, Smile, Film, MapPin, BookOpen, Sparkles, X, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
+import { Wallet, Smile, Film, MapPin, BookOpen, Sparkles, Loader2, Trash2, ChevronLeft, Check, Pencil } from "lucide-react";
 import { diaryEntries } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -141,7 +141,7 @@ const InsightsView = () => {
           <h1 className="text-2xl font-black text-foreground">看板</h1>
           
         </div>
-        <button onClick={() => setIsCreating(true)} className="bg-primary text-primary-foreground px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
+        <button onClick={() => { setIsCreating(!isCreating); if (isCreating) setTopicInput(""); }} className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform ${isCreating ? "bg-secondary text-foreground" : "bg-primary text-primary-foreground"}`}>
           <Sparkles size={14} /><span className="text-xs font-bold">AI看板</span>
         </button>
       </div>
@@ -154,7 +154,7 @@ const InsightsView = () => {
                 <h3 className="text-sm font-black text-foreground">AI 自动生成看板</h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">输入话题，AI 将从日记中提取生成</p>
               </div>
-              <button onClick={() => { setIsCreating(false); setTopicInput(""); }} className="text-muted-foreground"><X size={18} /></button>
+              
             </div>
             <input type="text" placeholder="输入话题，如：电影、游戏、美食..." className="w-full bg-secondary border border-border rounded-2xl py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:border-muted-foreground/40 mb-3" value={topicInput} onChange={(e) => setTopicInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleGenerate()} maxLength={20} autoFocus />
             <div className="flex flex-wrap gap-2 mb-4">
