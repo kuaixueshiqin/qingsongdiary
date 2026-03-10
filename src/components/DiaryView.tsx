@@ -374,10 +374,7 @@ const DiaryView = () => {
                 )}
               </div>
             );
-          })
-
-
-
+          })}
           {/* Billing card */}
           {selectedEntry.billing && !editingBilling && (
             <div className="bg-secondary/50 border border-border rounded-2xl p-4 flex items-center gap-3">
