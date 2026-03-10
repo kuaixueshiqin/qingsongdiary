@@ -132,9 +132,8 @@ const MailboxView = () => {
               <div className="flex justify-between items-center">
                 <p className="text-xs text-muted-foreground truncate">{item.companion.lastMsg}</p>
                 {item.unread && (
-                  <span className="flex-shrink-0 ml-2 text-sm relative">
+                  <span className="flex-shrink-0 ml-2 text-sm pinecone-sparkle">
                     🌰
-                    <span className="absolute inset-0 animate-ping opacity-40">🌰</span>
                   </span>
                 )}
               </div>
