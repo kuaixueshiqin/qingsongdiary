@@ -57,6 +57,8 @@ export default {
           "amber-text": "hsl(var(--companion-amber-text))",
           indigo: "hsl(var(--companion-indigo))",
           "indigo-text": "hsl(var(--companion-indigo-text))",
+          red: "hsl(var(--companion-red))",
+          "red-text": "hsl(var(--companion-red-text))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
