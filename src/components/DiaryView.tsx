@@ -154,11 +154,10 @@ const DiaryView = () => {
     }
   };
 
-  const handleSaveEdit = (entryId: number) => {
-    if (!editContent.trim()) return;
-    setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: editContent } : e));
-    setEditingEntryId(null);
-    toast.success("日记已更新");
+  const handleContentBlur = (entryId: number, newContent: string) => {
+    if (newContent.trim()) {
+      setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: newContent } : e));
+    }
   };
 
   const handleEditBilling = (entryId: number) => {
