@@ -7,7 +7,7 @@ interface MobileShellProps {
 const MobileShell = ({ children }: MobileShellProps) => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-muted">
-      <div className="w-[390px] h-[844px] bg-background rounded-[50px] shadow-2xl relative overflow-hidden border-8 border-foreground flex flex-col">
+      <div className="w-[360px] h-[800px] bg-background rounded-[40px] shadow-2xl relative overflow-hidden border-[6px] border-foreground flex flex-col">
         {/* Notch */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-foreground rounded-b-3xl z-50 flex items-center justify-center gap-2">
           <div className="w-10 h-1 bg-foreground/80 rounded-full" />
