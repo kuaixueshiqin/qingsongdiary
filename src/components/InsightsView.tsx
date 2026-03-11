@@ -30,21 +30,18 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
   const [customBoards, setCustomBoards] = useState<CustomBoard[]>([]);
   const [showDetail, setShowDetail] = useState(false);
   const [billingItems, setBillingItems] = useState<BillingItem[]>([
-    { id: 1, date: "5月20日", amount: 280, category: "餐饮", source: "日料店", verified: false },
-    { id: 9, date: "5月21日", amount: 0, category: "娱乐", source: "沙丘2·电影", verified: false },
-    { id: 10, date: "5月16日", amount: 0, category: "娱乐", source: "周处除三害·电影", verified: false },
-    { id: 11, date: "5月11日", amount: 0, category: "娱乐", source: "你想活出怎样的人生·电影", verified: false },
-    { id: 2, date: "5月17日", amount: 25, category: "交通", source: "打车去公园", verified: true },
-    { id: 3, date: "5月15日", amount: 89, category: "购物", source: "超市采购", verified: true },
-    { id: 4, date: "5月14日", amount: 35, category: "餐饮", source: "咖啡", verified: false },
-    { id: 5, date: "5月12日", amount: 560, category: "娱乐", source: "演唱会门票", verified: true },
-    { id: 6, date: "5月10日", amount: 150, category: "交通", source: "高铁票", verified: true },
-    { id: 7, date: "5月8日", amount: 300, category: "生活", source: "日用品", verified: true },
-    { id: 8, date: "5月5日", amount: 200, category: "餐饮", source: "朋友聚餐", verified: false },
+    { id: 9, date: "5月21日", amount: 0, category: "娱乐", source: "沙丘2·电影", status: "toFill" },
+    { id: 10, date: "5月16日", amount: 0, category: "娱乐", source: "周处除三害·电影", status: "toFill" },
+    { id: 11, date: "5月11日", amount: 0, category: "娱乐", source: "你想活出怎样的人生·电影", status: "toFill" },
+    { id: 1, date: "5月20日", amount: 280, category: "餐饮", source: "日料店", status: "toConfirm" },
+    { id: 4, date: "5月14日", amount: 35, category: "餐饮", source: "咖啡", status: "toConfirm" },
+    { id: 8, date: "5月5日", amount: 200, category: "餐饮", source: "朋友聚餐", status: "toConfirm" },
+    { id: 2, date: "5月17日", amount: 25, category: "交通", source: "打车去公园", status: "confirmed" },
+    { id: 3, date: "5月15日", amount: 89, category: "购物", source: "超市采购", status: "confirmed" },
+    { id: 5, date: "5月12日", amount: 560, category: "娱乐", source: "演唱会门票", status: "confirmed" },
+    { id: 6, date: "5月10日", amount: 150, category: "交通", source: "高铁票", status: "confirmed" },
+    { id: 7, date: "5月8日", amount: 300, category: "生活", source: "日用品", status: "confirmed" },
   ]);
-  const [editingItemId, setEditingItemId] = useState<number | null>(null);
-  const [editAmount, setEditAmount] = useState("");
-  const [editCategory, setEditCategory] = useState("");
 
   const handleGenerate = async () => {
     if (!topicInput.trim()) return;
