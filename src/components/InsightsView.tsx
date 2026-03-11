@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import movieDune2 from "@/assets/movie-dune2.jpg";
 import movieZhouchuchusanhai from "@/assets/movie-zhouchuchusanhai.jpg";
 import movieGhibli from "@/assets/movie-ghibli.jpg";
+import BillingDetailView, { type BillingItem } from "@/components/BillingDetailView";
 
 interface CustomBoard {
   id: string;
@@ -13,15 +14,6 @@ interface CustomBoard {
   emoji: string;
   items: { text: string }[];
   summary: string;
-}
-
-interface BillingItem {
-  id: number;
-  date: string;
-  amount: number;
-  category: string;
-  source: string;
-  verified: boolean;
 }
 
 interface InsightsViewProps {
