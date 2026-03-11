@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import movieDune2 from "@/assets/movie-dune2.jpg";
 import movieZhouchuchusanhai from "@/assets/movie-zhouchuchusanhai.jpg";
 import movieGhibli from "@/assets/movie-ghibli.jpg";
+import BillingDetailView, { type BillingItem } from "@/components/BillingDetailView";
 
 interface CustomBoard {
   id: string;
@@ -13,15 +14,6 @@ interface CustomBoard {
   emoji: string;
   items: { text: string }[];
   summary: string;
-}
-
-interface BillingItem {
-  id: number;
-  date: string;
-  amount: number;
-  category: string;
-  source: string;
-  verified: boolean;
 }
 
 interface InsightsViewProps {
@@ -38,21 +30,18 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
   const [customBoards, setCustomBoards] = useState<CustomBoard[]>([]);
   const [showDetail, setShowDetail] = useState(false);
   const [billingItems, setBillingItems] = useState<BillingItem[]>([
-    { id: 1, date: "5月20日", amount: 280, category: "餐饮", source: "日料店", verified: false },
-    { id: 9, date: "5月21日", amount: 0, category: "娱乐", source: "沙丘2·电影", verified: false },
-    { id: 10, date: "5月16日", amount: 0, category: "娱乐", source: "周处除三害·电影", verified: false },
-    { id: 11, date: "5月11日", amount: 0, category: "娱乐", source: "你想活出怎样的人生·电影", verified: false },
-    { id: 2, date: "5月17日", amount: 25, category: "交通", source: "打车去公园", verified: true },
-    { id: 3, date: "5月15日", amount: 89, category: "购物", source: "超市采购", verified: true },
-    { id: 4, date: "5月14日", amount: 35, category: "餐饮", source: "咖啡", verified: false },
-    { id: 5, date: "5月12日", amount: 560, category: "娱乐", source: "演唱会门票", verified: true },
-    { id: 6, date: "5月10日", amount: 150, category: "交通", source: "高铁票", verified: true },
-    { id: 7, date: "5月8日", amount: 300, category: "生活", source: "日用品", verified: true },
-    { id: 8, date: "5月5日", amount: 200, category: "餐饮", source: "朋友聚餐", verified: false },
+    { id: 9, date: "5月21日", amount: 0, category: "娱乐", source: "沙丘2·电影", status: "toFill" },
+    { id: 10, date: "5月16日", amount: 0, category: "娱乐", source: "周处除三害·电影", status: "toFill" },
+    { id: 11, date: "5月11日", amount: 0, category: "娱乐", source: "你想活出怎样的人生·电影", status: "toFill" },
+    { id: 1, date: "5月20日", amount: 280, category: "餐饮", source: "日料店", status: "toConfirm" },
+    { id: 4, date: "5月14日", amount: 35, category: "餐饮", source: "咖啡", status: "toConfirm" },
+    { id: 8, date: "5月5日", amount: 200, category: "餐饮", source: "朋友聚餐", status: "toConfirm" },
+    { id: 2, date: "5月17日", amount: 25, category: "交通", source: "打车去公园", status: "confirmed" },
+    { id: 3, date: "5月15日", amount: 89, category: "购物", source: "超市采购", status: "confirmed" },
+    { id: 5, date: "5月12日", amount: 560, category: "娱乐", source: "演唱会门票", status: "confirmed" },
+    { id: 6, date: "5月10日", amount: 150, category: "交通", source: "高铁票", status: "confirmed" },
+    { id: 7, date: "5月8日", amount: 300, category: "生活", source: "日用品", status: "confirmed" },
   ]);
-  const [editingItemId, setEditingItemId] = useState<number | null>(null);
-  const [editAmount, setEditAmount] = useState("");
-  const [editCategory, setEditCategory] = useState("");
 
   const handleGenerate = async () => {
     if (!topicInput.trim()) return;
@@ -71,85 +60,16 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
     } catch { toast.error("网络错误，请重试"); } finally { setIsGenerating(false); }
   };
 
-  const handleEditSave = (itemId: number) => {
-    const amount = parseFloat(editAmount);
-    if (isNaN(amount)) { toast.error("请输入有效金额"); return; }
-    setBillingItems((prev) => prev.map((i) => i.id === itemId ? { ...i, amount, category: editCategory, verified: true } : i));
-    setEditingItemId(null);
-    toast.success("账单已更新");
-  };
-
-  const handleDeleteItem = (itemId: number) => {
-    setBillingItems((prev) => prev.filter((i) => i.id !== itemId));
-    toast.success("已删除");
-  };
-
-  const sortedBillingItems = [...billingItems].sort((a, b) => {
-    if (a.verified === b.verified) return 0;
-    return a.verified ? 1 : -1;
-  });
-
   const totalAmount = billingItems.reduce((sum, i) => sum + i.amount, 0);
 
   // Detail view
   if (showDetail) {
     return (
-      <div className="pb-4 animate-in slide-in-from-right duration-300">
-        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
-          <button onClick={() => { setShowDetail(false); setEditingItemId(null); }} className="text-muted-foreground"><ChevronLeft size={24} /></button>
-          <div>
-            <span className="text-sm font-bold text-foreground">账单明细</span>
-            <span className="text-xs text-muted-foreground ml-2">共 {billingItems.length} 笔</span>
-          </div>
-        </div>
-        <div className="px-4 space-y-2">
-          {sortedBillingItems.map((item) => (
-            <div key={item.id} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
-              {editingItemId === item.id ? (
-                <div className="space-y-3 animate-in fade-in duration-200">
-                  <div className="flex gap-2">
-                    <div className="flex-1">
-                      <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
-                      <input type="number" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <label className="text-[10px] text-muted-foreground block mb-1">分类</label>
-                      <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground">
-                        <option>餐饮</option><option>交通</option><option>娱乐</option><option>购物</option><option>生活</option><option>其他</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 justify-end">
-                    <button onClick={() => setEditingItemId(null)} className="text-xs bg-secondary px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
-                    <button onClick={() => handleEditSave(item.id)} className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded-lg font-bold">保存</button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      {item.amount > 0 ? (
-                        <span className="text-sm font-bold text-foreground">¥{item.amount}</span>
-                      ) : (
-                        <span className="text-sm font-bold text-muted-foreground/40">待填写</span>
-                      )}
-                      <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{item.category}</span>
-                      {!item.verified && <span className="text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded font-bold">AI待确认</span>}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground">{item.date} · {item.source}</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => { setEditingItemId(item.id); setEditAmount(item.amount > 0 ? String(item.amount) : ""); setEditCategory(item.category); }} className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground"><Pencil size={14} /></button>
-                    {!item.verified && (
-                      <button onClick={() => handleDeleteItem(item.id)} className="p-1.5 bg-destructive/10 rounded-lg text-destructive"><X size={14} /></button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+      <BillingDetailView
+        billingItems={billingItems}
+        setBillingItems={setBillingItems}
+        onBack={() => setShowDetail(false)}
+      />
     );
   }
 
