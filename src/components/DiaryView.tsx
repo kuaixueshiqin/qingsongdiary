@@ -301,7 +301,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                               <span className="flex-shrink-0 mt-0.5">{comp.avatar}</span>
                               <span className="font-medium flex-shrink-0 mt-0.5">{comp.name}</span>
                               <span
-                                className={`${expandedComments.has(comment.id) ? "whitespace-pre-wrap" : "truncate"} ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}
+                                className={`${expandedComments.has(comment.id) ? "whitespace-pre-wrap text-left" : "truncate"} ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}
                                 onClick={(e) => { e.stopPropagation(); setExpandedComments(prev => { const next = new Set(prev); if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id); return next; }); }}
                               >{comment.text}</span>
                             </button>
