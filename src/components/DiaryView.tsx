@@ -262,7 +262,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (selectedEntry) {
     return (
-      <div className="pb-4 animate-in slide-in-from-right duration-300 paper-texture">
+      <div className="pb-4 animate-in slide-in-from-right duration-300">
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
