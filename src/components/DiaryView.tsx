@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Plus, ChevronLeft, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Plus, ChevronLeft, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp, RefreshCw, Sun, Cloud, CloudRain, CloudLightning, CloudSun } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
@@ -9,6 +9,43 @@ interface DiaryViewProps {
   initialEntryId?: number | null;
   onEntryViewed?: () => void;
 }
+
+const inspirationQuestions = [
+  "今天喝到最好喝的一杯水是什么？",
+  "今天最想感谢谁？",
+  "发现了一个什么生活小确幸？",
+  "今天学到了什么新东西？",
+  "如果用一首歌形容今天，会是哪首？",
+  "今天最让你微笑的瞬间是？",
+  "有没有一个画面，让你想按下暂停键？",
+  "今天的天气让你想起了什么？",
+  "如果给今天打个分，你会打几分？",
+  "此刻最想对自己说的一句话是什么？",
+];
+
+const getMoodIcon = (score?: number) => {
+  switch (score) {
+    case 1: return <CloudLightning size={16} className="text-muted-foreground" />;
+    case 2: return <CloudRain size={16} className="text-companion-indigo-text" />;
+    case 3: return <Cloud size={16} className="text-muted-foreground" />;
+    case 4: return <CloudSun size={16} className="text-companion-amber-text" />;
+    case 5: return <Sun size={16} className="text-accent" />;
+    default: return null;
+  }
+};
+
+const tagColors: Record<string, string> = {
+  "电影": "bg-companion-indigo text-companion-indigo-text",
+  "美食": "bg-companion-amber text-companion-amber-text",
+  "运动": "bg-companion-green text-companion-green-text",
+  "心情": "bg-companion-red text-companion-red-text",
+  "感悟": "bg-[hsl(270,40%,93%)] text-[hsl(270,40%,40%)]",
+  "社交": "bg-companion-amber text-companion-amber-text",
+  "职场": "bg-companion-indigo text-companion-indigo-text",
+  "旅行": "bg-companion-green text-companion-green-text",
+  "阅读": "bg-[hsl(270,40%,93%)] text-[hsl(270,40%,40%)]",
+  "音乐": "bg-companion-red text-companion-red-text",
+};
 
 const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [entries, setEntries] = useState<DiaryEntry[]>(initialEntries);
@@ -20,6 +57,10 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       onEntryViewed?.();
     }
   }, [initialEntryId]);
+  const [inspirationQ, setInspirationQ] = useState(() => inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
+  const shuffleQuestion = useCallback(() => {
+    setInspirationQ(inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
+  }, []);
   const [isWriting, setIsWriting] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [newMentions, setNewMentions] = useState<MentionTag[]>([]);
@@ -141,7 +182,19 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     setNewContent("");
     setNewMentions([]);
     setIsWriting(false);
-    toast.success("日记已保存！AI伙伴稍后会来评论哦~");
+    toast.success("日记已保存！正在分析标签和情绪...");
+
+    // AI analyze tags & mood
+    try {
+      const { data: analysis, error: analysisErr } = await supabase.functions.invoke("analyze-diary", {
+        body: { content: newEntry.content },
+      });
+      if (!analysisErr && analysis && !analysis.error) {
+        setEntries((prev) => prev.map((e) => e.id === newEntry.id ? { ...e, tags: analysis.tags, moodScore: analysis.moodScore, moodLabel: analysis.moodLabel } : e));
+      }
+    } catch (e) {
+      console.error("Analyze diary error:", e);
+    }
 
     // Trigger comments from @mentioned companions
     if (mentionedIds.length > 0) {
@@ -209,8 +262,25 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             <ChevronLeft size={24} />
           </button>
           <div className="flex-1">
-            <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
-            <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
+              <span className="text-xs text-muted-foreground">{selectedEntry.time}</span>
+              {selectedEntry.moodScore && (
+                <span className="flex items-center gap-1 ml-auto">
+                  {getMoodIcon(selectedEntry.moodScore)}
+                  {selectedEntry.moodLabel && <span className="text-[10px] text-muted-foreground">{selectedEntry.moodLabel}</span>}
+                </span>
+              )}
+            </div>
+            {selectedEntry.tags && selectedEntry.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {selectedEntry.tags.map((tag) => (
+                  <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tagColors[tag] || "bg-secondary text-muted-foreground"}`}>
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -463,6 +533,28 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           <Plus size={16} strokeWidth={3} /><span className="text-sm font-bold">记一篇</span>
         </button>
       </div>
+
+      {/* Inspiration card */}
+      <div className="px-4 mb-4">
+        <div className="bg-[hsl(48,100%,95%/0.7)] border border-[hsl(48,80%,85%)] rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-foreground">✨ 灵感瞬间</span>
+            <button onClick={shuffleQuestion} className="text-[10px] text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
+              <RefreshCw size={10} />换一个
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setNewContent(inspirationQ + "\n");
+              setIsWriting(true);
+            }}
+            className="text-sm text-foreground/80 leading-relaxed text-left w-full hover:text-foreground transition-colors"
+          >
+            {inspirationQ}
+          </button>
+        </div>
+      </div>
+
       <div className="px-4 space-y-3">
         {entries.map((entry) => {
           const entryCompanions = entry.comments.map((c) => companions.find((comp) => comp.id === c.companionId));
@@ -471,8 +563,18 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
                   <span>{entry.date}</span><span className="text-muted-foreground/40">·</span><span>{entry.time}</span>
+                  {entry.moodScore && <span className="ml-auto">{getMoodIcon(entry.moodScore)}</span>}
                 </div>
                 <p className="text-foreground/80 text-sm leading-relaxed line-clamp-3">{entry.content}</p>
+                {entry.tags && entry.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {entry.tags.map((tag) => (
+                      <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tagColors[tag] || "bg-secondary text-muted-foreground"}`}>
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {entry.billing && (
                   <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold">
                     <Wallet size={12} className="text-accent" />
