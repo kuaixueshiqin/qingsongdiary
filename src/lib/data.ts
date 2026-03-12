@@ -114,6 +114,9 @@ export const diaryEntries: DiaryEntry[] = [
     date: "5月11日",
     time: "19:30",
     content: "和朋友去看了《你想活出怎样的人生》，宫崎骏最后的作品，画面美得像梦境。看到最后眼眶湿了，不是因为悲伤，是因为感觉和一个时代告别了。\n\n出来后我们去咖啡店聊了很久，聊梦想，聊未来，聊那些年一起追过的吉卜力动画。",
+    tags: ["电影", "社交"],
+    moodScore: 4,
+    moodLabel: "温暖",
     comments: [
       { id: "c7", companionId: "moshu", text: "宫崎骏用一生告诉我们：想象力是人类最后的自由。", lineIndex: 0, highlightText: "画面美得像梦境", replies: [] },
     ],
