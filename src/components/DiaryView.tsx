@@ -516,6 +516,28 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           <Plus size={16} strokeWidth={3} /><span className="text-sm font-bold">记一篇</span>
         </button>
       </div>
+
+      {/* Inspiration card */}
+      <div className="px-4 mb-4">
+        <div className="bg-[hsl(48,100%,95%/0.7)] border border-[hsl(48,80%,85%)] rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-foreground">✨ 灵感瞬间</span>
+            <button onClick={shuffleQuestion} className="text-[10px] text-muted-foreground flex items-center gap-1 hover:text-foreground transition-colors">
+              <RefreshCw size={10} />换一个
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setNewContent(inspirationQ + "\n");
+              setIsWriting(true);
+            }}
+            className="text-sm text-foreground/80 leading-relaxed text-left w-full hover:text-foreground transition-colors"
+          >
+            {inspirationQ}
+          </button>
+        </div>
+      </div>
+
       <div className="px-4 space-y-3">
         {entries.map((entry) => {
           const entryCompanions = entry.comments.map((c) => companions.find((comp) => comp.id === c.companionId));
@@ -524,8 +546,18 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
                   <span>{entry.date}</span><span className="text-muted-foreground/40">·</span><span>{entry.time}</span>
+                  {entry.moodScore && <span className="ml-auto">{getMoodIcon(entry.moodScore)}</span>}
                 </div>
                 <p className="text-foreground/80 text-sm leading-relaxed line-clamp-3">{entry.content}</p>
+                {entry.tags && entry.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {entry.tags.map((tag) => (
+                      <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tagColors[tag] || "bg-secondary text-muted-foreground"}`}>
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {entry.billing && (
                   <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold">
                     <Wallet size={12} className="text-accent" />
