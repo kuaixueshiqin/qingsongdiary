@@ -61,6 +61,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const shuffleQuestion = useCallback(() => {
     setInspirationQ(inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
   }, []);
+  const [showCelebration, setShowCelebration] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [newMentions, setNewMentions] = useState<MentionTag[]>([]);
@@ -182,7 +183,12 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     setNewContent("");
     setNewMentions([]);
     setIsWriting(false);
-    toast.success("日记已保存！正在分析标签和情绪...");
+    
+    // Celebration animation
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 2000);
+    
+    toast("你的情绪已被世界温柔接收 ✨", { duration: 3000 });
 
     // AI analyze tags & mood
     try {
@@ -256,7 +262,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (selectedEntry) {
     return (
-      <div className="pb-4 animate-in slide-in-from-right duration-300">
+      <div className="pb-4 animate-in slide-in-from-right duration-300 paper-texture">
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
@@ -523,7 +529,16 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 paper-texture">
+      {/* Celebration effects */}
+      {showCelebration && (
+        <>
+          <div className="shooting-star" />
+          <div className="shooting-star" style={{ animationDelay: '0.3s', top: '20px', left: '-10px' }} />
+          <div className="ripple-circle" style={{ width: 60, height: 60, top: '50%', left: '50%', marginLeft: -30, marginTop: -30 }} />
+          <div className="ripple-circle" style={{ width: 60, height: 60, top: '50%', left: '50%', marginLeft: -30, marginTop: -30, animationDelay: '0.3s' }} />
+        </>
+      )}
       <div className="px-6 pt-14 pb-4 flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-black text-foreground">日记</h1>
