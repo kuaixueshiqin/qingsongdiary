@@ -4,6 +4,7 @@ import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import PineconeTracker from "@/components/PineconeTracker";
 
 interface DiaryViewProps {
   initialEntryId?: number | null;
@@ -548,6 +549,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           <Plus size={16} strokeWidth={3} /><span className="text-sm font-bold">记一篇</span>
         </button>
       </div>
+
+      {/* Pinecone Growth Tracker */}
+      <PineconeTracker streak={4} />
 
       {/* Inspiration card */}
       <div className="px-4 mb-4">

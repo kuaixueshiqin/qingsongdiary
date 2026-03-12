@@ -47,6 +47,10 @@
     --companion-indigo-text: 230 50% 45%;
     --companion-red: 0 70% 93%;
     --companion-red-text: 0 70% 40%;
+    --pine-brown: 30 50% 35%;
+    --pine-green: 110 35% 40%;
+    --pine-gold: 42 90% 55%;
+    --pine-bg: 110 25% 94%;
     --intimacy: 0 70% 60%;
 
     --sidebar-background: 0 0% 98%;
@@ -110,6 +114,11 @@
 
 .pinecone-sparkle {
   animation: pinecone-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 /* Shooting star animation */
