@@ -545,8 +545,15 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           </div>
           <button
             onClick={() => {
-              setNewContent(inspirationQ + "\n");
-              setIsWriting(true);
+              const newEntry: DiaryEntry = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" }).replace(/(\d+)\/(\d+)/, "$1月$2日"),
+                time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
+                content: inspirationQ + "\n",
+                comments: [],
+              };
+              setEntries((prev) => [newEntry, ...prev]);
+              setSelectedEntryId(newEntry.id);
             }}
             className="text-sm text-foreground/80 leading-relaxed text-left w-full hover:text-foreground transition-colors"
           >
