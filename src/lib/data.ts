@@ -142,6 +142,9 @@ export const diaryEntries: DiaryEntry[] = [
     time: "23:30",
     content:
       "昨晚又失眠了。看着窗外的路灯发呆，想起了很多以前的事。不知道大家现在过得怎么样。\n\n翻了翻以前的照片，发现时间过得真快。那些曾经觉得过不去的坎，现在回头看好像也没那么难。",
+    tags: ["心情", "感悟"],
+    moodScore: 2,
+    moodLabel: "孤独",
     comments: [
       { id: "c3", companionId: "moshu", text: "夜晚的孤独是月亮留给人类的礼物，别怕。", lineIndex: 0, highlightText: "想起了很多以前的事", replies: [] },
     ],
