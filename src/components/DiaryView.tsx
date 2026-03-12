@@ -182,7 +182,19 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     setNewContent("");
     setNewMentions([]);
     setIsWriting(false);
-    toast.success("日记已保存！AI伙伴稍后会来评论哦~");
+    toast.success("日记已保存！正在分析标签和情绪...");
+
+    // AI analyze tags & mood
+    try {
+      const { data: analysis, error: analysisErr } = await supabase.functions.invoke("analyze-diary", {
+        body: { content: newEntry.content },
+      });
+      if (!analysisErr && analysis && !analysis.error) {
+        setEntries((prev) => prev.map((e) => e.id === newEntry.id ? { ...e, tags: analysis.tags, moodScore: analysis.moodScore, moodLabel: analysis.moodLabel } : e));
+      }
+    } catch (e) {
+      console.error("Analyze diary error:", e);
+    }
 
     // Trigger comments from @mentioned companions
     if (mentionedIds.length > 0) {
