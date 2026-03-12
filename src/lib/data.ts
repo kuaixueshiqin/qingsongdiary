@@ -90,6 +90,9 @@ export const diaryEntries: DiaryEntry[] = [
     date: "5月21日",
     time: "22:10",
     content: "晚上看了《沙丘 2》，视觉效果真的太震撼了，沙虫出场那一幕直接起鸡皮疙瘩。Hans Zimmer的配乐依然封神，低频轰得座椅都在抖。\n\n保罗的成长线让我很有感触，有些路注定要一个人走。看完之后坐在影院里发呆了好久，不想回到现实。",
+    tags: ["电影", "感悟"],
+    moodScore: 4,
+    moodLabel: "震撼",
     comments: [
       { id: "c5", companionId: "moshu", text: "沙丘的世界观深邃如海，值得反复品味。", lineIndex: 0, highlightText: "视觉效果真的太震撼了", replies: [] },
     ],
