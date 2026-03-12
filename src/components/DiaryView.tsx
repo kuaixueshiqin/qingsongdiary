@@ -262,8 +262,25 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             <ChevronLeft size={24} />
           </button>
           <div className="flex-1">
-            <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
-            <span className="text-xs text-muted-foreground ml-2">{selectedEntry.time}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
+              <span className="text-xs text-muted-foreground">{selectedEntry.time}</span>
+              {selectedEntry.moodScore && (
+                <span className="flex items-center gap-1 ml-auto">
+                  {getMoodIcon(selectedEntry.moodScore)}
+                  {selectedEntry.moodLabel && <span className="text-[10px] text-muted-foreground">{selectedEntry.moodLabel}</span>}
+                </span>
+              )}
+            </div>
+            {selectedEntry.tags && selectedEntry.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {selectedEntry.tags.map((tag) => (
+                  <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tagColors[tag] || "bg-secondary text-muted-foreground"}`}>
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
