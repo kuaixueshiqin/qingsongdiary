@@ -10,6 +10,43 @@ interface DiaryViewProps {
   onEntryViewed?: () => void;
 }
 
+const inspirationQuestions = [
+  "今天喝到最好喝的一杯水是什么？",
+  "今天最想感谢谁？",
+  "发现了一个什么生活小确幸？",
+  "今天学到了什么新东西？",
+  "如果用一首歌形容今天，会是哪首？",
+  "今天最让你微笑的瞬间是？",
+  "有没有一个画面，让你想按下暂停键？",
+  "今天的天气让你想起了什么？",
+  "如果给今天打个分，你会打几分？",
+  "此刻最想对自己说的一句话是什么？",
+];
+
+const getMoodIcon = (score?: number) => {
+  switch (score) {
+    case 1: return <CloudLightning size={16} className="text-muted-foreground" />;
+    case 2: return <CloudRain size={16} className="text-companion-indigo-text" />;
+    case 3: return <Cloud size={16} className="text-muted-foreground" />;
+    case 4: return <CloudSun size={16} className="text-companion-amber-text" />;
+    case 5: return <Sun size={16} className="text-accent" />;
+    default: return null;
+  }
+};
+
+const tagColors: Record<string, string> = {
+  "电影": "bg-companion-indigo text-companion-indigo-text",
+  "美食": "bg-companion-amber text-companion-amber-text",
+  "运动": "bg-companion-green text-companion-green-text",
+  "心情": "bg-companion-red text-companion-red-text",
+  "感悟": "bg-[hsl(270,40%,93%)] text-[hsl(270,40%,40%)]",
+  "社交": "bg-companion-amber text-companion-amber-text",
+  "职场": "bg-companion-indigo text-companion-indigo-text",
+  "旅行": "bg-companion-green text-companion-green-text",
+  "阅读": "bg-[hsl(270,40%,93%)] text-[hsl(270,40%,40%)]",
+  "音乐": "bg-companion-red text-companion-red-text",
+};
+
 const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [entries, setEntries] = useState<DiaryEntry[]>(initialEntries);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(initialEntryId ?? null);
