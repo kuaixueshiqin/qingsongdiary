@@ -102,6 +102,9 @@ export const diaryEntries: DiaryEntry[] = [
     date: "5月16日",
     time: "21:00",
     content: "下班后一个人去看了《周处除三害》，本来没抱太大期望，结果被阮经天的演技惊到了。那段邪教的戏份拍得太好了，看得我后背发凉。\n\n回家路上一直在想，人到底要经历什么才能真正改变？也许每个人心里都有需要除掉的\u201C三害\u201D吧。",
+    tags: ["电影", "感悟"],
+    moodScore: 4,
+    moodLabel: "感动",
     comments: [
       { id: "c6", companionId: "xiaoman", text: "每个人都有自己的三害要面对呢，慢慢来。", lineIndex: 1, highlightText: "每个人心里都有需要除掉的\u201C三害\u201D", replies: [] },
     ],
