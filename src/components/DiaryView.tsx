@@ -183,7 +183,12 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     setNewContent("");
     setNewMentions([]);
     setIsWriting(false);
-    toast.success("日记已保存！正在分析标签和情绪...");
+    
+    // Celebration animation
+    setShowCelebration(true);
+    setTimeout(() => setShowCelebration(false), 2000);
+    
+    toast("你的情绪已被世界温柔接收 ✨", { duration: 3000 });
 
     // AI analyze tags & mood
     try {
