@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.companion-chat]
 verify_jwt = false
+
+[functions.analyze-diary]
+verify_jwt = false
