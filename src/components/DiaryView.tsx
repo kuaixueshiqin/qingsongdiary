@@ -620,10 +620,12 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       </div>
 
       {isWriting && (
-        <div className="absolute inset-0 bg-card z-[100] p-6 pt-16 flex flex-col animate-in slide-in-from-bottom duration-300">
-          <div className="flex justify-between items-center mb-6">
+        <div className="absolute inset-0 bg-card z-[100] p-6 pt-16 flex flex-col animate-in slide-in-from-right duration-300">
+          <div className="flex items-center gap-3 mb-6">
+            <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
+              <ChevronLeft size={24} />
+            </button>
             <span className="text-sm font-bold text-muted-foreground">新日志 · 5月21日</span>
-            <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground"><X size={20} /></button>
           </div>
           <MentionInput
             autoFocus
