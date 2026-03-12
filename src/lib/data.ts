@@ -37,6 +37,9 @@ export interface DiaryEntry {
   content: string;
   comments: DiaryComment[];
   billing?: { amount: number; category: string; verified: boolean };
+  tags?: string[];
+  moodScore?: number; // 1-5
+  moodLabel?: string; // e.g. "开心", "感动"
 }
 
 export const companions: Companion[] = [
