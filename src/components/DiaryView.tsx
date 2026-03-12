@@ -57,6 +57,10 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       onEntryViewed?.();
     }
   }, [initialEntryId]);
+  const [inspirationQ, setInspirationQ] = useState(() => inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
+  const shuffleQuestion = useCallback(() => {
+    setInspirationQ(inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
+  }, []);
   const [isWriting, setIsWriting] = useState(false);
   const [newContent, setNewContent] = useState("");
   const [newMentions, setNewMentions] = useState<MentionTag[]>([]);
