@@ -529,7 +529,16 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   }
 
   return (
-    <div className="pb-4">
+    <div className="pb-4 paper-texture">
+      {/* Celebration effects */}
+      {showCelebration && (
+        <>
+          <div className="shooting-star" />
+          <div className="shooting-star" style={{ animationDelay: '0.3s', top: '20px', left: '-10px' }} />
+          <div className="ripple-circle" style={{ width: 60, height: 60, top: '50%', left: '50%', marginLeft: -30, marginTop: -30 }} />
+          <div className="ripple-circle" style={{ width: 60, height: 60, top: '50%', left: '50%', marginLeft: -30, marginTop: -30, animationDelay: '0.3s' }} />
+        </>
+      )}
       <div className="px-6 pt-14 pb-4 flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-black text-foreground">日记</h1>
