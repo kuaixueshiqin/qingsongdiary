@@ -529,7 +529,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   }
 
   return (
-    <div className="pb-4 paper-texture">
+    <div className="pb-4">
       {/* Celebration effects */}
       {showCelebration && (
         <>
