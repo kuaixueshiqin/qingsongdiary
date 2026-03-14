@@ -268,9 +268,10 @@ const CompanionsView = () => {
               <button
                 onClick={handleGenerateAvatar}
                 disabled={generatingAvatar}
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isImageAvatar(newAvatar) ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"} ${generatingAvatar ? "opacity-60" : "hover:bg-primary/10"}`}
+                className={`relative w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isImageAvatar(newAvatar) ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"} ${generatingAvatar ? "opacity-60" : "hover:bg-primary/10"}`}
               >
                 {generatingAvatar ? <Loader2 size={18} className="animate-spin text-primary" /> : <Wand2 size={18} className="text-primary" />}
+                <span className="absolute -top-1 -right-1 text-[7px] font-black bg-primary text-primary-foreground px-1 rounded leading-tight">AI</span>
               </button>
             </div>
             <p className="text-[10px] text-muted-foreground/40 mt-4 mb-2">选择颜色</p>
