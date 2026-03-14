@@ -32,6 +32,32 @@ const CompanionsView = () => {
   const [editBio, setEditBio] = useState("");
   const [likedAgents, setLikedAgents] = useState<string[]>([]);
   const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
+  const [generatingAvatar, setGeneratingAvatar] = useState(false);
+
+  const handleGenerateAvatar = async () => {
+    if (!newRole.trim()) {
+      toast.error("请先填写角色定位，AI 才能生成匹配的头像");
+      return;
+    }
+    setGeneratingAvatar(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-avatar", {
+        body: { role: newRole.trim() },
+      });
+      if (error) throw error;
+      if (data?.imageUrl) {
+        setNewAvatar(data.imageUrl);
+        toast.success("头像已生成！");
+      } else {
+        throw new Error("未获取到图片");
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error("头像生成失败，请重试");
+    } finally {
+      setGeneratingAvatar(false);
+    }
+  };
 
   const handleToggleLike = (agentId: string) => {
     setLikedAgents((prev) => prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]);
