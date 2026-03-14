@@ -170,7 +170,9 @@ const CompanionsView = () => {
         <div className="px-4 space-y-4">
           {/* Profile card */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center relative">
-            <div className={`w-20 h-20 ${settingsFor.colorClass} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{settingsFor.avatar}</div>
+            <div className={`w-20 h-20 ${settingsFor.colorClass} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3 overflow-hidden`}>
+              {isImageAvatar(settingsFor.avatar) ? <img src={settingsFor.avatar} alt="" className="w-full h-full object-cover" /> : settingsFor.avatar}
+            </div>
             {editingProfile ? (
               <div className="space-y-3 text-left">
                 <div>
