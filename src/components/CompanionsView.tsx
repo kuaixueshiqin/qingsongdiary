@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil } from "lucide-react";
+import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil, Wand2, Loader2 } from "lucide-react";
 import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀", "⚡"];
+const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
+
+const isImageAvatar = (avatar: string) => avatar.startsWith("data:image");
 const COLOR_OPTIONS = [
   { colorClass: "bg-companion-green", label: "绿" },
   { colorClass: "bg-companion-indigo", label: "靛" },
