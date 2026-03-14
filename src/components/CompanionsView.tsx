@@ -332,7 +332,9 @@ const CompanionsView = () => {
             {myCompanions.map((comp) => (
               <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0`}>{comp.avatar}</div>
+                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden`}>
+                    {isImageAvatar(comp.avatar) ? <img src={comp.avatar} alt="" className="w-full h-full object-cover" /> : comp.avatar}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
