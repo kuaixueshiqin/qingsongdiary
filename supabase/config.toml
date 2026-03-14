@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.analyze-diary]
 verify_jwt = false
+
+[functions.generate-avatar]
+verify_jwt = false

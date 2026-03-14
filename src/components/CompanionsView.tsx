@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil } from "lucide-react";
+import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil, Wand2, Loader2 } from "lucide-react";
 import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀", "⚡"];
+const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
+
+const isImageAvatar = (avatar: string) => avatar.startsWith("data:image");
 const COLOR_OPTIONS = [
   { colorClass: "bg-companion-green", label: "绿" },
   { colorClass: "bg-companion-indigo", label: "靛" },
@@ -29,6 +32,32 @@ const CompanionsView = () => {
   const [editBio, setEditBio] = useState("");
   const [likedAgents, setLikedAgents] = useState<string[]>([]);
   const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
+  const [generatingAvatar, setGeneratingAvatar] = useState(false);
+
+  const handleGenerateAvatar = async () => {
+    if (!newRole.trim()) {
+      toast.error("请先填写角色定位，AI 才能生成匹配的头像");
+      return;
+    }
+    setGeneratingAvatar(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-avatar", {
+        body: { role: newRole.trim() },
+      });
+      if (error) throw error;
+      if (data?.imageUrl) {
+        setNewAvatar(data.imageUrl);
+        toast.success("头像已生成！");
+      } else {
+        throw new Error("未获取到图片");
+      }
+    } catch (e: any) {
+      console.error(e);
+      toast.error("头像生成失败，请重试");
+    } finally {
+      setGeneratingAvatar(false);
+    }
+  };
 
   const handleToggleLike = (agentId: string) => {
     setLikedAgents((prev) => prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]);
@@ -141,7 +170,9 @@ const CompanionsView = () => {
         <div className="px-4 space-y-4">
           {/* Profile card */}
           <div className="bg-card border border-border rounded-2xl p-6 shadow-sm text-center relative">
-            <div className={`w-20 h-20 ${settingsFor.colorClass} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{settingsFor.avatar}</div>
+            <div className={`w-20 h-20 ${settingsFor.colorClass} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3 overflow-hidden`}>
+              {isImageAvatar(settingsFor.avatar) ? <img src={settingsFor.avatar} alt="" className="w-full h-full object-cover" /> : settingsFor.avatar}
+            </div>
             {editingProfile ? (
               <div className="space-y-3 text-left">
                 <div>
@@ -222,7 +253,11 @@ const CompanionsView = () => {
         <div className="px-4 space-y-4">
           {/* Avatar picker */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
-            <div className={`w-20 h-20 ${newColor} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{newAvatar}</div>
+            <div className={`w-20 h-20 ${newColor} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3 overflow-hidden`}>
+              {isImageAvatar(newAvatar) ? (
+                <img src={newAvatar} alt="AI头像" className="w-full h-full object-cover" />
+              ) : newAvatar}
+            </div>
             <p className="text-[10px] text-muted-foreground/40 mb-2">选择头像</p>
             <div className="flex flex-wrap justify-center gap-2">
               {AVATAR_OPTIONS.map((a) => (
@@ -230,6 +265,13 @@ const CompanionsView = () => {
                   className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${newAvatar === a ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
                 >{a}</button>
               ))}
+              <button
+                onClick={handleGenerateAvatar}
+                disabled={generatingAvatar}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isImageAvatar(newAvatar) ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"} ${generatingAvatar ? "opacity-60" : "hover:bg-primary/10"}`}
+              >
+                {generatingAvatar ? <Loader2 size={18} className="animate-spin text-primary" /> : <Wand2 size={18} className="text-primary" />}
+              </button>
             </div>
             <p className="text-[10px] text-muted-foreground/40 mt-4 mb-2">选择颜色</p>
             <div className="flex justify-center gap-2">
@@ -290,7 +332,9 @@ const CompanionsView = () => {
             {myCompanions.map((comp) => (
               <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
                 <div className="flex items-start gap-3 mb-4">
-                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0`}>{comp.avatar}</div>
+                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden`}>
+                    {isImageAvatar(comp.avatar) ? <img src={comp.avatar} alt="" className="w-full h-full object-cover" /> : comp.avatar}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
