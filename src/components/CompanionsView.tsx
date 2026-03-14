@@ -251,7 +251,11 @@ const CompanionsView = () => {
         <div className="px-4 space-y-4">
           {/* Avatar picker */}
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm text-center">
-            <div className={`w-20 h-20 ${newColor} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3`}>{newAvatar}</div>
+            <div className={`w-20 h-20 ${newColor} rounded-2xl flex items-center justify-center text-5xl mx-auto mb-3 overflow-hidden`}>
+              {isImageAvatar(newAvatar) ? (
+                <img src={newAvatar} alt="AI头像" className="w-full h-full object-cover" />
+              ) : newAvatar}
+            </div>
             <p className="text-[10px] text-muted-foreground/40 mb-2">选择头像</p>
             <div className="flex flex-wrap justify-center gap-2">
               {AVATAR_OPTIONS.map((a) => (
@@ -259,6 +263,13 @@ const CompanionsView = () => {
                   className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${newAvatar === a ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
                 >{a}</button>
               ))}
+              <button
+                onClick={handleGenerateAvatar}
+                disabled={generatingAvatar}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isImageAvatar(newAvatar) ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"} ${generatingAvatar ? "opacity-60" : "hover:bg-primary/10"}`}
+              >
+                {generatingAvatar ? <Loader2 size={18} className="animate-spin text-primary" /> : <Wand2 size={18} className="text-primary" />}
+              </button>
             </div>
             <p className="text-[10px] text-muted-foreground/40 mt-4 mb-2">选择颜色</p>
             <div className="flex justify-center gap-2">
