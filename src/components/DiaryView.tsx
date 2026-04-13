@@ -261,6 +261,33 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     toast.success("账单已确认");
   };
 
+  if (isWriting) {
+    return (
+      <div className="pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full">
+        <div className="px-6 pt-14 pb-4 flex items-center gap-3">
+          <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
+            <ChevronLeft size={24} />
+          </button>
+          <span className="text-sm font-bold text-muted-foreground">新日志 · {new Date().toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" }).replace(/(\d+)\/(\d+)/, "$1月$2日")}</span>
+        </div>
+        <div className="flex-1 px-6">
+          <MentionInput
+            autoFocus
+            value={newContent}
+            mentions={newMentions}
+            onChange={(text, mentions) => { setNewContent(text); setNewMentions(mentions); }}
+            onSubmit={handleSaveDiary}
+            placeholder="今天发生了什么... 输入@可呼叫伙伴评论"
+            className="flex-1 !min-h-0 !max-h-none text-lg leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0"
+          />
+        </div>
+        <div className="px-6 pb-4">
+          <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold float-right disabled:opacity-30">保存记录</button>
+        </div>
+      </div>
+    );
+  }
+
   if (selectedEntry) {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
@@ -619,26 +646,6 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         })}
       </div>
 
-      {isWriting && (
-        <div className="absolute inset-0 bg-card z-[100] p-6 pt-16 flex flex-col animate-in slide-in-from-right duration-300">
-          <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
-              <ChevronLeft size={24} />
-            </button>
-            <span className="text-sm font-bold text-muted-foreground">新日志 · 5月21日</span>
-          </div>
-          <MentionInput
-            autoFocus
-            value={newContent}
-            mentions={newMentions}
-            onChange={(text, mentions) => { setNewContent(text); setNewMentions(mentions); }}
-            onSubmit={handleSaveDiary}
-            placeholder="今天发生了什么... 输入@可呼叫伙伴评论"
-            className="flex-1 !min-h-0 !max-h-none text-lg leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0"
-          />
-          <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="mt-4 bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold self-end disabled:opacity-30">保存记录</button>
-        </div>
-      )}
     </div>
   );
 };
