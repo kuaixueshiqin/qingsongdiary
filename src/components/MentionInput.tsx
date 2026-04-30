@@ -192,7 +192,7 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         data-placeholder={placeholder}
-        className={`min-h-[28px] max-h-[80px] overflow-y-auto bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30 ${className || ""}`}
+        className={`min-h-[28px] max-h-[120px] overflow-y-auto bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground whitespace-pre-wrap break-words empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30 ${className || ""}`}
       />
       {showDropdown && filtered.length > 0 && (
         <div ref={dropdownRef} className="absolute bottom-full left-0 mb-1 bg-popover border border-border rounded-lg shadow-lg py-1 z-50 min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-150">
