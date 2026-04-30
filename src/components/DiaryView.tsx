@@ -218,7 +218,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                   className={`relative h-14 rounded-xl border-2 overflow-hidden bg-brand-cream flex items-end justify-center pb-1 ${opt.className} ${diaryStyle.texture === opt.id ? "border-foreground" : "border-border"}`}
                 >
                   <span className="text-[10px] font-medium text-foreground/70 z-10">{opt.label}</span>
-                  {diaryStyle.texture === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground z-10" />}
+                  {diaryStyle.texture === opt.id && <Check size={14} className="text-foreground z-10" style={{ position: "absolute", top: 4, right: 4 }} />}
                 </button>
               ))}
             </div>
