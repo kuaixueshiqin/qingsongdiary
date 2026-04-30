@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock } from "lucide-react";
-import { companions } from "@/lib/data";
-import { useDiaryEntries } from "@/hooks/useUserData";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock, Bell, MessageCircle, Mailbox } from "lucide-react";
+import { companions as builtInCompanions } from "@/lib/data";
+import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -10,6 +10,13 @@ import { Switch } from "@/components/ui/switch";
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
 const isImageUrl = (s: string) => !!s && (s.startsWith("http") || s.startsWith("blob:"));
+
+type NotifPrefs = {
+  enabled: boolean;
+  comments: Record<string, boolean>;
+  mailbox: Record<string, boolean>;
+};
+const DEFAULT_PREFS: NotifPrefs = { enabled: true, comments: {}, mailbox: {} };
 
 const ProfileView = () => {
   const { user, signOut } = useAuth();
@@ -112,16 +119,48 @@ const ProfileView = () => {
   };
 
   const { entries } = useDiaryEntries();
+  const { customCompanions } = useCustomCompanions();
+  const allCompanions = useMemo(() => [...builtInCompanions, ...customCompanions], [customCompanions]);
   const notesCount = entries.length;
   const lettersCount = 7;
 
-  const recentVisitors = companions.map((c) => ({
+  const recentVisitors = allCompanions.map((c) => ({
     id: c.id,
     name: c.name,
     avatar: c.avatar,
     colorClass: c.colorClass,
     lastTime: c.delay,
   }));
+
+  // Notification preferences (per-user, persisted to localStorage)
+  const [showNotif, setShowNotif] = useState(false);
+  const prefsKey = user ? `notif_prefs_${user.id}` : null;
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    if (!prefsKey) return;
+    try {
+      const raw = localStorage.getItem(prefsKey);
+      if (raw) setNotifPrefs({ ...DEFAULT_PREFS, ...JSON.parse(raw) });
+    } catch {}
+  }, [prefsKey]);
+
+  const persistPrefs = (next: NotifPrefs) => {
+    setNotifPrefs(next);
+    if (prefsKey) localStorage.setItem(prefsKey, JSON.stringify(next));
+  };
+
+  const isOn = (kind: "comments" | "mailbox", id: string) => notifPrefs[kind][id] !== false;
+  const togglePerCompanion = (kind: "comments" | "mailbox", id: string) => {
+    persistPrefs({ ...notifPrefs, [kind]: { ...notifPrefs[kind], [id]: !isOn(kind, id) } });
+  };
+  const allOn = (kind: "comments" | "mailbox") => allCompanions.every((c) => isOn(kind, c.id));
+  const toggleAll = (kind: "comments" | "mailbox") => {
+    const target = !allOn(kind);
+    const map: Record<string, boolean> = {};
+    allCompanions.forEach((c) => { map[c.id] = target; });
+    persistPrefs({ ...notifPrefs, [kind]: map });
+  };
 
   return (
     <div className="pb-4">
@@ -278,7 +317,56 @@ const ProfileView = () => {
             </div>
           )}
 
-          <SettingLink label="通知偏好" />
+          <button
+            onClick={() => setShowNotif(!showNotif)}
+            className="w-full flex items-center justify-between px-5 py-3.5 border-b border-border hover:bg-secondary/30 transition-colors"
+          >
+            <span className="text-sm text-foreground flex items-center gap-2">
+              <Bell size={14} className="text-muted-foreground" />
+              通知偏好
+            </span>
+            <ChevronRight size={14} className={`text-muted-foreground/40 transition-transform ${showNotif ? "rotate-90" : ""}`} />
+          </button>
+
+          {showNotif && (
+            <div className="bg-secondary/20 border-b border-border animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center justify-between px-5 py-3.5">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground">允许通知</p>
+                  <p className="text-[11px] text-muted-foreground/70 mt-0.5">关闭后将不再收到任何提醒</p>
+                </div>
+                <Switch
+                  checked={notifPrefs.enabled}
+                  onCheckedChange={(c) => persistPrefs({ ...notifPrefs, enabled: c })}
+                />
+              </div>
+
+              {notifPrefs.enabled && (
+                <div className="px-5 pb-4 space-y-3 animate-in fade-in duration-200">
+                  <NotifGroup
+                    icon={<MessageCircle size={12} className="text-companion-indigo-text" />}
+                    title="评论回复通知"
+                    subtitle="伙伴在你的日记下留言时提醒你"
+                    companions={allCompanions}
+                    isOn={(id) => isOn("comments", id)}
+                    onToggle={(id) => togglePerCompanion("comments", id)}
+                    allOn={allOn("comments")}
+                    onToggleAll={() => toggleAll("comments")}
+                  />
+                  <NotifGroup
+                    icon={<Mailbox size={12} className="text-companion-amber-text" />}
+                    title="信箱来信通知"
+                    subtitle="伙伴主动写信给你时提醒你"
+                    companions={allCompanions}
+                    isOn={(id) => isOn("mailbox", id)}
+                    onToggle={(id) => togglePerCompanion("mailbox", id)}
+                    allOn={allOn("mailbox")}
+                    onToggleAll={() => toggleAll("mailbox")}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <SettingLink label="关于我们" />
         </div>
 
@@ -311,6 +399,45 @@ const SettingLink = ({ label }: { label: string }) => (
   <div className="flex items-center justify-between px-5 py-3.5 border-b border-border last:border-b-0">
     <span className="text-sm text-foreground">{label}</span>
     <ChevronRight size={14} className="text-muted-foreground/20" />
+  </div>
+);
+
+type NotifGroupProps = {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  companions: { id: string; name: string; avatar: string; colorClass: string }[];
+  isOn: (id: string) => boolean;
+  onToggle: (id: string) => void;
+  allOn: boolean;
+  onToggleAll: () => void;
+};
+
+const NotifGroup = ({ icon, title, subtitle, companions, isOn, onToggle, allOn, onToggleAll }: NotifGroupProps) => (
+  <div className="bg-card border border-border rounded-2xl overflow-hidden">
+    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-foreground flex items-center gap-1.5">{icon}{title}</p>
+        <p className="text-[10px] text-muted-foreground/60 mt-0.5">{subtitle}</p>
+      </div>
+      <button
+        onClick={onToggleAll}
+        className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors ${allOn ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
+      >
+        {allOn ? "全部关闭" : "全部开启"}
+      </button>
+    </div>
+    {companions.length === 0 ? (
+      <p className="text-[11px] text-muted-foreground/50 text-center py-4">暂无伙伴</p>
+    ) : (
+      companions.map((c) => (
+        <div key={c.id} className="flex items-center gap-2.5 px-4 py-2.5 border-b border-border last:border-b-0">
+          <div className={`w-7 h-7 ${c.colorClass} rounded-lg flex items-center justify-center text-base shrink-0`}>{c.avatar}</div>
+          <span className="flex-1 text-xs text-foreground truncate">{c.name}</span>
+          <Switch checked={isOn(c.id)} onCheckedChange={() => onToggle(c.id)} />
+        </div>
+      ))
+    )}
   </div>
 );
 
