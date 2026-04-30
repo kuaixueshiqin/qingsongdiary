@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      check_ins: {
+        Row: {
+          check_date: string
+          created_at: string
+          id: string
+          reward: number
+          streak: number
+          user_id: string
+        }
+        Insert: {
+          check_date: string
+          created_at?: string
+          id?: string
+          reward: number
+          streak: number
+          user_id: string
+        }
+        Update: {
+          check_date?: string
+          created_at?: string
+          id?: string
+          reward?: number
+          streak?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       comment_replies: {
         Row: {
           comment_id: string
@@ -287,6 +314,33 @@ export type Database = {
           },
         ]
       }
+      pinecone_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          note: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           ai_data_consent: boolean
@@ -322,7 +376,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      award_pinecones: {
+        Args: { _amount: number; _note?: string; _source: string }
+        Returns: number
+      }
+      claim_daily_checkin: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never
