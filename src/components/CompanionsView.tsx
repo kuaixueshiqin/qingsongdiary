@@ -24,6 +24,11 @@ const CompanionsView = () => {
   const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
+  // Agent is considered owned if matched by id (this session) OR if a companion
+  // with the same name already exists in the user's list (persisted purchase).
+  const ownedNames = new Set(myCompanions.map((c) => c.name));
+  const isAgentOwned = (agent: typeof squareAgents[0]) =>
+    addedAgents.includes(agent.id) || ownedNames.has(agent.name);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState("");
