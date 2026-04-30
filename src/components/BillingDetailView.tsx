@@ -1,6 +1,117 @@
-import { useState, useRef } from "react";
-import { ChevronLeft, Plus, Pencil, ChevronRight } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { ChevronLeft, Plus, Pencil, ChevronRight, Check, X } from "lucide-react";
 import { toast } from "sonner";
+
+const DEFAULT_CATEGORIES = ["餐饮", "交通", "娱乐", "购物", "生活", "其他"];
+const CUSTOM_CATEGORIES_KEY = "billing_custom_categories";
+
+const loadCustomCategories = (): string[] => {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+interface CategoryPickerProps {
+  value: string;
+  onChange: (v: string) => void;
+  customCategories: string[];
+  onAddCustom: (name: string) => void;
+  onRemoveCustom: (name: string) => void;
+}
+
+const CategoryPicker = ({ value, onChange, customCategories, onAddCustom, onRemoveCustom }: CategoryPickerProps) => {
+  const [adding, setAdding] = useState(false);
+  const [input, setInput] = useState("");
+
+  const all = [...DEFAULT_CATEGORIES.filter((c) => c !== "其他"), ...customCategories, "其他"];
+
+  const submit = () => {
+    const name = input.trim();
+    if (!name) { setAdding(false); return; }
+    if (name.length > 6) { toast.error("标签最多 6 个字"); return; }
+    if (all.includes(name)) {
+      onChange(name);
+      setInput("");
+      setAdding(false);
+      return;
+    }
+    onAddCustom(name);
+    onChange(name);
+    setInput("");
+    setAdding(false);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {all.map((c) => {
+        const isCustom = customCategories.includes(c);
+        const selected = value === c;
+        return (
+          <span
+            key={c}
+            className={`group inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all active:scale-95 ${
+              selected
+                ? "bg-brand-brown text-primary-foreground border-brand-brown"
+                : "bg-secondary text-muted-foreground border-transparent hover:text-foreground"
+            }`}
+          >
+            <button type="button" onClick={() => onChange(c)} className="leading-none">
+              {c}
+            </button>
+            {isCustom && !selected && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onRemoveCustom(c); }}
+                className="opacity-0 group-hover:opacity-100 text-muted-foreground/60 hover:text-destructive transition-opacity"
+                aria-label={`删除标签 ${c}`}
+              >
+                <X size={10} />
+              </button>
+            )}
+          </span>
+        );
+      })}
+
+      {adding ? (
+        <span className="inline-flex items-center gap-1 bg-card border border-primary/40 rounded-full pl-2.5 pr-1 py-0.5">
+          <input
+            autoFocus
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); submit(); }
+              if (e.key === "Escape") { setInput(""); setAdding(false); }
+            }}
+            placeholder="如：摄影"
+            maxLength={6}
+            className="w-16 bg-transparent text-[11px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={submit}
+            className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+            aria-label="保存标签"
+          >
+            <Check size={10} strokeWidth={3} />
+          </button>
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="inline-flex items-center gap-0.5 text-[11px] font-medium px-2.5 py-1 rounded-full border border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+        >
+          <Plus size={10} />
+          自定义
+        </button>
+      )}
+    </div>
+  );
+};
+
 
 type BillingStatus = "toFill" | "toConfirm" | "confirmed";
 
@@ -160,6 +271,18 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
   const [newDate, setNewDate] = useState("");
   const [deleteHintShown, setDeleteHintShown] = useState(false);
   const [confirmHintShown, setConfirmHintShown] = useState(false);
+  const [customCategories, setCustomCategories] = useState<string[]>(() => loadCustomCategories());
+
+  useEffect(() => {
+    try { localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(customCategories)); } catch {}
+  }, [customCategories]);
+
+  const addCustomCategory = (name: string) => {
+    setCustomCategories((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  };
+  const removeCustomCategory = (name: string) => {
+    setCustomCategories((prev) => prev.filter((c) => c !== name));
+  };
 
   const toFillItems = billingItems.filter((i) => i.status === "toFill");
   const toConfirmItems = billingItems.filter((i) => i.status === "toConfirm");
@@ -243,17 +366,19 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
           {items.map((item) =>
             editingItemId === item.id ? (
               <div key={item.id} className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
-                    <input type="number" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-[10px] text-muted-foreground block mb-1">分类</label>
-                    <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground">
-                      <option>餐饮</option><option>交通</option><option>娱乐</option><option>购物</option><option>生活</option><option>其他</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
+                  <input type="number" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1.5">分类标签</label>
+                  <CategoryPicker
+                    value={editCategory}
+                    onChange={setEditCategory}
+                    customCategories={customCategories}
+                    onAddCustom={addCustomCategory}
+                    onRemoveCustom={removeCustomCategory}
+                  />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => setEditingItemId(null)} className="text-xs bg-secondary px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
@@ -302,17 +427,19 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
         <div className="px-4 mb-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-3">
             <h3 className="text-xs font-bold text-foreground">手动添加</h3>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
-                <input type="number" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} placeholder="0" className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
-              </div>
-              <div className="flex-1">
-                <label className="text-[10px] text-muted-foreground block mb-1">分类</label>
-                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground">
-                  <option>餐饮</option><option>交通</option><option>娱乐</option><option>购物</option><option>生活</option><option>其他</option>
-                </select>
-              </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
+              <input type="number" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} placeholder="0" className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground block mb-1.5">分类标签</label>
+              <CategoryPicker
+                value={newCategory}
+                onChange={setNewCategory}
+                customCategories={customCategories}
+                onAddCustom={addCustomCategory}
+                onRemoveCustom={removeCustomCategory}
+              />
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
