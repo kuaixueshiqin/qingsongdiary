@@ -271,6 +271,18 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
   const [newDate, setNewDate] = useState("");
   const [deleteHintShown, setDeleteHintShown] = useState(false);
   const [confirmHintShown, setConfirmHintShown] = useState(false);
+  const [customCategories, setCustomCategories] = useState<string[]>(() => loadCustomCategories());
+
+  useEffect(() => {
+    try { localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(customCategories)); } catch {}
+  }, [customCategories]);
+
+  const addCustomCategory = (name: string) => {
+    setCustomCategories((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  };
+  const removeCustomCategory = (name: string) => {
+    setCustomCategories((prev) => prev.filter((c) => c !== name));
+  };
 
   const toFillItems = billingItems.filter((i) => i.status === "toFill");
   const toConfirmItems = billingItems.filter((i) => i.status === "toConfirm");
