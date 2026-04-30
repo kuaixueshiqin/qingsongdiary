@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil, Wand2, Loader2 } from "lucide-react";
-import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
+import { companions as builtInCompanions, squareAgents, type Companion } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCustomCompanions } from "@/hooks/useUserData";
 
 const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
 
@@ -16,8 +17,9 @@ const COLOR_OPTIONS = [
 ];
 
 const CompanionsView = () => {
+  const { customCompanions, createCompanion, updateCompanion, deleteCompanion } = useCustomCompanions();
   const [view, setView] = useState<"my" | "square">("my");
-  const [myCompanions, setMyCompanions] = useState<Companion[]>(initialCompanions);
+  const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
   const [showCreate, setShowCreate] = useState(false);
