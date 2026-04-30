@@ -4,6 +4,8 @@ import { companions as builtInCompanions, squareAgents, type Companion } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCustomCompanions } from "@/hooks/useUserData";
+import { usePinecones } from "@/hooks/usePinecones";
+import PineconeShop from "@/components/PineconeShop";
 
 const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
 
