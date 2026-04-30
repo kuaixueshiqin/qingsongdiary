@@ -38,6 +38,14 @@ const CompanionsView = () => {
   const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
   const [confirmAgent, setConfirmAgent] = useState<typeof squareAgents[0] | null>(null);
   const [generatingAvatar, setGeneratingAvatar] = useState(false);
+  const { balance: pineconeBalance, spend } = usePinecones();
+  const [shopOpen, setShopOpen] = useState(false);
+  const [shopReason, setShopReason] = useState<string | undefined>();
+
+  const openShop = (reason?: string) => {
+    setShopReason(reason);
+    setShopOpen(true);
+  };
 
   const handleGenerateAvatar = async () => {
     if (!newRole.trim()) {
