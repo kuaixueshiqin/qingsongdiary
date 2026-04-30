@@ -179,7 +179,8 @@ const CompanionsView = () => {
             {isAdded ? <><Check size={16} />已添加</> : <>🌰 花 {viewingAgent.pinecones} 松果带TA回家</>}
           </button>
         </div>
-        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
+        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} balance={pineconeBalance} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} onTopUp={() => { const a = confirmAgent; setConfirmAgent(null); openShop(`差一点～购买 ${a.name} 需要 ${a.pinecones} 松果`); }} />}
+        <PineconeShop open={shopOpen} onClose={() => setShopOpen(false)} reason={shopReason} />
       </div>
     );
   }
