@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2 } from "lucide-react";
 import { companions } from "@/lib/data";
 import { useDiaryEntries } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,8 @@ import { toast } from "@/hooks/use-toast";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
+const isImageUrl = (s: string) => !!s && (s.startsWith("http") || s.startsWith("blob:"));
+
 const ProfileView = () => {
   const { user, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -15,6 +17,31 @@ const ProfileView = () => {
   const [bio, setBio] = useState("记录生活，温柔前行 🌿");
   const [avatar, setAvatar] = useState("🌿");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadAvatar = async (file: File) => {
+    if (!user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "图片过大", description: "请选择 5MB 以内的图片", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatar(pub.publicUrl);
+      setShowAvatarPicker(false);
+      toast({ title: "已上传，记得点击保存" });
+    } catch (e: any) {
+      toast({ title: "上传失败", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
   const [pinecones, setPinecones] = useState(0);
 
   useEffect(() => {
