@@ -267,6 +267,7 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
                 onDelete={handleDelete}
                 onConfirm={handleConfirm}
                 onEdit={handleEdit}
+                onOpen={handleOpen}
                 hasShownDeleteHint={deleteHintShown}
                 hasShownConfirmHint={confirmHintShown}
                 setDeleteHintShown={() => setDeleteHintShown(true)}
