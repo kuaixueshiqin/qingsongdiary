@@ -335,7 +335,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (selectedEntry) {
     return (
-      <div className="pb-4 animate-in slide-in-from-right duration-300">
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} min-h-full`}>
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
@@ -345,7 +345,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
               <span className="text-xs text-muted-foreground">{selectedEntry.time}</span>
               {selectedEntry.moodScore && (
-                <span className="flex items-center gap-1 ml-auto">
+                <span className="flex items-center gap-1">
                   {getMoodIcon(selectedEntry.moodScore)}
                   {selectedEntry.moodLabel && <span className="text-[10px] text-muted-foreground">{selectedEntry.moodLabel}</span>}
                 </span>
@@ -361,6 +361,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               </div>
             )}
           </div>
+          <button onClick={() => setStyleOpen(true)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex-shrink-0" aria-label="个性化设置">
+            <Settings2 size={18} />
+          </button>
         </div>
 
         <div className="px-6 space-y-6">
