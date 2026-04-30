@@ -155,12 +155,12 @@ const ProfileView = () => {
           </div>
 
           {/* Avatar picker */}
-          {showAvatarPicker && editing && (
+          {showAvatarPicker && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center animate-in fade-in duration-200">
               {AVATAR_OPTIONS.map((a) => (
                 <button
                   key={a}
-                  onClick={() => { setAvatar(a); setShowAvatarPicker(false); }}
+                  onClick={() => { saveAvatar(a); setShowAvatarPicker(false); }}
                   className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${avatar === a ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
                 >
                   {a}
