@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import PineconeShop from "@/components/PineconeShop";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
@@ -67,8 +68,9 @@ const ProfileView = () => {
     }
   };
   const [pinecones, setPinecones] = useState(0);
+  const [shopOpen, setShopOpen] = useState(false);
 
-  useEffect(() => {
+  const loadProfile = () => {
     if (!user) return;
     supabase
       .from("profiles")
@@ -83,6 +85,11 @@ const ProfileView = () => {
           setAiConsent(data.ai_data_consent ?? true);
         }
       });
+  };
+
+  useEffect(() => {
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleToggleConsent = async (checked: boolean) => {
@@ -255,7 +262,9 @@ const ProfileView = () => {
         <div className="grid grid-cols-3 gap-2">
           <StatCard icon={<BookOpen size={16} />} label="笔记" value={notesCount} color="text-companion-green-text" bg="bg-companion-green" />
           <StatCard icon={<Mail size={16} />} label="书信" value={lettersCount} color="text-companion-indigo-text" bg="bg-companion-indigo" />
-          <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={pinecones} color="text-companion-amber-text" bg="bg-companion-amber" />
+          <button onClick={() => setShopOpen(true)} className="text-left active:scale-[0.98] transition-transform">
+            <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={pinecones} color="text-companion-amber-text" bg="bg-companion-amber" />
+          </button>
         </div>
 
         {/* Recent visitors */}
@@ -383,6 +392,7 @@ const ProfileView = () => {
           <p className="text-center text-[10px] text-muted-foreground/50 pt-2">{user.email}</p>
         )}
       </div>
+      <PineconeShop open={shopOpen} onClose={() => { setShopOpen(false); loadProfile(); }} />
     </div>
   );
 };

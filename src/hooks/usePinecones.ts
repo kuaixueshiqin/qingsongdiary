@@ -94,5 +94,52 @@ export function usePinecones() {
     return { reward: result.reward ?? 0, streak: result.streak, already: false };
   }, [user]);
 
-  return { balance, streak, todayClaimed, randomDrop, claimDailyCheckIn, refresh };
+  /** Spend pinecones atomically. Returns true on success; on insufficient funds returns false (no toast). */
+  const spend = useCallback(
+    async (amount: number, source: string, note?: string): Promise<{ ok: boolean; insufficient?: boolean }> => {
+      if (!user) return { ok: false };
+      const { data, error } = await supabase.rpc("spend_pinecones", {
+        _amount: amount,
+        _source: source,
+        _note: note ?? null,
+      });
+      if (error) {
+        if ((error.message || "").includes("INSUFFICIENT_FUNDS")) {
+          return { ok: false, insufficient: true };
+        }
+        console.error(error);
+        toast.error("操作失败，请稍后再试");
+        return { ok: false };
+      }
+      if (typeof data === "number") setBalance(data);
+      return { ok: true };
+    },
+    [user]
+  );
+
+  /**
+   * Mock in-app purchase. Real Paddle/Stripe checkout will replace this.
+   * Awards pinecones immediately as if a purchase succeeded.
+   */
+  const mockTopUp = useCallback(
+    async (amount: number, label: string): Promise<boolean> => {
+      if (!user) return false;
+      const { data, error } = await supabase.rpc("award_pinecones", {
+        _amount: amount,
+        _source: "purchase",
+        _note: label,
+      });
+      if (error) {
+        console.error(error);
+        toast.error("充值失败，请稍后再试");
+        return false;
+      }
+      if (typeof data === "number") setBalance(data);
+      toast.success(`🌰 +${amount} 松果`, { description: `${label} · 充值成功` });
+      return true;
+    },
+    [user]
+  );
+
+  return { balance, streak, todayClaimed, randomDrop, claimDailyCheckIn, spend, mockTopUp, refresh };
 }

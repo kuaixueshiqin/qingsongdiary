@@ -4,6 +4,8 @@ import { companions as builtInCompanions, squareAgents, type Companion } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCustomCompanions } from "@/hooks/useUserData";
+import { usePinecones } from "@/hooks/usePinecones";
+import PineconeShop from "@/components/PineconeShop";
 
 const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
 
@@ -36,6 +38,14 @@ const CompanionsView = () => {
   const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
   const [confirmAgent, setConfirmAgent] = useState<typeof squareAgents[0] | null>(null);
   const [generatingAvatar, setGeneratingAvatar] = useState(false);
+  const { balance: pineconeBalance, spend } = usePinecones();
+  const [shopOpen, setShopOpen] = useState(false);
+  const [shopReason, setShopReason] = useState<string | undefined>();
+
+  const openShop = (reason?: string) => {
+    setShopReason(reason);
+    setShopOpen(true);
+  };
 
   const handleGenerateAvatar = async () => {
     if (!newRole.trim()) {
@@ -113,6 +123,15 @@ const CompanionsView = () => {
   const confirmAddAgent = async () => {
     if (!confirmAgent) return;
     const agent = confirmAgent;
+    // Re-check funds atomically and deduct
+    const result = await spend(agent.pinecones, "companion_unlock", `解锁伙伴 ${agent.name}`);
+    if (!result.ok) {
+      setConfirmAgent(null);
+      if (result.insufficient) {
+        openShop(`差一点～购买 ${agent.name} 需要 ${agent.pinecones} 松果，去补充一下吧`);
+      }
+      return;
+    }
     setConfirmAgent(null);
     await handleAddAgent(agent);
   };
@@ -160,7 +179,8 @@ const CompanionsView = () => {
             {isAdded ? <><Check size={16} />已添加</> : <>🌰 花 {viewingAgent.pinecones} 松果带TA回家</>}
           </button>
         </div>
-        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
+        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} balance={pineconeBalance} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} onTopUp={() => { const a = confirmAgent; setConfirmAgent(null); openShop(`差一点～购买 ${a.name} 需要 ${a.pinecones} 松果`); }} />}
+        <PineconeShop open={shopOpen} onClose={() => setShopOpen(false)} reason={shopReason} />
       </div>
     );
   }
@@ -379,7 +399,8 @@ const CompanionsView = () => {
             );
           })}
         </div>
-        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
+        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} balance={pineconeBalance} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} onTopUp={() => { const a = confirmAgent; setConfirmAgent(null); openShop(`差一点～购买 ${a.name} 需要 ${a.pinecones} 松果`); }} />}
+        <PineconeShop open={shopOpen} onClose={() => setShopOpen(false)} reason={shopReason} />
       </div>
     );
   }
@@ -439,36 +460,51 @@ const CompanionsView = () => {
           <span className="text-xs font-bold">自定义伙伴</span>
         </button>
       </div>
-      {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
+      {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} balance={pineconeBalance} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} onTopUp={() => { const a = confirmAgent; setConfirmAgent(null); openShop(`差一点～购买 ${a.name} 需要 ${a.pinecones} 松果`); }} />}
+      <PineconeShop open={shopOpen} onClose={() => setShopOpen(false)} reason={shopReason} />
     </div>
   );
 };
 
 // Confirm purchase modal
-const ConfirmPurchaseModal = ({ agent, onCancel, onConfirm }: { agent: typeof squareAgents[0]; onCancel: () => void; onConfirm: () => void }) => (
-  <div className="absolute inset-0 z-50 bg-foreground/30 backdrop-blur-sm flex items-center justify-center px-6 animate-in fade-in duration-200" onClick={onCancel}>
-    <div className="w-full bg-card rounded-3xl p-6 shadow-xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-      <div className="flex flex-col items-center text-center">
-        <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center text-3xl mb-3">{agent.avatar}</div>
-        <h3 className="text-base font-black text-foreground">带 {agent.name} 回家？</h3>
-        <p className="text-xs text-muted-foreground/60 mt-1">{agent.role}</p>
-        <div className="mt-4 px-4 py-2.5 bg-companion-amber rounded-2xl flex items-center gap-1.5">
-          <span className="text-base">🌰</span>
-          <span className="text-sm font-black text-companion-amber-text">花费 {agent.pinecones} 松果</span>
+const ConfirmPurchaseModal = ({ agent, balance, onCancel, onConfirm, onTopUp }: { agent: typeof squareAgents[0]; balance: number; onCancel: () => void; onConfirm: () => void; onTopUp: () => void }) => {
+  const insufficient = balance < agent.pinecones;
+  return (
+    <div className="absolute inset-0 z-50 bg-foreground/30 backdrop-blur-sm flex items-center justify-center px-6 animate-in fade-in duration-200" onClick={onCancel}>
+      <div className="w-full bg-card rounded-3xl p-6 shadow-xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col items-center text-center">
+          <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center text-3xl mb-3">{agent.avatar}</div>
+          <h3 className="text-base font-black text-foreground">带 {agent.name} 回家？</h3>
+          <p className="text-xs text-muted-foreground/60 mt-1">{agent.role}</p>
+          <div className="mt-4 px-4 py-2.5 bg-companion-amber rounded-2xl flex items-center gap-1.5">
+            <span className="text-base">🌰</span>
+            <span className="text-sm font-black text-companion-amber-text">花费 {agent.pinecones} 松果</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground/50 mt-2">当前余额：🌰 {balance}</p>
+          {insufficient ? (
+            <p className="text-[11px] text-destructive font-bold mt-2">松果不足，去补充一下吧</p>
+          ) : (
+            <p className="text-[10px] text-muted-foreground/50 mt-1 leading-relaxed">确认后将从你的松果余额中扣除，无法撤销</p>
+          )}
         </div>
-        <p className="text-[10px] text-muted-foreground/50 mt-3 leading-relaxed">确认后将从你的松果余额中扣除，无法撤销</p>
-      </div>
-      <div className="flex gap-2 mt-5">
-        <button onClick={onCancel} className="flex-1 py-3 rounded-2xl bg-secondary text-muted-foreground font-bold text-sm active:scale-[0.98] transition-transform">
-          再想想
-        </button>
-        <button onClick={onConfirm} className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm active:scale-[0.98] transition-transform">
-          确认带回家
-        </button>
+        <div className="flex gap-2 mt-5">
+          <button onClick={onCancel} className="flex-1 py-3 rounded-2xl bg-secondary text-muted-foreground font-bold text-sm active:scale-[0.98] transition-transform">
+            再想想
+          </button>
+          {insufficient ? (
+            <button onClick={onTopUp} className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm active:scale-[0.98] transition-transform">
+              去充值
+            </button>
+          ) : (
+            <button onClick={onConfirm} className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm active:scale-[0.98] transition-transform">
+              确认带回家
+            </button>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Toggle setting row
 const SettingRow = ({ label, description, defaultOn, onToggle }: { label: string; description: string; defaultOn: boolean; onToggle: (v: boolean) => void }) => {
