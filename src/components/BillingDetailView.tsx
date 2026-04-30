@@ -194,9 +194,19 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
   const handleEditSave = (itemId: number) => {
     const amount = parseFloat(editAmount);
     if (isNaN(amount) || amount <= 0) { toast.error("请输入有效金额"); return; }
-    setBillingItems((prev) => prev.map((i) => i.id === itemId ? { ...i, amount, category: editCategory, status: "confirmed" as BillingStatus } : i));
+    setBillingItems((prev) => prev.map((i) => {
+      if (i.id !== itemId) return i;
+      const nextStatus: BillingStatus = i.status === "confirmed" ? "confirmed" : "confirmed";
+      return { ...i, amount, category: editCategory, status: nextStatus };
+    }));
     setEditingItemId(null);
     toast.success("账单已更新");
+  };
+
+  const handleOpen = (item: BillingItem) => {
+    if (item.diaryId && onNavigateToDiary) {
+      onNavigateToDiary(item.diaryId);
+    }
   };
 
   const handleAddManual = () => {
