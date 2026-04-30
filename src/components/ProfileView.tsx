@@ -155,6 +155,25 @@ const ProfileView = () => {
                   {a}
                 </button>
               ))}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border border-dashed border-primary/40 text-primary hover:bg-primary/10 ${isImageUrl(avatar) ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
+                title="上传本地图片"
+              >
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleUploadAvatar(f);
+                  e.target.value = "";
+                }}
+              />
             </div>
           )}
         </div>
