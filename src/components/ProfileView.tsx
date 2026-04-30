@@ -119,16 +119,48 @@ const ProfileView = () => {
   };
 
   const { entries } = useDiaryEntries();
+  const { customCompanions } = useCustomCompanions();
+  const allCompanions = useMemo(() => [...builtInCompanions, ...customCompanions], [customCompanions]);
   const notesCount = entries.length;
   const lettersCount = 7;
 
-  const recentVisitors = companions.map((c) => ({
+  const recentVisitors = allCompanions.map((c) => ({
     id: c.id,
     name: c.name,
     avatar: c.avatar,
     colorClass: c.colorClass,
     lastTime: c.delay,
   }));
+
+  // Notification preferences (per-user, persisted to localStorage)
+  const [showNotif, setShowNotif] = useState(false);
+  const prefsKey = user ? `notif_prefs_${user.id}` : null;
+  const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    if (!prefsKey) return;
+    try {
+      const raw = localStorage.getItem(prefsKey);
+      if (raw) setNotifPrefs({ ...DEFAULT_PREFS, ...JSON.parse(raw) });
+    } catch {}
+  }, [prefsKey]);
+
+  const persistPrefs = (next: NotifPrefs) => {
+    setNotifPrefs(next);
+    if (prefsKey) localStorage.setItem(prefsKey, JSON.stringify(next));
+  };
+
+  const isOn = (kind: "comments" | "mailbox", id: string) => notifPrefs[kind][id] !== false;
+  const togglePerCompanion = (kind: "comments" | "mailbox", id: string) => {
+    persistPrefs({ ...notifPrefs, [kind]: { ...notifPrefs[kind], [id]: !isOn(kind, id) } });
+  };
+  const allOn = (kind: "comments" | "mailbox") => allCompanions.every((c) => isOn(kind, c.id));
+  const toggleAll = (kind: "comments" | "mailbox") => {
+    const target = !allOn(kind);
+    const map: Record<string, boolean> = {};
+    allCompanions.forEach((c) => { map[c.id] = target; });
+    persistPrefs({ ...notifPrefs, [kind]: map });
+  };
 
   return (
     <div className="pb-4">
