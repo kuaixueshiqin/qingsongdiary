@@ -149,7 +149,7 @@ const SwipeableItem = ({
   );
 };
 
-const BillingDetailView = ({ billingItems, setBillingItems, onBack }: BillingDetailViewProps) => {
+const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateToDiary }: BillingDetailViewProps) => {
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editCategory, setEditCategory] = useState("");
