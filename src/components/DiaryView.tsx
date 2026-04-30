@@ -203,6 +203,21 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               ))}
             </div>
           </div>
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">纸张材质</p>
+            <div className="grid grid-cols-3 gap-2">
+              {TEXTURE_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => updateStyle({ texture: opt.id })}
+                  className={`relative h-14 rounded-xl border-2 overflow-hidden bg-brand-cream ${opt.className} ${diaryStyle.texture === opt.id ? "border-foreground" : "border-border"}`}
+                >
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70 z-10">{opt.label}</span>
+                  {diaryStyle.texture === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground z-10" />}
+                </button>
+              ))}
+            </div>
+          </div>
           <button
             onClick={() => {
               setBatchSelected(new Set());
