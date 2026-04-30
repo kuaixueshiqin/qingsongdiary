@@ -392,6 +392,7 @@ const ProfileView = () => {
           <p className="text-center text-[10px] text-muted-foreground/50 pt-2">{user.email}</p>
         )}
       </div>
+      <PineconeShop open={shopOpen} onClose={() => { setShopOpen(false); loadProfile(); }} />
     </div>
   );
 };
