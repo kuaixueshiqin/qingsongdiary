@@ -778,36 +778,45 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         {entries.map((entry) => {
           const entryCompanions = entry.comments.map((c) => allCompanions.find((comp) => comp.id === c.companionId));
           return (
-            <div key={entry.id} onClick={() => setSelectedEntryId(entry.id)} className="bg-card border border-border rounded-2xl p-4 flex gap-3 active:bg-secondary transition-colors shadow-sm cursor-pointer">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                  <span>{entry.date}</span><span className="text-muted-foreground/40">·</span><span>{entry.time}</span>
-                  {entry.moodScore && <span className="ml-auto">{getMoodIcon(entry.moodScore)}</span>}
+            <SwipeableEntryCard
+              key={entry.id}
+              onOpen={() => setSelectedEntryId(entry.id)}
+              onDelete={async () => {
+                await deleteEntry(entry.id);
+                toast.success("日记已删除");
+              }}
+            >
+              <div className="bg-card border border-border rounded-2xl p-4 flex gap-3 active:bg-secondary transition-colors shadow-sm cursor-pointer">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                    <span>{entry.date}</span><span className="text-muted-foreground/40">·</span><span>{entry.time}</span>
+                    {entry.moodScore && <span className="ml-auto">{getMoodIcon(entry.moodScore)}</span>}
+                  </div>
+                  <p className="text-foreground/80 text-sm leading-relaxed line-clamp-3">{entry.content}</p>
+                  {entry.tags && entry.tags.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {entry.tags.map((tag) => (
+                        <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tagColors[tag] || "bg-secondary text-muted-foreground"}`}>
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {entry.billing && (
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold">
+                      <Wallet size={12} className="text-accent" />
+                      <span className="text-accent">¥{entry.billing.amount} · {entry.billing.category}</span>
+                      {entry.billing.verified && <Check size={10} className="text-companion-green-text" />}
+                    </div>
+                  )}
                 </div>
-                <p className="text-foreground/80 text-sm leading-relaxed line-clamp-3">{entry.content}</p>
-                {entry.tags && entry.tags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {entry.tags.map((tag) => (
-                      <span key={tag} className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tagColors[tag] || "bg-secondary text-muted-foreground"}`}>
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                {entry.billing && (
-                  <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold">
-                    <Wallet size={12} className="text-accent" />
-                    <span className="text-accent">¥{entry.billing.amount} · {entry.billing.category}</span>
-                    {entry.billing.verified && <Check size={10} className="text-companion-green-text" />}
-                  </div>
-                )}
+                <div className="flex flex-col gap-1.5 items-center justify-start pt-1">
+                  {entryCompanions.map((comp, idx) => comp ? (
+                    <div key={idx} className={`w-8 h-8 ${comp.colorClass} rounded-lg flex items-center justify-center text-base`}>{comp.avatar}</div>
+                  ) : null)}
+                </div>
               </div>
-              <div className="flex flex-col gap-1.5 items-center justify-start pt-1">
-                {entryCompanions.map((comp, idx) => comp ? (
-                  <div key={idx} className={`w-8 h-8 ${comp.colorClass} rounded-lg flex items-center justify-center text-base`}>{comp.avatar}</div>
-                ) : null)}
-              </div>
-            </div>
+            </SwipeableEntryCard>
           );
         })}
       </div>
