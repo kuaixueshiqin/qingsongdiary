@@ -9,9 +9,9 @@ import ProfileView from "@/components/ProfileView";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("diary");
-  const [targetDiaryId, setTargetDiaryId] = useState<number | null>(null);
+  const [targetDiaryId, setTargetDiaryId] = useState<string | null>(null);
 
-  const handleNavigateToDiary = (entryId: number) => {
+  const handleNavigateToDiary = (entryId: string) => {
     setTargetDiaryId(entryId);
     setActiveTab("diary");
   };

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Compass, Users, Heart, Search, Settings, X, ChevronLeft, Check, Plus, Sparkles, Pencil, Wand2, Loader2 } from "lucide-react";
-import { companions as initialCompanions, squareAgents, type Companion } from "@/lib/data";
+import { companions as builtInCompanions, squareAgents, type Companion } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useCustomCompanions } from "@/hooks/useUserData";
 
 const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
 
@@ -16,8 +17,9 @@ const COLOR_OPTIONS = [
 ];
 
 const CompanionsView = () => {
+  const { customCompanions, createCompanion, updateCompanion, deleteCompanion } = useCustomCompanions();
   const [view, setView] = useState<"my" | "square">("my");
-  const [myCompanions, setMyCompanions] = useState<Companion[]>(initialCompanions);
+  const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
   const [showCreate, setShowCreate] = useState(false);
@@ -63,52 +65,39 @@ const CompanionsView = () => {
     setLikedAgents((prev) => prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]);
   };
 
-  const handleCreateCompanion = () => {
+  const handleCreateCompanion = async () => {
     if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
     if (!newRole.trim()) { toast.error("请输入伙伴角色"); return; }
-    const comp: Companion = {
-      id: `custom-${Date.now()}`,
+    const created = await createCompanion({
       name: newName.trim(),
-      avatar: newAvatar,
-      colorClass: newColor,
-      textColorClass: "text-foreground",
       role: newRole.trim(),
       bio: newBio.trim() || "自定义伙伴",
-      intimacy: 0,
-      level: 1,
-      lastMsg: "你好呀，很高兴认识你！",
-      delay: "随机",
-    };
-    setMyCompanions((prev) => [...prev, comp]);
+      avatar: newAvatar,
+      colorClass: newColor,
+    });
+    if (!created) { toast.error("创建失败"); return; }
     setShowCreate(false);
     setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
-    toast.success(`${comp.name} 已创建并加入伙伴列表！`);
+    toast.success(`${newName.trim()} 已创建并加入伙伴列表！`);
   };
 
   const handleToggleCompanion = (id: string, enabled: boolean) => {
     toast.success(enabled ? "已启用该伙伴的互动" : "已暂停该伙伴的互动");
   };
 
-  const handleAddAgent = (agent: typeof squareAgents[0]) => {
+  const handleAddAgent = async (agent: typeof squareAgents[0]) => {
     if (addedAgents.includes(agent.id)) {
       toast("已经添加过了哦");
       return;
     }
     setAddedAgents((prev) => [...prev, agent.id]);
-    const newComp: Companion = {
-      id: agent.id,
+    await createCompanion({
       name: agent.name,
-      avatar: agent.avatar,
-      colorClass: "bg-secondary",
-      textColorClass: "text-foreground",
       role: agent.role,
       bio: `来自广场 · by ${agent.creator}`,
-      intimacy: 0,
-      level: 1,
-      lastMsg: "你好呀，我是新来的！",
-      delay: "随机",
-    };
-    setMyCompanions((prev) => [...prev, newComp]);
+      avatar: agent.avatar,
+      colorClass: "bg-secondary",
+    });
     toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
 
@@ -189,13 +178,16 @@ const CompanionsView = () => {
                 </div>
                 <div className="flex gap-2 justify-center">
                   <button onClick={() => setEditingProfile(false)} className="text-xs bg-secondary px-4 py-1.5 rounded-lg text-muted-foreground">取消</button>
-                  <button onClick={() => {
+                  <button onClick={async () => {
                     if (!editName.trim()) { toast.error("名称不能为空"); return; }
                     const updated = { ...settingsFor, name: editName.trim(), role: editRole.trim(), bio: editBio.trim() };
-                    setMyCompanions((prev) => prev.map((c) => c.id === settingsFor.id ? updated : c));
+                    const isBuiltIn = builtInCompanions.some((c) => c.id === settingsFor.id);
+                    if (!isBuiltIn) {
+                      await updateCompanion(settingsFor.id, { name: updated.name, role: updated.role, bio: updated.bio });
+                    }
                     setSettingsFor(updated);
                     setEditingProfile(false);
-                    toast.success("人设已保存");
+                    toast.success(isBuiltIn ? "内置伙伴的人设暂不可保存" : "人设已保存");
                   }} className="text-xs bg-primary text-primary-foreground px-4 py-1.5 rounded-lg font-bold">保存</button>
                 </div>
               </div>
@@ -230,8 +222,13 @@ const CompanionsView = () => {
           </div>
 
           {/* Remove */}
-          <button onClick={() => {
-            setMyCompanions((prev) => prev.filter((c) => c.id !== settingsFor.id));
+          <button onClick={async () => {
+            const isBuiltIn = builtInCompanions.some((c) => c.id === settingsFor.id);
+            if (isBuiltIn) {
+              toast.error("内置伙伴无法移除");
+              return;
+            }
+            await deleteCompanion(settingsFor.id);
             setSettingsFor(null);
             toast.success(`已移除 ${settingsFor.name}`);
           }} className="w-full text-center text-xs text-destructive/60 py-3">
