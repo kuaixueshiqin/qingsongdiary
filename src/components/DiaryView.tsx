@@ -457,6 +457,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             onChange={(text, mentions) => { setNewContent(text); setNewMentions(mentions); }}
             onSubmit={handleSaveDiary}
             placeholder="今天发生了什么... 输入@可呼叫伙伴评论"
+            companions={allCompanions}
             className={`flex-1 !min-h-0 !max-h-none ${sizeClass} leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0`}
           />
         </div>
