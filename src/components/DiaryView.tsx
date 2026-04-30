@@ -280,7 +280,8 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     </div>
   ) : null;
 
-  const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
+
+
 
   const handleDeleteComment = async (entryId: string, commentId: string) => {
     await deleteComment(entryId, commentId);
