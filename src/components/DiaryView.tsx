@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import PineconeTracker from "@/components/PineconeTracker";
 import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
+import { usePinecones } from "@/hooks/usePinecones";
 
 interface DiaryViewProps {
   initialEntryId?: string | null;
