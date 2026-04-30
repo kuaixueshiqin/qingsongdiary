@@ -251,7 +251,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               if (batchSelected.size === others.length) setBatchSelected(new Set());
               else setBatchSelected(new Set(others.map((e) => e.id)));
             }}
-            className="text-[11px] font-bold text-foreground underline-offset-2 hover:underline"
+            className="text-[11px] font-bold text-foreground px-2.5 py-1 rounded-full border border-foreground/20 bg-background hover:bg-foreground/5 transition-colors"
           >
             {batchSelected.size === entries.filter((e) => e.id !== selectedEntry?.id).length && batchSelected.size > 0 ? "取消全选" : "全选"}
           </button>
