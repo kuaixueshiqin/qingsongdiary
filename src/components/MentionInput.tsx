@@ -145,8 +145,28 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !showDropdown) {
-      e.preventDefault();
-      onSubmit?.();
+      if (e.shiftKey) {
+        // Shift+Enter: insert a line break manually for consistent behavior
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        const br = document.createElement("br");
+        range.insertNode(br);
+        // Ensure caret can sit after the <br> by adding a zero-width text node if needed
+        const trailing = document.createTextNode("\u200B");
+        br.parentNode?.insertBefore(trailing, br.nextSibling);
+        const newRange = document.createRange();
+        newRange.setStart(trailing, 1);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        handleInput();
+      } else {
+        e.preventDefault();
+        onSubmit?.();
+      }
     }
     if (e.key === "Escape" && showDropdown) {
       setShowDropdown(false);
