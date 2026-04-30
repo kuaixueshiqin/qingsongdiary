@@ -137,6 +137,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const bgClass = BG_OPTIONS.find(b => b.id === diaryStyle.bg)?.className ?? "bg-background";
   const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
   const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
+  const textureClass = TEXTURE_OPTIONS.find(t => t.id === diaryStyle.texture)?.className ?? "";
 
   const applyStyleToEntries = (ids: string[]) => {
     setStyleMap((m) => {
