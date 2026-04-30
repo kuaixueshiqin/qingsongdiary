@@ -6,6 +6,7 @@ import { companions, type DiaryEntry, type DiaryComment, type CommentReply } fro
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import PineconeTracker from "@/components/PineconeTracker";
+import SwipeableEntryCard from "@/components/SwipeableEntryCard";
 import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
 import { usePinecones } from "@/hooks/usePinecones";
 
