@@ -366,7 +366,7 @@ const CompanionsView = () => {
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-[9px] bg-companion-indigo text-companion-indigo-text px-2 py-0.5 rounded-full font-bold">{agent.role}</span>
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleAddAgent(agent); }}
+                      onClick={(e) => { e.stopPropagation(); requestAddAgent(agent); }}
                       disabled={isAdded}
                       className={`ml-auto text-[10px] px-3 py-1 rounded-lg font-bold transition-all ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
                     >
