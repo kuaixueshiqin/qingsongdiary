@@ -256,6 +256,7 @@ const MailboxView = () => {
 
 const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companion; conversationId: string; onBack: () => void }) => {
   const { user } = useAuth();
+  const { randomDrop } = usePinecones();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
