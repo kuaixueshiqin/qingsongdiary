@@ -1,13 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Plus, ChevronLeft, Trash2, Wallet, X, Send, Check, ChevronDown, ChevronUp, RefreshCw, Sun, Cloud, CloudRain, CloudLightning, CloudSun } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, ChevronLeft, Trash2, Wallet, Send, Check, ChevronDown, ChevronUp, RefreshCw, Sun, Cloud, CloudRain, CloudLightning, CloudSun } from "lucide-react";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
-import { diaryEntries as initialEntries, companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
+import { companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import PineconeTracker from "@/components/PineconeTracker";
+import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
 
 interface DiaryViewProps {
-  initialEntryId?: number | null;
+  initialEntryId?: string | null;
   onEntryViewed?: () => void;
 }
 
@@ -49,8 +50,11 @@ const tagColors: Record<string, string> = {
 };
 
 const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
-  const [entries, setEntries] = useState<DiaryEntry[]>(initialEntries);
-  const [selectedEntryId, setSelectedEntryId] = useState<number | null>(initialEntryId ?? null);
+  const { entries, loading, createEntry, updateEntry, addComment, deleteComment, addReply } = useDiaryEntries();
+  const { customCompanions } = useCustomCompanions();
+  const allCompanions = [...companions, ...customCompanions];
+
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(initialEntryId ?? null);
 
   useEffect(() => {
     if (initialEntryId != null) {
@@ -58,6 +62,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       onEntryViewed?.();
     }
   }, [initialEntryId]);
+
   const [inspirationQ, setInspirationQ] = useState(() => inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
   const shuffleQuestion = useCallback(() => {
     setInspirationQ(inspirationQuestions[Math.floor(Math.random() * inspirationQuestions.length)]);
@@ -80,64 +85,34 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
-  const handleDeleteComment = (entryId: number, commentId: string) => {
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? { ...e, comments: e.comments.filter((c) => c.id !== commentId) }
-          : e
-      )
-    );
+  const handleDeleteComment = async (entryId: string, commentId: string) => {
+    await deleteComment(entryId, commentId);
     setActiveCommentId(null);
     toast.success("评论已删除");
   };
 
-  const addReplyToComment = (entryId: number, commentId: string, reply: CommentReply) => {
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? {
-              ...e,
-              comments: e.comments.map((c) =>
-                c.id === commentId ? { ...c, replies: [...c.replies, reply] } : c
-              ),
-            }
-          : e
-      )
-    );
-  };
-
-  const handleReply = async (entryId: number, comment: DiaryComment) => {
+  const handleReply = async (entryId: string, comment: DiaryComment) => {
     if (!replyText.trim() || loadingReply) return;
-    const comp = companions.find((c) => c.id === comment.companionId);
+    const comp = allCompanions.find((c) => c.id === comment.companionId);
     if (!comp) return;
 
-    const now = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-    const userReply: CommentReply = {
-      id: `ur-${Date.now()}`,
-      role: "user",
-      companionId: comment.companionId,
-      text: replyText.trim(),
-      time: now,
-    };
-
-    addReplyToComment(entryId, comment.id, userReply);
-    const savedReplyText = replyText.trim();
+    const savedText = replyText.trim();
     const savedMentions = [...replyMentions];
     setReplyText("");
     setReplyMentions([]);
     setReplyingTo(null);
     setLoadingReply(comment.id);
 
-    // Only @mentioned companions reply (not the comment's companion by default)
+    // Save user reply to cloud
+    await addReply(entryId, comment.id, "user", comment.companionId, savedText);
+
     const respondingIds = new Set<string>();
     savedMentions.forEach((m) => respondingIds.add(m.id));
 
-    // Build conversation context
     const chatMessages = [
       { role: "assistant" as const, content: comment.text },
       ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
-      { role: "user" as const, content: savedReplyText },
+      { role: "user" as const, content: savedText },
     ];
 
     if (respondingIds.size === 0) {
@@ -151,20 +126,14 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           body: { companionId: compId, messages: chatMessages },
         });
         if (error) throw error;
-
-        const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-        const aiReply: CommentReply = {
-          id: `ar-${Date.now()}-${compId}`,
-          role: "assistant",
-          companionId: compId,
-          text: data.reply || "...",
-          time: replyTime,
-        };
-        addReplyToComment(entryId, comment.id, aiReply);
+        await addReply(entryId, comment.id, "assistant", compId, data?.reply || "...");
       }
     } catch (e: any) {
       console.error("Reply error:", e);
-      toast.error(e?.message || "AI回复失败，请稍后再试");
+      const msg = e?.message || "";
+      if (msg.includes("429")) toast.error("AI 太忙啦，请稍后再试");
+      else if (msg.includes("402")) toast.error("AI 额度已用完，请充值后再试");
+      else toast.error(msg || "AI回复失败");
     } finally {
       setLoadingReply(null);
     }
@@ -172,92 +141,73 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   const handleSaveDiary = async () => {
     if (!newContent.trim()) return;
-    const newEntry: DiaryEntry = {
-      id: Date.now(),
-      date: "5月21日",
-      time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
-      content: newContent,
-      comments: [],
-    };
-    setEntries((prev) => [newEntry, ...prev]);
+    const created = await createEntry(newContent);
+    if (!created) {
+      toast.error("保存失败");
+      return;
+    }
     const mentionedIds = newMentions.map((m) => m.id);
     setNewContent("");
     setNewMentions([]);
     setIsWriting(false);
-    
-    // Celebration animation
+
     setShowCelebration(true);
     setTimeout(() => setShowCelebration(false), 2000);
-    
     toast("你的情绪已被世界温柔接收 ✨", { duration: 3000 });
 
-    // AI analyze tags & mood
+    // AI tag/mood analysis
     try {
-      const { data: analysis, error: analysisErr } = await supabase.functions.invoke("analyze-diary", {
-        body: { content: newEntry.content },
+      const { data: analysis, error } = await supabase.functions.invoke("analyze-diary", {
+        body: { content: created.content },
       });
-      if (!analysisErr && analysis && !analysis.error) {
-        setEntries((prev) => prev.map((e) => e.id === newEntry.id ? { ...e, tags: analysis.tags, moodScore: analysis.moodScore, moodLabel: analysis.moodLabel } : e));
+      if (!error && analysis && !analysis.error) {
+        await updateEntry(created.id, {
+          tags: analysis.tags,
+          moodScore: analysis.moodScore,
+          moodLabel: analysis.moodLabel,
+        });
       }
     } catch (e) {
       console.error("Analyze diary error:", e);
     }
 
-    // Trigger comments from @mentioned companions
-    if (mentionedIds.length > 0) {
-      for (const compId of mentionedIds) {
-        try {
-          const { data, error } = await supabase.functions.invoke("companion-chat", {
-            body: { companionId: compId, messages: [{ role: "user", content: newEntry.content }] },
-          });
-          if (error) throw error;
-          const aiComment: DiaryComment = {
-            id: `mc-${Date.now()}-${compId}`,
-            companionId: compId,
-            text: data.reply || "...",
-            lineIndex: 0,
-            highlightText: "",
-            replies: [],
-          };
-          setEntries((prev) => prev.map((e) => e.id === newEntry.id ? { ...e, comments: [...e.comments, aiComment] } : e));
-        } catch (e: any) {
-          console.error("Mention comment error:", e);
-        }
+    // @-mentioned companions reply
+    for (const compId of mentionedIds) {
+      try {
+        const { data, error } = await supabase.functions.invoke("companion-chat", {
+          body: { companionId: compId, messages: [{ role: "user", content: created.content }] },
+        });
+        if (error) throw error;
+        await addComment(created.id, {
+          companionId: compId,
+          text: data?.reply || "...",
+          lineIndex: 0,
+          highlightText: "",
+        });
+      } catch (e: any) {
+        console.error("Mention comment error:", e);
       }
     }
   };
 
-  const handleContentBlur = (entryId: number, newContent: string) => {
-    if (newContent.trim()) {
-      setEntries((prev) => prev.map((e) => e.id === entryId ? { ...e, content: newContent } : e));
-    }
+  const handleContentBlur = (entryId: string, newContent: string) => {
+    if (newContent.trim()) updateEntry(entryId, { content: newContent });
   };
 
-  const handleEditBilling = (entryId: number) => {
+  const handleEditBilling = (entryId: string) => {
     const amount = parseFloat(billingAmount);
     if (isNaN(amount) || !billingCategory.trim()) {
       toast.error("请输入有效的金额和分类");
       return;
     }
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? { ...e, billing: { amount, category: billingCategory, verified: true } }
-          : e
-      )
-    );
+    updateEntry(entryId, { billing: { amount, category: billingCategory, verified: true } });
     setEditingBilling(false);
     toast.success("账单已更新");
   };
 
-  const handleConfirmBilling = (entryId: number) => {
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId && e.billing
-          ? { ...e, billing: { ...e.billing, verified: true } }
-          : e
-      )
-    );
+  const handleConfirmBilling = (entryId: string) => {
+    const e = entries.find((x) => x.id === entryId);
+    if (e?.billing) updateEntry(entryId, { billing: { ...e.billing, verified: true } });
     toast.success("账单已确认");
   };
 
@@ -357,7 +307,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                     allParas[pIdx] = e.currentTarget.textContent || "";
                     handleContentBlur(selectedEntry.id, allParas.join("\n"));
                   }}
-                >{para}</p>
+                >{renderParagraph()}</p>
                 {lineComments.length > 0 && (
                   <div className="mt-2 pl-2">
                     <div className="flex items-center justify-between mb-1">
@@ -377,20 +327,16 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                     {!collapsedComments.has(pIdx) && (
                     <div className="space-y-1.5">
                     {lineComments.map((comment) => {
-                      const comp = companions.find((c) => c.id === comment.companionId);
+                      const comp = allCompanions.find((c) => c.id === comment.companionId);
                       if (!comp) return null;
-                      const isActive = activeCommentId === comment.id;
                       const isReplying = replyingTo === comment.id;
                       const isLoading = loadingReply === comment.id;
                       return (
                         <div key={comment.id} className="space-y-1">
-                          {/* Original AI comment - click to toggle reply */}
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => {
-                                // Always toggle expand
                                 setExpandedComments(prev => { const next = new Set(prev); if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id); return next; });
-                                // Toggle reply
                                 if (isReplying) {
                                   setReplyingTo(null);
                                   setReplyText("");
@@ -407,9 +353,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                             >
                               <span className="flex-shrink-0 mt-0.5">{comp.avatar}</span>
                               <span className="font-medium flex-shrink-0 mt-0.5">{comp.name}</span>
-                              <span
-                                className={`${expandedComments.has(comment.id) ? "whitespace-pre-wrap text-left" : "truncate"} ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}
-                              >{comment.text}</span>
+                              <span className={`${expandedComments.has(comment.id) ? "whitespace-pre-wrap text-left" : "truncate"} ${isReplying ? "text-primary-foreground/80" : "opacity-70"}`}>{comment.text}</span>
                             </button>
                             {isReplying && (
                               <button onClick={(e) => { e.stopPropagation(); handleDeleteComment(selectedEntry.id, comment.id); }} className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200">
@@ -418,7 +362,6 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                             )}
                           </div>
 
-                          {/* Reply thread */}
                           {comment.replies.length > 0 && (
                             <div className="relative">
                               <div className="flex items-center justify-between pl-5 ml-3">
@@ -436,35 +379,34 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                                 </button>
                               </div>
                               {!collapsedReplies.has(comment.id) && (
-                            <div className="pl-5 border-l-2 border-border ml-3 space-y-1.5">
-                              {comment.replies.map((reply) => {
-                                const replyComp = companions.find((c) => c.id === reply.companionId);
-                                return (
-                                  <div key={reply.id} className="flex items-start gap-2 animate-in fade-in duration-300">
-                                    {reply.role === "user" ? (
-                                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-primary/10 text-foreground max-w-[80%]">
-                                        <span className="flex-shrink-0">🧑</span>
-                                        <span className="font-medium flex-shrink-0">我</span>
-                                        <span className="opacity-70">{reply.text}</span>
-                                        <span className="text-[9px] text-muted-foreground/40 ml-1 flex-shrink-0">{reply.time}</span>
-                                      </div>
-                                    ) : (
-                                      <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"} max-w-[80%]`}>
-                                        <span className="flex-shrink-0">{replyComp?.avatar ?? "🤖"}</span>
-                                        <span className="font-medium flex-shrink-0">{replyComp?.name ?? "AI"}</span>
-                                        <span className="opacity-70">{reply.text}</span>
-                                        <span className="text-[9px] opacity-40 ml-1 flex-shrink-0">{reply.time}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
+                              <div className="pl-5 border-l-2 border-border ml-3 space-y-1.5">
+                                {comment.replies.map((reply) => {
+                                  const replyComp = allCompanions.find((c) => c.id === reply.companionId);
+                                  return (
+                                    <div key={reply.id} className="flex items-start gap-2 animate-in fade-in duration-300">
+                                      {reply.role === "user" ? (
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-primary/10 text-foreground max-w-[80%]">
+                                          <span className="flex-shrink-0">🧑</span>
+                                          <span className="font-medium flex-shrink-0">我</span>
+                                          <span className="opacity-70">{reply.text}</span>
+                                          <span className="text-[9px] text-muted-foreground/40 ml-1 flex-shrink-0">{reply.time}</span>
+                                        </div>
+                                      ) : (
+                                        <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"} max-w-[80%]`}>
+                                          <span className="flex-shrink-0">{replyComp?.avatar ?? "🤖"}</span>
+                                          <span className="font-medium flex-shrink-0">{replyComp?.name ?? "AI"}</span>
+                                          <span className="opacity-70">{reply.text}</span>
+                                          <span className="text-[9px] opacity-40 ml-1 flex-shrink-0">{reply.time}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
                               )}
                             </div>
                           )}
 
-                          {/* Loading indicator for AI reply */}
                           {isLoading && (
                             <div className="pl-5 border-l-2 border-border ml-3">
                               <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${comp.colorClass}`}>
@@ -478,7 +420,6 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                             </div>
                           )}
 
-                          {/* Reply input */}
                           {isReplying && (
                             <div className="flex gap-2 pl-5 ml-3 animate-in slide-in-from-top-2 duration-200">
                               <MentionInput
@@ -504,7 +445,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               </div>
             );
           })}
-          {/* Billing card */}
+
           {selectedEntry.billing && !editingBilling && (
             <div className="bg-secondary/50 border border-border rounded-2xl p-4 flex items-center gap-3">
               <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
@@ -525,7 +466,6 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             </div>
           )}
 
-          {/* Billing edit form */}
           {editingBilling && selectedEntry.billing && (
             <div className="bg-secondary/50 border border-border rounded-2xl p-4 space-y-3 animate-in fade-in duration-200">
               <div className="flex items-center gap-2">
@@ -551,14 +491,12 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             </div>
           )}
         </div>
-
       </div>
     );
   }
 
   return (
     <div className="pb-4">
-      {/* Celebration effects */}
       {showCelebration && (
         <>
           <div className="shooting-star" />
@@ -570,17 +508,14 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       <div className="px-6 pt-14 pb-4 flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-black text-foreground">日记</h1>
-          
         </div>
         <button onClick={() => setIsWriting(true)} className="bg-primary text-primary-foreground px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
           <Plus size={16} strokeWidth={3} /><span className="text-sm font-bold">记一篇</span>
         </button>
       </div>
 
-      {/* Pinecone Growth Tracker */}
       <PineconeTracker streak={4} />
 
-      {/* Inspiration card */}
       <div className="px-4 mb-4">
         <div className="bg-[hsl(48,100%,95%/0.7)] border border-[hsl(48,80%,85%)] rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
@@ -590,16 +525,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             </button>
           </div>
           <button
-            onClick={() => {
-              const newEntry: DiaryEntry = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" }).replace(/(\d+)\/(\d+)/, "$1月$2日"),
-                time: new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" }),
-                content: inspirationQ + "\n",
-                comments: [],
-              };
-              setEntries((prev) => [newEntry, ...prev]);
-              setSelectedEntryId(newEntry.id);
+            onClick={async () => {
+              const created = await createEntry(inspirationQ + "\n");
+              if (created) setSelectedEntryId(created.id);
             }}
             className="text-sm text-foreground/80 leading-relaxed text-left w-full hover:text-foreground transition-colors"
           >
@@ -609,8 +537,11 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       </div>
 
       <div className="px-4 space-y-3">
+        {loading && entries.length === 0 && (
+          <div className="text-center text-xs text-muted-foreground py-8">载入日记...</div>
+        )}
         {entries.map((entry) => {
-          const entryCompanions = entry.comments.map((c) => companions.find((comp) => comp.id === c.companionId));
+          const entryCompanions = entry.comments.map((c) => allCompanions.find((comp) => comp.id === c.companionId));
           return (
             <div key={entry.id} onClick={() => setSelectedEntryId(entry.id)} className="bg-card border border-border rounded-2xl p-4 flex gap-3 active:bg-secondary transition-colors shadow-sm cursor-pointer">
               <div className="flex-1 min-w-0">
@@ -645,7 +576,6 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           );
         })}
       </div>
-
     </div>
   );
 };
