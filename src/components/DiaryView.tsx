@@ -119,6 +119,61 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
   const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
 
+  const styleSheet = (
+    <Sheet open={styleOpen} onOpenChange={setStyleOpen}>
+      <SheetContent side="bottom" className="rounded-t-3xl border-0 max-h-[75vh] overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="text-left text-base font-bold">个性化书写</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4 space-y-5">
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">页面背景</p>
+            <div className="grid grid-cols-3 gap-2">
+              {BG_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setDiaryStyle((s: any) => ({ ...s, bg: opt.id }))}
+                  className={`relative h-14 rounded-xl border-2 transition-all ${opt.className} ${diaryStyle.bg === opt.id ? "border-foreground" : "border-border"}`}
+                >
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70">{opt.label}</span>
+                  {diaryStyle.bg === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground" />}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">字体</p>
+            <div className="grid grid-cols-3 gap-2">
+              {FONT_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setDiaryStyle((s: any) => ({ ...s, font: opt.id }))}
+                  className={`py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">字号</p>
+            <div className="grid grid-cols-4 gap-2">
+              {SIZE_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setDiaryStyle((s: any) => ({ ...s, size: opt.id }))}
+                  className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                >
+                  Aa
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
   const handleDeleteComment = async (entryId: string, commentId: string) => {
