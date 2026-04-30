@@ -96,6 +96,7 @@ const ProfileView = () => {
   };
   const [pinecones, setPinecones] = useState(0);
   const [shopOpen, setShopOpen] = useState(false);
+  const [showTxs, setShowTxs] = useState(false);
 
   const loadProfile = () => {
     if (!user) return;
