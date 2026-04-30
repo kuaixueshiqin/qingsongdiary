@@ -543,4 +543,34 @@ const SettingRow = ({ label, description, defaultOn, onToggle }: { label: string
   );
 };
 
+const ConfirmRemoveModal = ({ agent, onCancel, onConfirm }: { agent: Companion; onCancel: () => void; onConfirm: () => void }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 animate-in fade-in duration-200" onClick={onCancel}>
+      <div className="w-full max-w-[360px] mx-auto bg-card rounded-t-3xl p-6 pb-8 animate-in slide-in-from-bottom duration-300" onClick={(e) => e.stopPropagation()}>
+        <div className="flex flex-col items-center text-center">
+          <div className={`w-16 h-16 ${agent.colorClass} rounded-2xl flex items-center justify-center text-4xl mb-3 overflow-hidden`}>
+            {typeof agent.avatar === "string" && (agent.avatar.startsWith("http") || agent.avatar.startsWith("blob:"))
+              ? <img src={agent.avatar} alt="" className="w-full h-full object-cover" />
+              : agent.avatar}
+          </div>
+          <h3 className="text-base font-black text-foreground">确定要移除 {agent.name} 吗？</h3>
+          <p className="text-[12px] text-muted-foreground/70 mt-2 leading-relaxed px-2">
+            移除后 TA 将不再陪伴你，相关的对话记录与好感度会被清空，且<span className="text-destructive font-bold">无法恢复</span>。
+          </p>
+          <p className="text-[10px] text-muted-foreground/50 mt-2">已花费的松果不会退回</p>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button onClick={onCancel} className="flex-1 py-3 rounded-2xl bg-secondary text-foreground text-sm font-bold active:scale-[0.98] transition-transform">
+            再想想
+          </button>
+          <button onClick={onConfirm} className="flex-1 py-3 rounded-2xl bg-destructive text-destructive-foreground text-sm font-bold active:scale-[0.98] transition-transform">
+            确认移除
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default CompanionsView;
