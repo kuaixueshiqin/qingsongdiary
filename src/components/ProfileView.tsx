@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2 } from "lucide-react";
 import { companions } from "@/lib/data";
 import { useDiaryEntries } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,8 @@ import { toast } from "@/hooks/use-toast";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
+const isImageUrl = (s: string) => !!s && (s.startsWith("http") || s.startsWith("blob:"));
+
 const ProfileView = () => {
   const { user, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -15,6 +17,31 @@ const ProfileView = () => {
   const [bio, setBio] = useState("记录生活，温柔前行 🌿");
   const [avatar, setAvatar] = useState("🌿");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadAvatar = async (file: File) => {
+    if (!user) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "图片过大", description: "请选择 5MB 以内的图片", variant: "destructive" });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatar(pub.publicUrl);
+      setShowAvatarPicker(false);
+      toast({ title: "已上传，记得点击保存" });
+    } catch (e: any) {
+      toast({ title: "上传失败", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
   const [pinecones, setPinecones] = useState(0);
 
   useEffect(() => {
@@ -74,10 +101,14 @@ const ProfileView = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => editing && setShowAvatarPicker(!showAvatarPicker)}
-              className="relative w-18 h-18 rounded-2xl flex items-center justify-center text-5xl bg-secondary shrink-0"
+              className="relative w-18 h-18 rounded-2xl flex items-center justify-center text-5xl bg-secondary shrink-0 overflow-hidden"
               style={{ width: 72, height: 72 }}
             >
-              {avatar}
+              {isImageUrl(avatar) ? (
+                <img src={avatar} alt="头像" className="w-full h-full object-cover" />
+              ) : (
+                avatar
+              )}
               {editing && (
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                   <Camera size={12} className="text-primary-foreground" />
@@ -124,6 +155,25 @@ const ProfileView = () => {
                   {a}
                 </button>
               ))}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all border border-dashed border-primary/40 text-primary hover:bg-primary/10 ${isImageUrl(avatar) ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
+                title="上传本地图片"
+              >
+                {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleUploadAvatar(f);
+                  e.target.value = "";
+                }}
+              />
             </div>
           )}
         </div>
