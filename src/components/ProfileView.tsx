@@ -198,6 +198,20 @@ const ProfileView = () => {
   };
 
   return (
+  if (showTxs) {
+    return (
+      <>
+        <PineconeTransactionsView
+          balance={pinecones}
+          onBack={() => { setShowTxs(false); loadProfile(); }}
+          onOpenShop={() => setShopOpen(true)}
+        />
+        <PineconeShop open={shopOpen} onClose={() => { setShopOpen(false); loadProfile(); }} />
+      </>
+    );
+  }
+
+  return (
     <div className="pb-4">
       {/* Header */}
       <div className="px-6 pt-14 pb-2">
