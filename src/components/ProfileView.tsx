@@ -197,7 +197,6 @@ const ProfileView = () => {
     persistPrefs({ ...notifPrefs, [kind]: map });
   };
 
-  return (
   if (showTxs) {
     return (
       <>
