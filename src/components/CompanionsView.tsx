@@ -34,6 +34,7 @@ const CompanionsView = () => {
   const [editBio, setEditBio] = useState("");
   const [likedAgents, setLikedAgents] = useState<string[]>([]);
   const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
+  const [confirmAgent, setConfirmAgent] = useState<typeof squareAgents[0] | null>(null);
   const [generatingAvatar, setGeneratingAvatar] = useState(false);
 
   const handleGenerateAvatar = async () => {
@@ -101,6 +102,21 @@ const CompanionsView = () => {
     toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
 
+  const requestAddAgent = (agent: typeof squareAgents[0]) => {
+    if (addedAgents.includes(agent.id)) {
+      toast("已经添加过了哦");
+      return;
+    }
+    setConfirmAgent(agent);
+  };
+
+  const confirmAddAgent = async () => {
+    if (!confirmAgent) return;
+    const agent = confirmAgent;
+    setConfirmAgent(null);
+    await handleAddAgent(agent);
+  };
+
   // Agent detail view
   if (viewingAgent) {
     const isAdded = addedAgents.includes(viewingAgent.id);
@@ -137,13 +153,14 @@ const CompanionsView = () => {
             <p className="text-xs text-muted-foreground leading-relaxed">{viewingAgent.bio}</p>
           </div>
           <button
-            onClick={() => { handleAddAgent(viewingAgent); }}
+            onClick={() => { requestAddAgent(viewingAgent); }}
             disabled={isAdded}
             className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground"}`}
           >
             {isAdded ? <><Check size={16} />已添加</> : <>🌰 花 {viewingAgent.pinecones} 松果带TA回家</>}
           </button>
         </div>
+        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
       </div>
     );
   }
@@ -350,7 +367,7 @@ const CompanionsView = () => {
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-[9px] bg-companion-indigo text-companion-indigo-text px-2 py-0.5 rounded-full font-bold">{agent.role}</span>
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleAddAgent(agent); }}
+                      onClick={(e) => { e.stopPropagation(); requestAddAgent(agent); }}
                       disabled={isAdded}
                       className={`ml-auto text-[10px] px-3 py-1 rounded-lg font-bold transition-all ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
                     >
@@ -362,6 +379,7 @@ const CompanionsView = () => {
             );
           })}
         </div>
+        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
       </div>
     );
   }
@@ -421,9 +439,36 @@ const CompanionsView = () => {
           <span className="text-xs font-bold">自定义伙伴</span>
         </button>
       </div>
+      {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
     </div>
   );
 };
+
+// Confirm purchase modal
+const ConfirmPurchaseModal = ({ agent, onCancel, onConfirm }: { agent: typeof squareAgents[0]; onCancel: () => void; onConfirm: () => void }) => (
+  <div className="absolute inset-0 z-50 bg-foreground/30 backdrop-blur-sm flex items-center justify-center px-6 animate-in fade-in duration-200" onClick={onCancel}>
+    <div className="w-full bg-card rounded-3xl p-6 shadow-xl animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+      <div className="flex flex-col items-center text-center">
+        <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center text-3xl mb-3">{agent.avatar}</div>
+        <h3 className="text-base font-black text-foreground">带 {agent.name} 回家？</h3>
+        <p className="text-xs text-muted-foreground/60 mt-1">{agent.role}</p>
+        <div className="mt-4 px-4 py-2.5 bg-companion-amber rounded-2xl flex items-center gap-1.5">
+          <span className="text-base">🌰</span>
+          <span className="text-sm font-black text-companion-amber-text">花费 {agent.pinecones} 松果</span>
+        </div>
+        <p className="text-[10px] text-muted-foreground/50 mt-3 leading-relaxed">确认后将从你的松果余额中扣除，无法撤销</p>
+      </div>
+      <div className="flex gap-2 mt-5">
+        <button onClick={onCancel} className="flex-1 py-3 rounded-2xl bg-secondary text-muted-foreground font-bold text-sm active:scale-[0.98] transition-transform">
+          再想想
+        </button>
+        <button onClick={onConfirm} className="flex-1 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm active:scale-[0.98] transition-transform">
+          确认带回家
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 // Toggle setting row
 const SettingRow = ({ label, description, defaultOn, onToggle }: { label: string; description: string; defaultOn: boolean; onToggle: (v: boolean) => void }) => {
