@@ -20,6 +20,20 @@ const ProfileView = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const saveAvatar = async (newAvatar: string) => {
+    if (!user) return;
+    setAvatar(newAvatar);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_url: newAvatar })
+      .eq("id", user.id);
+    if (error) {
+      toast({ title: "保存失败", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "头像已更新" });
+    }
+  };
+
   const handleUploadAvatar = async (file: File) => {
     if (!user) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -33,9 +47,8 @@ const ProfileView = () => {
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      setAvatar(pub.publicUrl);
+      await saveAvatar(pub.publicUrl);
       setShowAvatarPicker(false);
-      toast({ title: "已上传，记得点击保存" });
     } catch (e: any) {
       toast({ title: "上传失败", description: e.message, variant: "destructive" });
     } finally {
@@ -64,7 +77,7 @@ const ProfileView = () => {
     if (editing && user) {
       const { error } = await supabase
         .from("profiles")
-        .update({ nickname: name.trim() || null, avatar_url: avatar })
+        .update({ nickname: name.trim() || null })
         .eq("id", user.id);
       if (error) {
         toast({ title: "保存失败", description: error.message, variant: "destructive" });
@@ -100,7 +113,7 @@ const ProfileView = () => {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => editing && setShowAvatarPicker(!showAvatarPicker)}
+              onClick={() => setShowAvatarPicker(!showAvatarPicker)}
               className="relative w-18 h-18 rounded-2xl flex items-center justify-center text-5xl bg-secondary shrink-0 overflow-hidden"
               style={{ width: 72, height: 72 }}
             >
@@ -109,11 +122,9 @@ const ProfileView = () => {
               ) : (
                 avatar
               )}
-              {editing && (
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                  <Camera size={12} className="text-primary-foreground" />
-                </div>
-              )}
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-md">
+                <Camera size={12} className="text-primary-foreground" />
+              </div>
             </button>
             <div className="flex-1 min-w-0">
               {editing ? (
@@ -144,12 +155,12 @@ const ProfileView = () => {
           </div>
 
           {/* Avatar picker */}
-          {showAvatarPicker && editing && (
+          {showAvatarPicker && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center animate-in fade-in duration-200">
               {AVATAR_OPTIONS.map((a) => (
                 <button
                   key={a}
-                  onClick={() => { setAvatar(a); setShowAvatarPicker(false); }}
+                  onClick={() => { saveAvatar(a); setShowAvatarPicker(false); }}
                   className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-all ${avatar === a ? "bg-primary/20 ring-2 ring-primary" : "bg-secondary"}`}
                 >
                   {a}
