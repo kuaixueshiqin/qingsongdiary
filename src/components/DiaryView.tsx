@@ -589,6 +589,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             </div>
           )}
         </div>
+        {styleSheet}
       </div>
     );
   }
