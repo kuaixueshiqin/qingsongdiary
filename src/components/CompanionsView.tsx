@@ -372,11 +372,20 @@ const CompanionsView = () => {
   if (view === "square") {
     return (
       <div className="pb-4">
-        <div className="px-6 pt-14 pb-4 flex items-center gap-3">
-          <button onClick={() => setView("my")} className="text-muted-foreground active:scale-90 transition-transform">
-            <ChevronLeft size={24} />
+        <div className="px-6 pt-14 pb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setView("my")} className="text-muted-foreground active:scale-90 transition-transform">
+              <ChevronLeft size={24} />
+            </button>
+            <h1 className="text-xl font-black text-foreground">发现广场</h1>
+          </div>
+          <button
+            onClick={() => setView("publish")}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-primary text-primary-foreground active:scale-95 transition-all"
+          >
+            <Upload size={13} />
+            发布
           </button>
-          <h1 className="text-xl font-black text-foreground">发现广场</h1>
         </div>
         <div className="px-4 space-y-3">
           <div className="relative mb-1">
