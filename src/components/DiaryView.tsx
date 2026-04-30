@@ -249,12 +249,71 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (isWriting) {
     return (
-      <div className="pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full">
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full ${bgClass} ${fontClass}`}>
         <div className="px-6 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
           </button>
           <span className="text-sm font-bold text-muted-foreground">新日志 · {new Date().toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" }).replace(/(\d+)\/(\d+)/, "$1月$2日")}</span>
+          <Sheet open={styleOpen} onOpenChange={setStyleOpen}>
+            <SheetTrigger asChild>
+              <button className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" aria-label="个性化设置">
+                <Settings2 size={18} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-3xl border-0 max-h-[75vh] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle className="text-left text-base font-bold">个性化书写</SheetTitle>
+              </SheetHeader>
+              <div className="mt-4 space-y-5">
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground mb-2">页面背景</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {BG_OPTIONS.map(opt => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setDiaryStyle((s: any) => ({ ...s, bg: opt.id }))}
+                        className={`relative h-14 rounded-xl border-2 transition-all ${opt.className} ${diaryStyle.bg === opt.id ? "border-foreground" : "border-border"}`}
+                      >
+                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70">{opt.label}</span>
+                        {diaryStyle.bg === opt.id && (
+                          <Check size={14} className="absolute top-1 right-1 text-foreground" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground mb-2">字体</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {FONT_OPTIONS.map(opt => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setDiaryStyle((s: any) => ({ ...s, font: opt.id }))}
+                        className={`py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground mb-2">字号</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {SIZE_OPTIONS.map(opt => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setDiaryStyle((s: any) => ({ ...s, size: opt.id }))}
+                        className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                      >
+                        Aa
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
         <div className="flex-1 px-6">
           <MentionInput
@@ -264,7 +323,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             onChange={(text, mentions) => { setNewContent(text); setNewMentions(mentions); }}
             onSubmit={handleSaveDiary}
             placeholder="今天发生了什么... 输入@可呼叫伙伴评论"
-            className="flex-1 !min-h-0 !max-h-none text-lg leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0"
+            className={`flex-1 !min-h-0 !max-h-none ${sizeClass} leading-relaxed border-none !rounded-none !bg-transparent !py-0 !px-0`}
           />
         </div>
         <div className="px-6 pb-4">
