@@ -749,7 +749,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         </button>
       </div>
 
-      <PineconeTracker streak={4} />
+      <PineconeTracker />
 
       <div className="px-4 mb-4">
         <div className="bg-[hsl(48,100%,95%/0.7)] border border-[hsl(48,80%,85%)] rounded-xl p-4">
