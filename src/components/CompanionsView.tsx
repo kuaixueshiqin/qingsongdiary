@@ -102,6 +102,21 @@ const CompanionsView = () => {
     toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
 
+  const requestAddAgent = (agent: typeof squareAgents[0]) => {
+    if (addedAgents.includes(agent.id)) {
+      toast("已经添加过了哦");
+      return;
+    }
+    setConfirmAgent(agent);
+  };
+
+  const confirmAddAgent = async () => {
+    if (!confirmAgent) return;
+    const agent = confirmAgent;
+    setConfirmAgent(null);
+    await handleAddAgent(agent);
+  };
+
   // Agent detail view
   if (viewingAgent) {
     const isAdded = addedAgents.includes(viewingAgent.id);
