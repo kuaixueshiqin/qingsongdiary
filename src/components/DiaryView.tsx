@@ -419,7 +419,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (isWriting) {
     return (
-      <div className={`pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full ${bgClass} ${fontClass}`}>
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full ${bgClass} ${fontClass} ${textureClass}`}>
         <div className="px-6 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
@@ -451,7 +451,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (selectedEntry) {
     return (
-      <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} min-h-full`}>
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} ${textureClass} min-h-full`}>
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
