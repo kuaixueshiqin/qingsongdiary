@@ -34,6 +34,7 @@ const CompanionsView = () => {
   const [editBio, setEditBio] = useState("");
   const [likedAgents, setLikedAgents] = useState<string[]>([]);
   const [viewingAgent, setViewingAgent] = useState<typeof squareAgents[0] | null>(null);
+  const [confirmAgent, setConfirmAgent] = useState<typeof squareAgents[0] | null>(null);
   const [generatingAvatar, setGeneratingAvatar] = useState(false);
 
   const handleGenerateAvatar = async () => {
