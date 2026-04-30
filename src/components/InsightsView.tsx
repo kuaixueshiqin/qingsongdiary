@@ -29,6 +29,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
     .filter((e) => e.billing)
     .map((e, idx) => ({
       id: idx + 1,
+      diaryId: e.id,
       date: e.date,
       amount: e.billing!.amount,
       category: e.billing!.category,
