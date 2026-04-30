@@ -36,13 +36,26 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
   const getTextContent = useCallback(() => {
     if (!inputRef.current) return "";
     let text = "";
-    inputRef.current.childNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        text += node.textContent || "";
-      } else if (node instanceof HTMLElement && node.dataset.mentionId) {
-        text += `@${node.dataset.mentionName}`;
-      }
-    });
+    const walk = (node: Node) => {
+      node.childNodes.forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          text += (child.textContent || "").replace(/\u200B/g, "");
+        } else if (child instanceof HTMLElement) {
+          if (child.dataset.mentionId) {
+            text += `@${child.dataset.mentionName}`;
+          } else if (child.tagName === "BR") {
+            text += "\n";
+          } else if (child.tagName === "DIV") {
+            // Some browsers wrap new lines in <div>
+            if (text && !text.endsWith("\n")) text += "\n";
+            walk(child);
+          } else {
+            walk(child);
+          }
+        }
+      });
+    };
+    walk(inputRef.current);
     return text;
   }, []);
 
@@ -145,8 +158,28 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !showDropdown) {
-      e.preventDefault();
-      onSubmit?.();
+      if (e.shiftKey) {
+        // Shift+Enter: insert a line break manually for consistent behavior
+        e.preventDefault();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        const br = document.createElement("br");
+        range.insertNode(br);
+        // Ensure caret can sit after the <br> by adding a zero-width text node if needed
+        const trailing = document.createTextNode("\u200B");
+        br.parentNode?.insertBefore(trailing, br.nextSibling);
+        const newRange = document.createRange();
+        newRange.setStart(trailing, 1);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        handleInput();
+      } else {
+        e.preventDefault();
+        onSubmit?.();
+      }
     }
     if (e.key === "Escape" && showDropdown) {
       setShowDropdown(false);
@@ -172,7 +205,7 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
         onInput={handleInput}
         onKeyDown={handleKeyDown}
         data-placeholder={placeholder}
-        className={`min-h-[28px] max-h-[80px] overflow-y-auto bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30 ${className || ""}`}
+        className={`min-h-[28px] max-h-[120px] overflow-y-auto bg-secondary border border-border rounded-lg py-1.5 px-3 text-xs focus:outline-none focus:border-muted-foreground/40 text-foreground whitespace-pre-wrap break-words empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground/30 ${className || ""}`}
       />
       {showDropdown && filtered.length > 0 && (
         <div ref={dropdownRef} className="absolute bottom-full left-0 mb-1 bg-popover border border-border rounded-lg shadow-lg py-1 z-50 min-w-[140px] animate-in fade-in slide-in-from-bottom-2 duration-150">
