@@ -370,6 +370,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       toast.error("保存失败");
       return;
     }
+    randomDrop("diary");
     const mentionedIds = newMentions.map((m) => m.id);
     setNewContent("");
     setNewMentions([]);
