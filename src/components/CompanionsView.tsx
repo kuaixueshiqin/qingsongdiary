@@ -24,6 +24,11 @@ const CompanionsView = () => {
   const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
+  // Agent is considered owned if matched by id (this session) OR if a companion
+  // with the same name already exists in the user's list (persisted purchase).
+  const ownedNames = new Set(myCompanions.map((c) => c.name));
+  const isAgentOwned = (agent: typeof squareAgents[0]) =>
+    addedAgents.includes(agent.id) || ownedNames.has(agent.name);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newRole, setNewRole] = useState("");
@@ -97,7 +102,7 @@ const CompanionsView = () => {
   };
 
   const handleAddAgent = async (agent: typeof squareAgents[0]) => {
-    if (addedAgents.includes(agent.id)) {
+    if (isAgentOwned(agent)) {
       toast("已经添加过了哦");
       return;
     }
@@ -113,7 +118,7 @@ const CompanionsView = () => {
   };
 
   const requestAddAgent = (agent: typeof squareAgents[0]) => {
-    if (addedAgents.includes(agent.id)) {
+    if (isAgentOwned(agent)) {
       toast("已经添加过了哦");
       return;
     }
@@ -138,7 +143,7 @@ const CompanionsView = () => {
 
   // Agent detail view
   if (viewingAgent) {
-    const isAdded = addedAgents.includes(viewingAgent.id);
+    const isAdded = isAgentOwned(viewingAgent);
     const isLiked = likedAgents.includes(viewingAgent.id);
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
@@ -365,7 +370,7 @@ const CompanionsView = () => {
             <Search className="absolute left-3 top-3 text-muted-foreground/30" size={18} />
           </div>
           {squareAgents.map((agent) => {
-            const isAdded = addedAgents.includes(agent.id);
+            const isAdded = isAgentOwned(agent);
             const isLiked = likedAgents.includes(agent.id);
             return (
               <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm cursor-pointer active:scale-[0.98] transition-transform">
