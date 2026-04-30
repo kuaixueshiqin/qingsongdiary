@@ -317,7 +317,56 @@ const ProfileView = () => {
             </div>
           )}
 
-          <SettingLink label="通知偏好" />
+          <button
+            onClick={() => setShowNotif(!showNotif)}
+            className="w-full flex items-center justify-between px-5 py-3.5 border-b border-border hover:bg-secondary/30 transition-colors"
+          >
+            <span className="text-sm text-foreground flex items-center gap-2">
+              <Bell size={14} className="text-muted-foreground" />
+              通知偏好
+            </span>
+            <ChevronRight size={14} className={`text-muted-foreground/40 transition-transform ${showNotif ? "rotate-90" : ""}`} />
+          </button>
+
+          {showNotif && (
+            <div className="bg-secondary/20 border-b border-border animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-center justify-between px-5 py-3.5">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground">允许通知</p>
+                  <p className="text-[11px] text-muted-foreground/70 mt-0.5">关闭后将不再收到任何提醒</p>
+                </div>
+                <Switch
+                  checked={notifPrefs.enabled}
+                  onCheckedChange={(c) => persistPrefs({ ...notifPrefs, enabled: c })}
+                />
+              </div>
+
+              {notifPrefs.enabled && (
+                <div className="px-5 pb-4 space-y-3 animate-in fade-in duration-200">
+                  <NotifGroup
+                    icon={<MessageCircle size={12} className="text-companion-indigo-text" />}
+                    title="评论回复通知"
+                    subtitle="伙伴在你的日记下留言时提醒你"
+                    companions={allCompanions}
+                    isOn={(id) => isOn("comments", id)}
+                    onToggle={(id) => togglePerCompanion("comments", id)}
+                    allOn={allOn("comments")}
+                    onToggleAll={() => toggleAll("comments")}
+                  />
+                  <NotifGroup
+                    icon={<Mailbox size={12} className="text-companion-amber-text" />}
+                    title="信箱来信通知"
+                    subtitle="伙伴主动写信给你时提醒你"
+                    companions={allCompanions}
+                    isOn={(id) => isOn("mailbox", id)}
+                    onToggle={(id) => togglePerCompanion("mailbox", id)}
+                    allOn={allOn("mailbox")}
+                    onToggleAll={() => toggleAll("mailbox")}
+                  />
+                </div>
+              )}
+            </div>
+          )}
           <SettingLink label="关于我们" />
         </div>
 
