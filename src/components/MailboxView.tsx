@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, Send, MoreHorizontal, Pin, Trash2, PenLine, X } from "lucide-react";
-import { companions, squareAgents, type Companion } from "@/lib/data";
+import { companions as builtInCompanions, squareAgents, type Companion } from "@/lib/data";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useCustomCompanions } from "@/hooks/useUserData";
 
 interface Message {
   id: string;
@@ -12,57 +14,75 @@ interface Message {
 }
 
 interface ChatItem {
+  conversationId: string;
   companion: Companion;
   pinned: boolean;
   lastTime: string;
   unread: boolean;
 }
 
-const initialMessages: Record<string, Message[]> = {
-  xiaoman: [
-    { id: "m1", role: "assistant", content: "亲爱的用户：\n\n看你这几天的日记，好像在为工作的事情感到烦心。我记得你去年冬天也经历过类似的心境，那时候你通过每天在公园散步半小时慢慢找回了节奏。\n\n生活有时候就像我爬树一样，慢慢来，反而能看清每一片叶子的纹理。\n\n— 永远支持你的小慢", time: "14:20" },
-    { id: "m2", role: "user", content: "谢谢你的来信。那家店确实很棒，但我发现独自享受美食后，总希望能有人分享这种快乐。", time: "15:30" },
-    { id: "m3", role: "assistant", content: "分享的渴望恰恰说明你心里装着温暖。能感受到孤独，正是因为你珍惜陪伴。下次去好吃的店，记得拍给我看呀 🍜", time: "21:45" },
-  ],
-  shanshan: [
-    { id: "m4", role: "assistant", content: "嗨！看你最近日记里提到好几次美食呢，是不是在探索新餐厅呀？有什么好吃的一定要分享给我～ 🍣🐿️", time: "10:05" },
-  ],
-  moshu: [
-    { id: "m5", role: "assistant", content: "夜深了，读到一段话想与你分享：\n\n\"人生就像一本书，有些章节很无聊，有些章节很精彩，但如果你不翻页，你永远不会知道下一章有什么。\"\n\n愿你在每一个深夜都能找到属于自己的光。\n\n— 墨墨", time: "23:50" },
-  ],
-};
+const timeFromIso = (iso: string) => new Date(iso).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
 
 const MailboxView = () => {
-  const [selectedChat, setSelectedChat] = useState<Companion | null>(null);
-  const [chatList, setChatList] = useState<ChatItem[]>(
-    companions.map((c, i) => ({ companion: c, pinned: false, lastTime: i === 0 ? "14:20" : i === 1 ? "10:05" : "昨天", unread: i === 0 }))
-  );
+  const { user } = useAuth();
+  const { customCompanions } = useCustomCompanions();
+  const allCompanions = [...builtInCompanions, ...customCompanions];
+
+  const [selectedChat, setSelectedChat] = useState<{ companion: Companion; conversationId: string } | null>(null);
+  const [chatList, setChatList] = useState<ChatItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [contextMenu, setContextMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Load conversations
+  const reloadConversations = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data: convs } = await supabase
+      .from("mail_conversations")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("last_message_at", { ascending: false, nullsFirst: false });
+    const list: ChatItem[] = (convs || [])
+      .map((c: any) => {
+        const comp = allCompanions.find((x) => x.id === c.companion_id);
+        if (!comp) return null;
+        return {
+          conversationId: c.id,
+          companion: comp,
+          pinned: false,
+          lastTime: c.last_message_at ? timeFromIso(c.last_message_at) : "刚刚",
+          unread: (c.unread_count ?? 0) > 0,
+        };
+      })
+      .filter(Boolean) as ChatItem[];
+    setChatList(list);
+    setLoading(false);
+  }, [user, customCompanions.length]);
+
+  useEffect(() => { reloadConversations(); }, [reloadConversations]);
 
   const handleTouchStart = useCallback((id: string, e: React.TouchEvent | React.MouseEvent) => {
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    longPressTimer.current = setTimeout(() => {
-      setContextMenu({ id, x: clientX, y: clientY });
-    }, 600);
+    longPressTimer.current = setTimeout(() => setContextMenu({ id, x: clientX, y: clientY }), 600);
   }, []);
-
   const handleTouchEnd = useCallback(() => {
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
   }, []);
 
   const handlePin = (id: string) => {
     setChatList((prev) => {
-      const updated = prev.map((c) => c.companion.id === id ? { ...c, pinned: !c.pinned } : c);
+      const updated = prev.map((c) => c.conversationId === id ? { ...c, pinned: !c.pinned } : c);
       return [...updated.filter((c) => c.pinned), ...updated.filter((c) => !c.pinned)];
     });
     setContextMenu(null);
     toast.success("已更新");
   };
 
-  const handleDelete = (id: string) => {
-    setChatList((prev) => prev.filter((c) => c.companion.id !== id));
+  const handleDelete = async (id: string) => {
+    await supabase.from("mail_conversations").delete().eq("id", id);
+    setChatList((prev) => prev.filter((c) => c.conversationId !== id));
     setContextMenu(null);
     toast.success("已删除对话");
   };
@@ -75,32 +95,37 @@ const MailboxView = () => {
 
   const [showNewChat, setShowNewChat] = useState(false);
 
-  // All companions not already in chatList
   const availableCompanions: Companion[] = [
-    ...companions,
+    ...allCompanions,
     ...squareAgents.map((a) => ({
-      id: a.id,
-      name: a.name,
-      avatar: a.avatar,
-      colorClass: "bg-secondary",
-      textColorClass: "text-foreground",
-      role: a.role,
-      bio: "",
-      intimacy: 0,
-      level: 1,
-      lastMsg: "还没有对话",
-      delay: "随机",
+      id: a.id, name: a.name, avatar: a.avatar,
+      colorClass: "bg-secondary", textColorClass: "text-foreground",
+      role: a.role, bio: "", intimacy: 0, level: 1,
+      lastMsg: "还没有对话", delay: "随机",
     })),
   ].filter((c) => !chatList.some((item) => item.companion.id === c.id));
 
-  const handleStartNewChat = (comp: Companion) => {
-    setChatList((prev) => [{ companion: comp, pinned: false, lastTime: "刚刚", unread: false }, ...prev]);
+  const handleStartNewChat = async (comp: Companion) => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("mail_conversations")
+      .insert({ user_id: user.id, companion_id: comp.id, last_message_at: new Date().toISOString() })
+      .select()
+      .maybeSingle();
+    if (error || !data) { toast.error("创建对话失败"); return; }
     setShowNewChat(false);
-    setSelectedChat(comp);
+    setSelectedChat({ companion: comp, conversationId: data.id });
+    reloadConversations();
   };
 
   if (selectedChat) {
-    return <ChatDetail companion={selectedChat} onBack={() => setSelectedChat(null)} />;
+    return (
+      <ChatDetail
+        companion={selectedChat.companion}
+        conversationId={selectedChat.conversationId}
+        onBack={() => { setSelectedChat(null); reloadConversations(); }}
+      />
+    );
   }
 
   return (
@@ -111,36 +136,42 @@ const MailboxView = () => {
           <PenLine size={14} /><span className="text-xs font-bold">写信</span>
         </button>
       </div>
-      <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-        {chatList.map((item, idx) => (
-          <div
-            key={item.companion.id}
-            onClick={() => { if (!contextMenu) setSelectedChat(item.companion); }}
-            onTouchStart={(e) => handleTouchStart(item.companion.id, e)}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={(e) => handleTouchStart(item.companion.id, e)}
-            onMouseUp={handleTouchEnd}
-            onMouseLeave={handleTouchEnd}
-            className={`flex items-center gap-3 px-4 py-3 active:bg-secondary/60 transition-colors cursor-pointer select-none ${item.pinned ? "bg-secondary/30" : ""} ${idx < chatList.length - 1 ? "border-b border-border" : ""}`}
-          >
-            <div className={`w-11 h-11 ${item.companion.colorClass} rounded-xl flex items-center justify-center text-2xl flex-shrink-0`}>{item.companion.avatar}</div>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-center mb-0.5">
-                <span className="font-bold text-foreground text-sm">{item.companion.name}</span>
-                <span className="text-[10px] text-muted-foreground/40 text-right">{item.lastTime}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-muted-foreground truncate">{item.companion.lastMsg}</p>
-                {item.unread && (
-                  <span className="flex-shrink-0 ml-2 text-sm pinecone-sparkle">
-                    🌰
-                  </span>
-                )}
+      {loading && chatList.length === 0 ? (
+        <div className="text-center text-xs text-muted-foreground py-8">载入信箱...</div>
+      ) : chatList.length === 0 ? (
+        <div className="px-6 text-center text-xs text-muted-foreground/60 py-12">
+          <p className="mb-2">📫</p>
+          <p>还没有书信往来</p>
+          <p className="mt-1 text-muted-foreground/40">点击右上角「写信」开始与伙伴对话</p>
+        </div>
+      ) : (
+        <div className="mx-4 bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+          {chatList.map((item, idx) => (
+            <div
+              key={item.conversationId}
+              onClick={() => { if (!contextMenu) setSelectedChat({ companion: item.companion, conversationId: item.conversationId }); }}
+              onTouchStart={(e) => handleTouchStart(item.conversationId, e)}
+              onTouchEnd={handleTouchEnd}
+              onMouseDown={(e) => handleTouchStart(item.conversationId, e)}
+              onMouseUp={handleTouchEnd}
+              onMouseLeave={handleTouchEnd}
+              className={`flex items-center gap-3 px-4 py-3 active:bg-secondary/60 transition-colors cursor-pointer select-none ${item.pinned ? "bg-secondary/30" : ""} ${idx < chatList.length - 1 ? "border-b border-border" : ""}`}
+            >
+              <div className={`w-11 h-11 ${item.companion.colorClass} rounded-xl flex items-center justify-center text-2xl flex-shrink-0`}>{item.companion.avatar}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-0.5">
+                  <span className="font-bold text-foreground text-sm">{item.companion.name}</span>
+                  <span className="text-[10px] text-muted-foreground/40 text-right">{item.lastTime}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-muted-foreground truncate">{item.companion.lastMsg}</p>
+                  {item.unread && <span className="flex-shrink-0 ml-2 text-sm pinecone-sparkle">🌰</span>}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {contextMenu && (
         <div
@@ -150,12 +181,11 @@ const MailboxView = () => {
         >
           <button onClick={() => handlePin(contextMenu.id)} className="flex items-center gap-2.5 px-4 py-3 text-sm text-foreground hover:bg-secondary w-full text-left">
             <Pin size={14} />
-            {chatList.find((c) => c.companion.id === contextMenu.id)?.pinned ? "取消置顶" : "置顶"}
+            {chatList.find((c) => c.conversationId === contextMenu.id)?.pinned ? "取消置顶" : "置顶"}
           </button>
           <div className="border-t border-border" />
           <button onClick={() => handleDelete(contextMenu.id)} className="flex items-center gap-2.5 px-4 py-3 text-sm text-destructive hover:bg-secondary w-full text-left">
-            <Trash2 size={14} />
-            删除
+            <Trash2 size={14} />删除
           </button>
         </div>
       )}
@@ -188,43 +218,73 @@ const MailboxView = () => {
   );
 };
 
-const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () => void }) => {
-  const [messages, setMessages] = useState<Message[]>(initialMessages[companion.id] || []);
+const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companion; conversationId: string; onBack: () => void }) => {
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Load messages
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("mail_messages")
+        .select("*")
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: true });
+      setMessages((data || []).map((m: any) => ({
+        id: m.id, role: m.role, content: m.text, time: timeFromIso(m.created_at),
+      })));
+    })();
+  }, [conversationId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isTyping]);
 
   const handleSend = async () => {
-    if (!input.trim() || isTyping) return;
-    const now = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-    const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: input.trim(), time: now };
-    const updatedMessages = [...messages, userMsg];
-    setMessages(updatedMessages);
+    if (!input.trim() || isTyping || !user) return;
+    const text = input.trim();
     setInput("");
+
+    // Save user message to cloud
+    const { data: userMsgRow } = await supabase
+      .from("mail_messages")
+      .insert({ user_id: user.id, conversation_id: conversationId, role: "user", text })
+      .select()
+      .maybeSingle();
+    if (userMsgRow) {
+      setMessages((prev) => [...prev, { id: userMsgRow.id, role: "user", content: text, time: timeFromIso(userMsgRow.created_at) }]);
+    }
     setIsTyping(true);
 
     try {
+      const fullMessages = [...messages, { role: "user" as const, content: text }];
       const { data, error } = await supabase.functions.invoke("companion-chat", {
-        body: {
-          companionId: companion.id,
-          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-        },
+        body: { companionId: companion.id, messages: fullMessages.map((m) => ({ role: m.role, content: m.content })) },
       });
-
       if (error) throw error;
 
-      const replyTime = new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
-      setMessages((prev) => [
-        ...prev,
-        { id: `a-${Date.now()}`, role: "assistant", content: data.reply || "...", time: replyTime },
-      ]);
+      const reply = data?.reply || "...";
+      const { data: aiMsgRow } = await supabase
+        .from("mail_messages")
+        .insert({ user_id: user.id, conversation_id: conversationId, role: "assistant", text: reply })
+        .select()
+        .maybeSingle();
+      await supabase
+        .from("mail_conversations")
+        .update({ last_message_at: new Date().toISOString() })
+        .eq("id", conversationId);
+      if (aiMsgRow) {
+        setMessages((prev) => [...prev, { id: aiMsgRow.id, role: "assistant", content: reply, time: timeFromIso(aiMsgRow.created_at) }]);
+      }
     } catch (e: any) {
       console.error("Chat error:", e);
-      toast.error(e?.message || "回复失败，请稍后再试");
+      const msg = e?.message || "";
+      if (msg.includes("429")) toast.error("AI 太忙啦，稍后再试");
+      else if (msg.includes("402")) toast.error("AI 额度已用完");
+      else toast.error(msg || "回复失败，请稍后再试");
     } finally {
       setIsTyping(false);
     }
@@ -245,8 +305,9 @@ const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () =>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide">
-        <div className="text-center text-[10px] text-muted-foreground/30 tracking-widest uppercase mb-4">2024年5月18日</div>
-
+        {messages.length === 0 && !isTyping && (
+          <div className="text-center text-xs text-muted-foreground/40 py-8">写下第一封信，{companion.name} 会回复你</div>
+        )}
         {messages.map((msg) =>
           msg.role === "assistant" ? (
             <div key={msg.id} className="flex gap-3">
@@ -263,7 +324,6 @@ const ChatDetail = ({ companion, onBack }: { companion: Companion; onBack: () =>
             </div>
           )
         )}
-
         {isTyping && (
           <div className="flex gap-3">
             <div className={`w-8 h-8 ${companion.colorClass} rounded-lg flex-shrink-0 flex items-center justify-center text-lg`}>{companion.avatar}</div>
