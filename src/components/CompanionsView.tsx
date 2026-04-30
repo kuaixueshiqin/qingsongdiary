@@ -178,13 +178,16 @@ const CompanionsView = () => {
                 </div>
                 <div className="flex gap-2 justify-center">
                   <button onClick={() => setEditingProfile(false)} className="text-xs bg-secondary px-4 py-1.5 rounded-lg text-muted-foreground">取消</button>
-                  <button onClick={() => {
+                  <button onClick={async () => {
                     if (!editName.trim()) { toast.error("名称不能为空"); return; }
                     const updated = { ...settingsFor, name: editName.trim(), role: editRole.trim(), bio: editBio.trim() };
-                    setMyCompanions((prev) => prev.map((c) => c.id === settingsFor.id ? updated : c));
+                    const isBuiltIn = builtInCompanions.some((c) => c.id === settingsFor.id);
+                    if (!isBuiltIn) {
+                      await updateCompanion(settingsFor.id, { name: updated.name, role: updated.role, bio: updated.bio });
+                    }
                     setSettingsFor(updated);
                     setEditingProfile(false);
-                    toast.success("人设已保存");
+                    toast.success(isBuiltIn ? "内置伙伴的人设暂不可保存" : "人设已保存");
                   }} className="text-xs bg-primary text-primary-foreground px-4 py-1.5 rounded-lg font-bold">保存</button>
                 </div>
               </div>
@@ -219,8 +222,13 @@ const CompanionsView = () => {
           </div>
 
           {/* Remove */}
-          <button onClick={() => {
-            setMyCompanions((prev) => prev.filter((c) => c.id !== settingsFor.id));
+          <button onClick={async () => {
+            const isBuiltIn = builtInCompanions.some((c) => c.id === settingsFor.id);
+            if (isBuiltIn) {
+              toast.error("内置伙伴无法移除");
+              return;
+            }
+            await deleteCompanion(settingsFor.id);
             setSettingsFor(null);
             toast.success(`已移除 ${settingsFor.name}`);
           }} className="w-full text-center text-xs text-destructive/60 py-3">
