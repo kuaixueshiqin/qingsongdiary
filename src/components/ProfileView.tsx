@@ -242,7 +242,42 @@ const ProfileView = () => {
 
         {/* Settings links */}
         <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-          <SettingLink label="隐私设置" />
+          <button
+            onClick={() => setShowPrivacy(!showPrivacy)}
+            className="w-full flex items-center justify-between px-5 py-3.5 border-b border-border hover:bg-secondary/30 transition-colors"
+          >
+            <span className="text-sm text-foreground flex items-center gap-2">
+              <Shield size={14} className="text-muted-foreground" />
+              隐私设置
+            </span>
+            <ChevronRight size={14} className={`text-muted-foreground/40 transition-transform ${showPrivacy ? "rotate-90" : ""}`} />
+          </button>
+
+          {showPrivacy && (
+            <div className="px-5 py-4 bg-secondary/20 border-b border-border animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-foreground">允许 AI 读取我的内容</p>
+                  <p className="text-[11px] text-muted-foreground/70 leading-relaxed mt-1">
+                    开启后，伙伴们才能阅读你的日记并写下评论与回信。关闭后将停止所有 AI 互动。
+                  </p>
+                </div>
+                <Switch
+                  checked={aiConsent}
+                  onCheckedChange={handleToggleConsent}
+                  disabled={savingConsent}
+                />
+              </div>
+
+              <div className="mt-3 flex items-start gap-2 px-3 py-2.5 bg-card rounded-xl border border-border">
+                <Lock size={12} className="text-companion-green-text mt-0.5 shrink-0" />
+                <p className="text-[10px] text-muted-foreground/80 leading-relaxed">
+                  你的数据通过 HTTPS 加密传输，存储于私有数据库中，仅你本人可访问。我们承诺<span className="text-foreground font-medium">绝不会向任何第三方泄露</span>，也不会用于训练模型。
+                </p>
+              </div>
+            </div>
+          )}
+
           <SettingLink label="通知偏好" />
           <SettingLink label="关于我们" />
         </div>
