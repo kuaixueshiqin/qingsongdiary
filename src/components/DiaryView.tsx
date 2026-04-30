@@ -104,8 +104,15 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     { id: "lg", label: "大", className: "text-xl" },
     { id: "xl", label: "特大", className: "text-2xl" },
   ];
-  const DEFAULT_STYLE = { bg: "cream", font: "sans", size: "md" };
-  type DiaryStyle = { bg: string; font: string; size: string };
+  const TEXTURE_OPTIONS = [
+    { id: "smooth", label: "光滑", className: "texture-smooth" },
+    { id: "kraft", label: "牛皮纸", className: "texture-kraft" },
+    { id: "linen", label: "亚麻", className: "texture-linen" },
+    { id: "confetti", label: "彩屑", className: "texture-confetti" },
+    { id: "stars", label: "星点", className: "texture-stars" },
+  ];
+  const DEFAULT_STYLE = { bg: "cream", font: "sans", size: "md", texture: "smooth" };
+  type DiaryStyle = { bg: string; font: string; size: string; texture: string };
   const [styleMap, setStyleMap] = useState<Record<string, DiaryStyle>>(() => {
     try {
       const saved = localStorage.getItem("diary_style_map");
@@ -123,13 +130,14 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
   // Active key: current entry id, or "__draft" for the new-write page
   const activeStyleKey = selectedEntry ? selectedEntry.id : "__draft";
-  const diaryStyle = styleMap[activeStyleKey] ?? DEFAULT_STYLE;
+  const diaryStyle = { ...DEFAULT_STYLE, ...(styleMap[activeStyleKey] ?? {}) };
   const updateStyle = (patch: Partial<DiaryStyle>) => {
-    setStyleMap((m) => ({ ...m, [activeStyleKey]: { ...(m[activeStyleKey] ?? DEFAULT_STYLE), ...patch } }));
+    setStyleMap((m) => ({ ...m, [activeStyleKey]: { ...DEFAULT_STYLE, ...(m[activeStyleKey] ?? {}), ...patch } }));
   };
   const bgClass = BG_OPTIONS.find(b => b.id === diaryStyle.bg)?.className ?? "bg-background";
   const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
   const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
+  const textureClass = TEXTURE_OPTIONS.find(t => t.id === diaryStyle.texture)?.className ?? "";
 
   const applyStyleToEntries = (ids: string[]) => {
     setStyleMap((m) => {
@@ -191,6 +199,21 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                   className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
                 >
                   Aa
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">纸张材质</p>
+            <div className="grid grid-cols-3 gap-2">
+              {TEXTURE_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => updateStyle({ texture: opt.id })}
+                  className={`relative h-14 rounded-xl border-2 overflow-hidden bg-brand-cream ${opt.className} ${diaryStyle.texture === opt.id ? "border-foreground" : "border-border"}`}
+                >
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70 z-10">{opt.label}</span>
+                  {diaryStyle.texture === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground z-10" />}
                 </button>
               ))}
             </div>
@@ -411,7 +434,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (isWriting) {
     return (
-      <div className={`pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full ${bgClass} ${fontClass}`}>
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full ${bgClass} ${fontClass} ${textureClass}`}>
         <div className="px-6 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
@@ -443,7 +466,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   if (selectedEntry) {
     return (
-      <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} min-h-full`}>
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} ${textureClass} min-h-full`}>
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
