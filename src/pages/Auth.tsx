@@ -70,10 +70,10 @@ const Auth = () => {
         <div className="mb-12">
           <div className="text-5xl mb-4">🌲</div>
           <h1 className="text-3xl font-black text-foreground tracking-tight leading-tight">
-            欢迎来到<br />松果林
+            欢迎来到<br />轻松书
           </h1>
           <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-            记录每一个温柔的瞬间，<br />让伙伴们陪你一起生长。
+            囤下每一个温柔的瞬间，<br />在冬天收获一大筐松果。
           </p>
         </div>
 
