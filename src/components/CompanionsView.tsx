@@ -285,18 +285,21 @@ const CompanionsView = () => {
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
             <div>
               <label className="text-xs font-bold text-foreground">名称 *</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="给TA起个名字"
-                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+              <textarea value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="给TA起个名字" rows={1}
+                onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }}
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary resize-none overflow-hidden leading-snug" />
             </div>
             <div>
               <label className="text-xs font-bold text-foreground">角色定位 *</label>
-              <input value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="如：健身教练、读书伙伴、理财顾问"
-                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+              <textarea value={newRole} onChange={(e) => setNewRole(e.target.value)} placeholder="如：健身教练、读书伙伴、理财顾问" rows={1}
+                onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }}
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary resize-none overflow-hidden leading-snug" />
             </div>
             <div>
               <label className="text-xs font-bold text-foreground">个性签名</label>
-              <input value={newBio} onChange={(e) => setNewBio(e.target.value)} placeholder="描述TA的性格或口头禅"
-                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary" />
+              <textarea value={newBio} onChange={(e) => setNewBio(e.target.value)} placeholder="描述TA的性格或口头禅" rows={1}
+                onInput={(e) => { const t = e.currentTarget; t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }}
+                className="mt-1 w-full bg-secondary rounded-xl py-2.5 px-3 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-1 focus:ring-primary resize-none overflow-hidden leading-snug" />
             </div>
           </div>
 
