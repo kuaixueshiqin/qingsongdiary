@@ -1,11 +1,12 @@
-import { useState, useRef, useCallback } from "react";
-import { ChevronLeft, Plus, Pencil } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronLeft, Plus, Pencil, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 type BillingStatus = "toFill" | "toConfirm" | "confirmed";
 
 export interface BillingItem {
   id: number;
+  diaryId?: string;
   date: string;
   amount: number;
   category: string;
@@ -17,6 +18,7 @@ interface BillingDetailViewProps {
   billingItems: BillingItem[];
   setBillingItems: React.Dispatch<React.SetStateAction<BillingItem[]>>;
   onBack: () => void;
+  onNavigateToDiary?: (entryId: string) => void;
 }
 
 const SWIPE_THRESHOLD = 80;
@@ -26,6 +28,7 @@ const SwipeableItem = ({
   onDelete,
   onConfirm,
   onEdit,
+  onOpen,
   hasShownDeleteHint,
   hasShownConfirmHint,
   setDeleteHintShown,
@@ -35,6 +38,7 @@ const SwipeableItem = ({
   onDelete: (id: number) => void;
   onConfirm: (id: number) => void;
   onEdit: (item: BillingItem) => void;
+  onOpen?: (item: BillingItem) => void;
   hasShownDeleteHint: boolean;
   hasShownConfirmHint: boolean;
   setDeleteHintShown: () => void;
@@ -112,8 +116,13 @@ const SwipeableItem = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onOpen?.(item)}
+            disabled={!item.diaryId}
+            className="flex-1 min-w-0 text-left active:opacity-70 transition-opacity disabled:cursor-default"
+          >
             <div className="flex items-center gap-2 mb-0.5">
               {item.amount > 0 ? (
                 <span className="text-sm font-bold text-foreground">¥{item.amount}</span>
@@ -121,24 +130,26 @@ const SwipeableItem = ({
                 <span className="text-sm font-bold text-muted-foreground/40">待填写</span>
               )}
               <span className="text-[10px] bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{item.category}</span>
+              {item.diaryId && (
+                <ChevronRight size={12} className="text-muted-foreground/40 ml-auto" />
+              )}
             </div>
-            <p className="text-[10px] text-muted-foreground">{item.date} · {item.source}</p>
-          </div>
-          {item.status !== "confirmed" && (
-            <button
-              onClick={() => onEdit(item)}
-              className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground"
-            >
-              <Pencil size={14} />
-            </button>
-          )}
+            <p className="text-[10px] text-muted-foreground truncate">{item.date} · {item.source}</p>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(item); }}
+            className="p-1.5 bg-secondary rounded-lg text-muted-foreground hover:text-foreground flex-shrink-0"
+            aria-label="编辑"
+          >
+            <Pencil size={14} />
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-const BillingDetailView = ({ billingItems, setBillingItems, onBack }: BillingDetailViewProps) => {
+const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateToDiary }: BillingDetailViewProps) => {
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editCategory, setEditCategory] = useState("");
@@ -183,9 +194,19 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack }: BillingDet
   const handleEditSave = (itemId: number) => {
     const amount = parseFloat(editAmount);
     if (isNaN(amount) || amount <= 0) { toast.error("请输入有效金额"); return; }
-    setBillingItems((prev) => prev.map((i) => i.id === itemId ? { ...i, amount, category: editCategory, status: "confirmed" as BillingStatus } : i));
+    setBillingItems((prev) => prev.map((i) => {
+      if (i.id !== itemId) return i;
+      const nextStatus: BillingStatus = i.status === "confirmed" ? "confirmed" : "confirmed";
+      return { ...i, amount, category: editCategory, status: nextStatus };
+    }));
     setEditingItemId(null);
     toast.success("账单已更新");
+  };
+
+  const handleOpen = (item: BillingItem) => {
+    if (item.diaryId && onNavigateToDiary) {
+      onNavigateToDiary(item.diaryId);
+    }
   };
 
   const handleAddManual = () => {
@@ -246,6 +267,7 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack }: BillingDet
                 onDelete={handleDelete}
                 onConfirm={handleConfirm}
                 onEdit={handleEdit}
+                onOpen={handleOpen}
                 hasShownDeleteHint={deleteHintShown}
                 hasShownConfirmHint={confirmHintShown}
                 setDeleteHintShown={() => setDeleteHintShown(true)}
