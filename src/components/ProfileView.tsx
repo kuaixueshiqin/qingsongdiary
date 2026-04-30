@@ -77,7 +77,7 @@ const ProfileView = () => {
     if (editing && user) {
       const { error } = await supabase
         .from("profiles")
-        .update({ nickname: name.trim() || null, avatar_url: avatar })
+        .update({ nickname: name.trim() || null })
         .eq("id", user.id);
       if (error) {
         toast({ title: "保存失败", description: error.message, variant: "destructive" });
