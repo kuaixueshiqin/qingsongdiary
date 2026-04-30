@@ -402,4 +402,43 @@ const SettingLink = ({ label }: { label: string }) => (
   </div>
 );
 
+type NotifGroupProps = {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  companions: { id: string; name: string; avatar: string; colorClass: string }[];
+  isOn: (id: string) => boolean;
+  onToggle: (id: string) => void;
+  allOn: boolean;
+  onToggleAll: () => void;
+};
+
+const NotifGroup = ({ icon, title, subtitle, companions, isOn, onToggle, allOn, onToggleAll }: NotifGroupProps) => (
+  <div className="bg-card border border-border rounded-2xl overflow-hidden">
+    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-foreground flex items-center gap-1.5">{icon}{title}</p>
+        <p className="text-[10px] text-muted-foreground/60 mt-0.5">{subtitle}</p>
+      </div>
+      <button
+        onClick={onToggleAll}
+        className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors ${allOn ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
+      >
+        {allOn ? "全部关闭" : "全部开启"}
+      </button>
+    </div>
+    {companions.length === 0 ? (
+      <p className="text-[11px] text-muted-foreground/50 text-center py-4">暂无伙伴</p>
+    ) : (
+      companions.map((c) => (
+        <div key={c.id} className="flex items-center gap-2.5 px-4 py-2.5 border-b border-border last:border-b-0">
+          <div className={`w-7 h-7 ${c.colorClass} rounded-lg flex items-center justify-center text-base shrink-0`}>{c.avatar}</div>
+          <span className="flex-1 text-xs text-foreground truncate">{c.name}</span>
+          <Switch checked={isOn(c.id)} onCheckedChange={() => onToggle(c.id)} />
+        </div>
+      ))
+    )}
+  </div>
+);
+
 export default ProfileView;
