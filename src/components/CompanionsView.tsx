@@ -370,7 +370,7 @@ const CompanionsView = () => {
             <Search className="absolute left-3 top-3 text-muted-foreground/30" size={18} />
           </div>
           {squareAgents.map((agent) => {
-            const isAdded = addedAgents.includes(agent.id);
+            const isAdded = isAgentOwned(agent);
             const isLiked = likedAgents.includes(agent.id);
             return (
               <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm cursor-pointer active:scale-[0.98] transition-transform">
