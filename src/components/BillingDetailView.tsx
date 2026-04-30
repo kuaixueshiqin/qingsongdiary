@@ -366,17 +366,19 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
           {items.map((item) =>
             editingItemId === item.id ? (
               <div key={item.id} className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
-                <div className="flex gap-2">
-                  <div className="flex-1">
-                    <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
-                    <input type="number" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
-                  </div>
-                  <div className="flex-1">
-                    <label className="text-[10px] text-muted-foreground block mb-1">分类</label>
-                    <select value={editCategory} onChange={(e) => setEditCategory(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground">
-                      <option>餐饮</option><option>交通</option><option>娱乐</option><option>购物</option><option>生活</option><option>其他</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
+                  <input type="number" value={editAmount} onChange={(e) => setEditAmount(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-1.5">分类标签</label>
+                  <CategoryPicker
+                    value={editCategory}
+                    onChange={setEditCategory}
+                    customCategories={customCategories}
+                    onAddCustom={addCustomCategory}
+                    onRemoveCustom={removeCustomCategory}
+                  />
                 </div>
                 <div className="flex gap-2 justify-end">
                   <button onClick={() => setEditingItemId(null)} className="text-xs bg-secondary px-3 py-1.5 rounded-lg text-muted-foreground">取消</button>
