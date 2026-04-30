@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2 } from "lucide-react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock } from "lucide-react";
 import { companions } from "@/lib/data";
 import { useDiaryEntries } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
@@ -18,6 +19,9 @@ const ProfileView = () => {
   const [avatar, setAvatar] = useState("🌿");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [aiConsent, setAiConsent] = useState(true);
+  const [savingConsent, setSavingConsent] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const saveAvatar = async (newAvatar: string) => {
