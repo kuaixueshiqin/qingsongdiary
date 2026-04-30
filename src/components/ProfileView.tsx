@@ -20,6 +20,20 @@ const ProfileView = () => {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const saveAvatar = async (newAvatar: string) => {
+    if (!user) return;
+    setAvatar(newAvatar);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_url: newAvatar })
+      .eq("id", user.id);
+    if (error) {
+      toast({ title: "保存失败", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "头像已更新" });
+    }
+  };
+
   const handleUploadAvatar = async (file: File) => {
     if (!user) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -33,9 +47,8 @@ const ProfileView = () => {
       const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
       if (upErr) throw upErr;
       const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      setAvatar(pub.publicUrl);
+      await saveAvatar(pub.publicUrl);
       setShowAvatarPicker(false);
-      toast({ title: "已上传，记得点击保存" });
     } catch (e: any) {
       toast({ title: "上传失败", description: e.message, variant: "destructive" });
     } finally {
