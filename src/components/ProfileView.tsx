@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
+import PineconeShop from "@/components/PineconeShop";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
