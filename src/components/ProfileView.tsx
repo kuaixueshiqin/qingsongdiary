@@ -103,7 +103,7 @@ const ProfileView = () => {
               )}
             </div>
             <button
-              onClick={() => setEditing(!editing)}
+              onClick={handleToggleEdit}
               className="shrink-0 w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
               {editing ? <Check size={14} /> : <Edit2 size={14} />}
@@ -160,6 +160,19 @@ const ProfileView = () => {
           <SettingLink label="通知偏好" />
           <SettingLink label="关于我们" />
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={signOut}
+          className="w-full bg-card border border-border rounded-2xl shadow-sm py-3.5 px-5 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
+        >
+          <LogOut size={14} />
+          退出登录
+        </button>
+
+        {user?.email && (
+          <p className="text-center text-[10px] text-muted-foreground/50 pt-2">{user.email}</p>
+        )}
       </div>
     </div>
   );
