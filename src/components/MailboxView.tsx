@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCustomCompanions } from "@/hooks/useUserData";
+import { usePinecones } from "@/hooks/usePinecones";
 
 interface Message {
   id: string;
@@ -26,6 +27,7 @@ const timeFromIso = (iso: string) => new Date(iso).toLocaleTimeString("zh-CN", {
 const MailboxView = () => {
   const { user } = useAuth();
   const { customCompanions } = useCustomCompanions();
+  const { randomDrop } = usePinecones();
   const allCompanions = [...builtInCompanions, ...customCompanions];
 
   const [selectedChat, setSelectedChat] = useState<{ companion: Companion; conversationId: string } | null>(null);
@@ -254,6 +256,7 @@ const MailboxView = () => {
 
 const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companion; conversationId: string; onBack: () => void }) => {
   const { user } = useAuth();
+  const { randomDrop } = usePinecones();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -290,6 +293,7 @@ const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companio
       .maybeSingle();
     if (userMsgRow) {
       setMessages((prev) => [...prev, { id: userMsgRow.id, role: "user", content: text, time: timeFromIso(userMsgRow.created_at) }]);
+      randomDrop("letter");
     }
     setIsTyping(true);
 

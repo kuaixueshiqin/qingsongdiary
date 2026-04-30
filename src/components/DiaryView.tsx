@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import PineconeTracker from "@/components/PineconeTracker";
 import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
+import { usePinecones } from "@/hooks/usePinecones";
 
 interface DiaryViewProps {
   initialEntryId?: string | null;
@@ -53,6 +54,7 @@ const tagColors: Record<string, string> = {
 const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const { entries, loading, createEntry, updateEntry, addComment, deleteComment, addReply } = useDiaryEntries();
   const { customCompanions } = useCustomCompanions();
+  const { randomDrop } = usePinecones();
   const allCompanions = [...companions, ...customCompanions];
 
   const [selectedEntryId, setSelectedEntryId] = useState<string | null>(initialEntryId ?? null);
@@ -326,6 +328,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
     // Save user reply to cloud
     await addReply(entryId, comment.id, "user", comment.companionId, savedText);
+    randomDrop("reply");
 
     const respondingIds = new Set<string>();
     savedMentions.forEach((m) => respondingIds.add(m.id));
@@ -367,6 +370,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
       toast.error("保存失败");
       return;
     }
+    randomDrop("diary");
     const mentionedIds = newMentions.map((m) => m.id);
     setNewContent("");
     setNewMentions([]);
@@ -745,7 +749,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         </button>
       </div>
 
-      <PineconeTracker streak={4} />
+      <PineconeTracker />
 
       <div className="px-4 mb-4">
         <div className="bg-[hsl(48,100%,95%/0.7)] border border-[hsl(48,80%,85%)] rounded-xl p-4">
