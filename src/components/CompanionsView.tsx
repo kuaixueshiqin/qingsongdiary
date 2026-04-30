@@ -143,7 +143,7 @@ const CompanionsView = () => {
 
   // Agent detail view
   if (viewingAgent) {
-    const isAdded = addedAgents.includes(viewingAgent.id);
+    const isAdded = isAgentOwned(viewingAgent);
     const isLiked = likedAgents.includes(viewingAgent.id);
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
