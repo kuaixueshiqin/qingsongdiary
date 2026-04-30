@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, ChevronLeft, Trash2, Wallet, Send, Check, ChevronDown, ChevronUp, RefreshCw, Sun, Cloud, CloudRain, CloudLightning, CloudSun } from "lucide-react";
+import { Plus, ChevronLeft, Trash2, Wallet, Send, Check, ChevronDown, ChevronUp, RefreshCw, Sun, Cloud, CloudRain, CloudLightning, CloudSun, Settings2 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import MentionInput, { type MentionTag } from "@/components/MentionInput";
 import { companions, type DiaryEntry, type DiaryComment, type CommentReply } from "@/lib/data";
 import { toast } from "sonner";
