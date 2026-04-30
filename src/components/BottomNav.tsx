@@ -24,7 +24,7 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => {
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`flex flex-col items-center gap-1 transition-all ${
-              isActive ? "text-foreground scale-110" : "text-muted-foreground/40"
+              isActive ? "text-brand-brown scale-110" : "text-muted-foreground/40"
             }`}
           >
             <Icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
