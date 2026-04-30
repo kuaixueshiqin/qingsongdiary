@@ -65,7 +65,7 @@ const ProfileView = () => {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("nickname, avatar_url, pinecones")
+      .select("nickname, avatar_url, pinecones, ai_data_consent")
       .eq("id", user.id)
       .maybeSingle()
       .then(({ data }) => {
@@ -73,9 +73,28 @@ const ProfileView = () => {
           if (data.nickname) setName(data.nickname);
           if (data.avatar_url) setAvatar(data.avatar_url);
           setPinecones(data.pinecones ?? 0);
+          setAiConsent(data.ai_data_consent ?? true);
         }
       });
   }, [user]);
+
+  const handleToggleConsent = async (checked: boolean) => {
+    if (!user) return;
+    const prev = aiConsent;
+    setAiConsent(checked);
+    setSavingConsent(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ ai_data_consent: checked })
+      .eq("id", user.id);
+    setSavingConsent(false);
+    if (error) {
+      setAiConsent(prev);
+      toast({ title: "保存失败", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: checked ? "已开启 AI 数据授权" : "已关闭，AI 将停止读取你的内容" });
+    }
+  };
 
   const handleToggleEdit = async () => {
     if (editing && user) {
