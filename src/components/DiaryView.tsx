@@ -127,7 +127,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-base font-black text-foreground">个性化书写</h3>
+          <h3 className="text-base font-black text-foreground">个性化设置</h3>
           <button onClick={() => setStyleOpen(false)} className="text-muted-foreground"><X size={18} /></button>
         </div>
         <div className="space-y-5">
