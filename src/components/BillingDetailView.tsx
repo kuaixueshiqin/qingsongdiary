@@ -1,6 +1,117 @@
-import { useState, useRef } from "react";
-import { ChevronLeft, Plus, Pencil, ChevronRight } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { ChevronLeft, Plus, Pencil, ChevronRight, Check, X } from "lucide-react";
 import { toast } from "sonner";
+
+const DEFAULT_CATEGORIES = ["餐饮", "交通", "娱乐", "购物", "生活", "其他"];
+const CUSTOM_CATEGORIES_KEY = "billing_custom_categories";
+
+const loadCustomCategories = (): string[] => {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+interface CategoryPickerProps {
+  value: string;
+  onChange: (v: string) => void;
+  customCategories: string[];
+  onAddCustom: (name: string) => void;
+  onRemoveCustom: (name: string) => void;
+}
+
+const CategoryPicker = ({ value, onChange, customCategories, onAddCustom, onRemoveCustom }: CategoryPickerProps) => {
+  const [adding, setAdding] = useState(false);
+  const [input, setInput] = useState("");
+
+  const all = [...DEFAULT_CATEGORIES.filter((c) => c !== "其他"), ...customCategories, "其他"];
+
+  const submit = () => {
+    const name = input.trim();
+    if (!name) { setAdding(false); return; }
+    if (name.length > 6) { toast.error("标签最多 6 个字"); return; }
+    if (all.includes(name)) {
+      onChange(name);
+      setInput("");
+      setAdding(false);
+      return;
+    }
+    onAddCustom(name);
+    onChange(name);
+    setInput("");
+    setAdding(false);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {all.map((c) => {
+        const isCustom = customCategories.includes(c);
+        const selected = value === c;
+        return (
+          <span
+            key={c}
+            className={`group inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-all active:scale-95 ${
+              selected
+                ? "bg-brand-brown text-primary-foreground border-brand-brown"
+                : "bg-secondary text-muted-foreground border-transparent hover:text-foreground"
+            }`}
+          >
+            <button type="button" onClick={() => onChange(c)} className="leading-none">
+              {c}
+            </button>
+            {isCustom && !selected && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onRemoveCustom(c); }}
+                className="opacity-0 group-hover:opacity-100 text-muted-foreground/60 hover:text-destructive transition-opacity"
+                aria-label={`删除标签 ${c}`}
+              >
+                <X size={10} />
+              </button>
+            )}
+          </span>
+        );
+      })}
+
+      {adding ? (
+        <span className="inline-flex items-center gap-1 bg-card border border-primary/40 rounded-full pl-2.5 pr-1 py-0.5">
+          <input
+            autoFocus
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); submit(); }
+              if (e.key === "Escape") { setInput(""); setAdding(false); }
+            }}
+            placeholder="如：摄影"
+            maxLength={6}
+            className="w-16 bg-transparent text-[11px] text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={submit}
+            className="w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center"
+            aria-label="保存标签"
+          >
+            <Check size={10} strokeWidth={3} />
+          </button>
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="inline-flex items-center gap-0.5 text-[11px] font-medium px-2.5 py-1 rounded-full border border-dashed border-muted-foreground/40 text-muted-foreground hover:text-foreground hover:border-foreground/40 transition-colors"
+        >
+          <Plus size={10} />
+          自定义
+        </button>
+      )}
+    </div>
+  );
+};
+
 
 type BillingStatus = "toFill" | "toConfirm" | "confirmed";
 
