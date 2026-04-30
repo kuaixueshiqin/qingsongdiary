@@ -130,7 +130,7 @@ const ProfileView = () => {
         <div className="grid grid-cols-3 gap-2">
           <StatCard icon={<BookOpen size={16} />} label="笔记" value={notesCount} color="text-companion-green-text" bg="bg-companion-green" />
           <StatCard icon={<Mail size={16} />} label="书信" value={lettersCount} color="text-companion-indigo-text" bg="bg-companion-indigo" />
-          <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={acorns} color="text-companion-amber-text" bg="bg-companion-amber" />
+          <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={pinecones} color="text-companion-amber-text" bg="bg-companion-amber" />
         </div>
 
         {/* Recent visitors */}
