@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { companions } from "@/lib/data";
+import { companions as defaultCompanions, type Companion } from "@/lib/data";
 
 export interface MentionTag {
   id: string;
   name: string;
   avatar: string;
 }
+
+type MentionCompanion = Pick<Companion, "id" | "name" | "avatar"> & { role?: string };
 
 interface MentionInputProps {
   value: string;
@@ -15,9 +17,11 @@ interface MentionInputProps {
   onSubmit?: () => void;
   autoFocus?: boolean;
   className?: string;
+  companions?: MentionCompanion[];
 }
 
-const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFocus, className }: MentionInputProps) => {
+const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFocus, className, companions: companionsProp }: MentionInputProps) => {
+  const companions = companionsProp ?? defaultCompanions;
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownFilter, setDropdownFilter] = useState("");
   const [atStartIndex, setAtStartIndex] = useState<number | null>(null);
