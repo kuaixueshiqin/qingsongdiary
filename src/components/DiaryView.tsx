@@ -664,6 +664,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                                 onChange={(text, mentions) => { setReplyText(text); setReplyMentions(mentions); }}
                                 onSubmit={() => handleReply(selectedEntry.id, comment)}
                                 placeholder={`回复 ${comp.name}... 输入@可呼叫伙伴`}
+                                companions={allCompanions}
                               />
                               <button onClick={() => handleReply(selectedEntry.id, comment)} disabled={!replyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30 self-end">
                                 <Send size={12} />
