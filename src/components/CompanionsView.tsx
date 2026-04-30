@@ -265,19 +265,31 @@ const CompanionsView = () => {
           </div>
 
           {/* Remove */}
-          <button onClick={async () => {
+          <button onClick={() => {
             const isBuiltIn = builtInCompanions.some((c) => c.id === settingsFor.id);
             if (isBuiltIn) {
               toast.error("内置伙伴无法移除");
               return;
             }
-            await deleteCompanion(settingsFor.id);
-            setSettingsFor(null);
-            toast.success(`已移除 ${settingsFor.name}`);
+            setConfirmRemove(settingsFor);
           }} className="w-full text-center text-xs text-destructive/60 py-3">
             移除该伙伴
           </button>
         </div>
+
+        {confirmRemove && (
+          <ConfirmRemoveModal
+            agent={confirmRemove}
+            onCancel={() => setConfirmRemove(null)}
+            onConfirm={async () => {
+              const target = confirmRemove;
+              setConfirmRemove(null);
+              await deleteCompanion(target.id);
+              setSettingsFor(null);
+              toast.success(`已移除 ${target.name}`);
+            }}
+          />
+        )}
       </div>
     );
   }
