@@ -153,7 +153,7 @@ const CompanionsView = () => {
             <p className="text-xs text-muted-foreground leading-relaxed">{viewingAgent.bio}</p>
           </div>
           <button
-            onClick={() => { handleAddAgent(viewingAgent); }}
+            onClick={() => { requestAddAgent(viewingAgent); }}
             disabled={isAdded}
             className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground"}`}
           >
