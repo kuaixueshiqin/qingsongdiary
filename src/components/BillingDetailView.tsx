@@ -28,6 +28,7 @@ const SwipeableItem = ({
   onDelete,
   onConfirm,
   onEdit,
+  onOpen,
   hasShownDeleteHint,
   hasShownConfirmHint,
   setDeleteHintShown,
@@ -37,6 +38,7 @@ const SwipeableItem = ({
   onDelete: (id: number) => void;
   onConfirm: (id: number) => void;
   onEdit: (item: BillingItem) => void;
+  onOpen?: (item: BillingItem) => void;
   hasShownDeleteHint: boolean;
   hasShownConfirmHint: boolean;
   setDeleteHintShown: () => void;
