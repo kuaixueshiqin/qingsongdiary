@@ -38,6 +38,40 @@ const MailboxView = () => {
   const reloadConversations = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+
+    // Seed initial welcome letter from 松鼠 if user has no squirrel conversation yet
+    const seedKey = `mailbox_seeded_squirrel_${user.id}`;
+    if (!localStorage.getItem(seedKey)) {
+      const { data: existing } = await supabase
+        .from("mail_conversations")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("companion_id", "shanshan")
+        .maybeSingle();
+      if (!existing) {
+        const { data: newConv } = await supabase
+          .from("mail_conversations")
+          .insert({
+            user_id: user.id,
+            companion_id: "shanshan",
+            last_message_at: new Date().toISOString(),
+            unread_count: 1,
+          })
+          .select()
+          .maybeSingle();
+        if (newConv) {
+          await supabase.from("mail_messages").insert({
+            user_id: user.id,
+            conversation_id: newConv.id,
+            role: "assistant",
+            text:
+              "你好呀，我是松鼠 🐿️\n\n欢迎来到轻松书 —— 这里是我们一起囤藏生活坚果的小树洞。\n\n在这里你可以：\n· 在「日记」里记下任何心情，我和其他伙伴会在角落悄悄留言\n· 在「信箱」里给我们写信，慢慢聊\n· 在「整理」里看看 AI 帮你梳理出的账单、心情和小确幸\n· 在「伙伴」里认识更多想陪你的小动物\n\n今天过得怎么样？要不要回一封信告诉我～",
+          });
+        }
+      }
+      localStorage.setItem(seedKey, "1");
+    }
+
     const { data: convs } = await supabase
       .from("mail_conversations")
       .select("*")
