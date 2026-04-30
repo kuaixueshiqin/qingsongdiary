@@ -84,6 +84,41 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
   const [collapsedReplies, setCollapsedReplies] = useState<Set<string>>(new Set());
 
+  // Diary writing customization
+  const BG_OPTIONS = [
+    { id: "cream", label: "奶油米白", className: "bg-background" },
+    { id: "warm", label: "暖米", className: "surface-warm" },
+    { id: "mint", label: "薄荷", className: "bg-companion-green" },
+    { id: "sky", label: "晴空", className: "bg-companion-indigo" },
+    { id: "butter", label: "暖黄", className: "bg-companion-amber" },
+    { id: "rose", label: "胭脂", className: "bg-companion-red" },
+  ];
+  const FONT_OPTIONS = [
+    { id: "sans", label: "清新黑体", className: "font-sans" },
+    { id: "serif", label: "温润宋体", className: "font-serif" },
+    { id: "mono", label: "手写等宽", className: "font-mono" },
+  ];
+  const SIZE_OPTIONS = [
+    { id: "sm", label: "小", className: "text-base" },
+    { id: "md", label: "中", className: "text-lg" },
+    { id: "lg", label: "大", className: "text-xl" },
+    { id: "xl", label: "特大", className: "text-2xl" },
+  ];
+  const [diaryStyle, setDiaryStyle] = useState(() => {
+    try {
+      const saved = localStorage.getItem("diary_style");
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return { bg: "cream", font: "sans", size: "md" };
+  });
+  useEffect(() => {
+    try { localStorage.setItem("diary_style", JSON.stringify(diaryStyle)); } catch {}
+  }, [diaryStyle]);
+  const [styleOpen, setStyleOpen] = useState(false);
+  const bgClass = BG_OPTIONS.find(b => b.id === diaryStyle.bg)?.className ?? "bg-background";
+  const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
+  const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
+
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
   const handleDeleteComment = async (entryId: string, commentId: string) => {
