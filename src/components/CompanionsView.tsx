@@ -368,6 +368,75 @@ const CompanionsView = () => {
     );
   }
 
+  // Publish to square (only user-created custom companions are eligible)
+  if (view === "publish") {
+    const eligible = customCompanions.filter(
+      (c) => !c.bio?.startsWith("来自广场")
+    );
+    return (
+      <div className="pb-4">
+        <div className="px-6 pt-14 pb-4 flex items-center gap-3">
+          <button onClick={() => setView("square")} className="text-muted-foreground active:scale-90 transition-transform">
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-black text-foreground">发布到广场</h1>
+        </div>
+        <div className="px-4">
+          <p className="text-[11px] text-muted-foreground/60 mb-3 px-1 leading-relaxed">
+            选择一位你自定义的伙伴分享到广场。被其他用户领养时，你将获得松果分成。
+          </p>
+          <div className="space-y-3">
+            {eligible.length === 0 ? (
+              <div className="bg-card border border-dashed border-border rounded-2xl p-8 text-center">
+                <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                  你还没有自定义的伙伴<br />先去创建一个吧
+                </p>
+              </div>
+            ) : (
+              eligible.map((comp) => {
+                const published = publishedIds.includes(comp.id);
+                return (
+                  <div key={comp.id} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm">
+                    <div className={`w-12 h-12 ${comp.colorClass} rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden`}>
+                      {isImageAvatar(comp.avatar) ? <img src={comp.avatar} alt="" className="w-full h-full object-cover" /> : comp.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-sm text-foreground truncate">{comp.name}</span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${comp.colorClass} ${comp.textColorClass} flex-shrink-0`}>{comp.role}</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground/50 mt-1 truncate">{comp.bio}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (published) return;
+                        setPublishedIds((prev) => [...prev, comp.id]);
+                        toast.success(`${comp.name} 已发布到广场！`);
+                      }}
+                      disabled={published}
+                      className={`flex-shrink-0 text-[11px] px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${published ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
+                    >
+                      {published ? <><Check size={11} />已发布</> : <><Send size={11} />发布</>}
+                    </button>
+                  </div>
+                );
+              })
+            )}
+
+            {/* Custom companion entry — same as on companions list */}
+            <button
+              onClick={() => setShowCreate(true)}
+              className="w-full border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-muted-foreground/40 hover:text-muted-foreground hover:border-muted-foreground/40 active:scale-[0.98] transition-all"
+            >
+              <Plus size={24} />
+              <span className="text-xs font-bold">自定义伙伴</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Square as a secondary page
   if (view === "square") {
     return (
