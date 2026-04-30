@@ -6,52 +6,62 @@
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 220 15% 15%;
+    /* Brand palette (knowledge base):
+       olive #a19e56 / cream #f3eddd / brown #774320 / black #000
+       lilac #c2afe7 / butter #f2d27b / sky #aac2ec */
+    --brand-olive: 57 31% 48%;
+    --brand-cream: 43 49% 91%;
+    --brand-brown: 24 58% 30%;
+    --brand-lilac: 259 53% 79%;
+    --brand-butter: 42 83% 72%;
+    --brand-sky: 218 64% 80%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
+    --background: 43 49% 95%;
+    --foreground: 0 0% 10%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 15%;
+    --card: 43 49% 97%;
+    --card-foreground: 0 0% 10%;
 
-    --primary: 220 10% 10%;
-    --primary-foreground: 40 20% 98%;
+    --popover: 43 49% 97%;
+    --popover-foreground: 0 0% 10%;
 
-    --secondary: 220 10% 95%;
-    --secondary-foreground: 220 15% 15%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 43 49% 95%;
 
-    --muted: 220 10% 95%;
-    --muted-foreground: 220 8% 55%;
+    --secondary: 43 35% 90%;
+    --secondary-foreground: 24 58% 30%;
 
-    --accent: 35 100% 55%;
-    --accent-foreground: 0 0% 100%;
+    --muted: 43 30% 92%;
+    --muted-foreground: 24 25% 38%;
 
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --accent: 57 31% 48%;
+    --accent-foreground: 43 49% 97%;
 
-    --border: 220 10% 92%;
-    --input: 220 10% 92%;
-    --ring: 220 10% 10%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 43 49% 97%;
+
+    --border: 43 30% 86%;
+    --input: 43 30% 86%;
+    --ring: 24 58% 30%;
 
     --radius: 1rem;
 
     /* Custom tokens */
-    --surface-warm: 40 20% 97%;
-    --highlight: 48 100% 90%;
-    --companion-green: 155 40% 92%;
-    --companion-amber: 40 80% 93%;
-    --companion-indigo: 230 50% 93%;
-    --companion-green-text: 155 50% 35%;
-    --companion-amber-text: 35 80% 45%;
-    --companion-indigo-text: 230 50% 45%;
-    --companion-red: 0 70% 93%;
-    --companion-red-text: 0 70% 40%;
-    --pine-brown: 30 50% 35%;
-    --pine-green: 110 35% 40%;
-    --pine-gold: 42 90% 55%;
-    --pine-bg: 110 25% 94%;
-    --intimacy: 0 70% 60%;
+    --surface-warm: 43 49% 91%;
+    --highlight: 42 83% 85%;
+    --companion-green: 57 35% 88%;
+    --companion-amber: 42 83% 88%;
+    --companion-indigo: 218 64% 90%;
+    --companion-green-text: 57 40% 30%;
+    --companion-amber-text: 35 70% 38%;
+    --companion-indigo-text: 218 50% 38%;
+    --companion-red: 259 53% 90%;
+    --companion-red-text: 259 45% 40%;
+    --pine-brown: 24 58% 30%;
+    --pine-green: 57 31% 42%;
+    --pine-gold: 42 83% 60%;
+    --pine-bg: 57 35% 90%;
+    --intimacy: 0 65% 60%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
