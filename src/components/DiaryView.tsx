@@ -104,32 +104,53 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     { id: "lg", label: "大", className: "text-xl" },
     { id: "xl", label: "特大", className: "text-2xl" },
   ];
-  const [diaryStyle, setDiaryStyle] = useState(() => {
+  const DEFAULT_STYLE = { bg: "cream", font: "sans", size: "md" };
+  type DiaryStyle = { bg: string; font: string; size: string };
+  const [styleMap, setStyleMap] = useState<Record<string, DiaryStyle>>(() => {
     try {
-      const saved = localStorage.getItem("diary_style");
+      const saved = localStorage.getItem("diary_style_map");
       if (saved) return JSON.parse(saved);
     } catch {}
-    return { bg: "cream", font: "sans", size: "md" };
+    return {};
   });
   useEffect(() => {
-    try { localStorage.setItem("diary_style", JSON.stringify(diaryStyle)); } catch {}
-  }, [diaryStyle]);
+    try { localStorage.setItem("diary_style_map", JSON.stringify(styleMap)); } catch {}
+  }, [styleMap]);
   const [styleOpen, setStyleOpen] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchSelected, setBatchSelected] = useState<Set<string>>(new Set());
+
+  const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
+  // Active key: current entry id, or "__draft" for the new-write page
+  const activeStyleKey = selectedEntry ? selectedEntry.id : "__draft";
+  const diaryStyle = styleMap[activeStyleKey] ?? DEFAULT_STYLE;
+  const updateStyle = (patch: Partial<DiaryStyle>) => {
+    setStyleMap((m) => ({ ...m, [activeStyleKey]: { ...(m[activeStyleKey] ?? DEFAULT_STYLE), ...patch } }));
+  };
   const bgClass = BG_OPTIONS.find(b => b.id === diaryStyle.bg)?.className ?? "bg-background";
   const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
   const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
+
+  const applyStyleToEntries = (ids: string[]) => {
+    setStyleMap((m) => {
+      const next = { ...m };
+      ids.forEach((id) => { next[id] = { ...diaryStyle }; });
+      return next;
+    });
+  };
 
   const styleSheet = styleOpen ? (
     <div className="absolute inset-0 z-[110] flex items-end" onClick={() => setStyleOpen(false)}>
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200" />
       <div
-        className="relative bg-card w-full rounded-t-[32px] p-5 max-h-[80%] overflow-y-auto scrollbar-hide animate-in slide-in-from-bottom duration-300"
+        className="relative bg-card w-full rounded-t-[32px] p-5 max-h-[85%] overflow-y-auto scrollbar-hide animate-in slide-in-from-bottom duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-1">
           <h3 className="text-base font-black text-foreground">个性化设置</h3>
           <button onClick={() => setStyleOpen(false)} className="text-muted-foreground"><X size={18} /></button>
         </div>
+        <p className="text-[10px] text-muted-foreground mb-4">仅作用于当前这一篇日记</p>
         <div className="space-y-5">
           <div>
             <p className="text-xs font-bold text-muted-foreground mb-2">页面背景</p>
@@ -137,7 +158,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               {BG_OPTIONS.map(opt => (
                 <button
                   key={opt.id}
-                  onClick={() => setDiaryStyle((s: any) => ({ ...s, bg: opt.id }))}
+                  onClick={() => updateStyle({ bg: opt.id })}
                   className={`relative h-14 rounded-xl border-2 transition-all ${opt.className} ${diaryStyle.bg === opt.id ? "border-foreground" : "border-border"}`}
                 >
                   <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70">{opt.label}</span>
@@ -152,7 +173,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               {FONT_OPTIONS.map(opt => (
                 <button
                   key={opt.id}
-                  onClick={() => setDiaryStyle((s: any) => ({ ...s, font: opt.id }))}
+                  onClick={() => updateStyle({ font: opt.id })}
                   className={`py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
                 >
                   {opt.label}
@@ -166,7 +187,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               {SIZE_OPTIONS.map(opt => (
                 <button
                   key={opt.id}
-                  onClick={() => setDiaryStyle((s: any) => ({ ...s, size: opt.id }))}
+                  onClick={() => updateStyle({ size: opt.id })}
                   className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
                 >
                   Aa
@@ -174,12 +195,93 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               ))}
             </div>
           </div>
+          <button
+            onClick={() => {
+              setBatchSelected(new Set());
+              setBatchOpen(true);
+            }}
+            className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold active:scale-[0.98] transition-transform"
+          >
+            批量应用到其他日记
+          </button>
         </div>
       </div>
     </div>
   ) : null;
 
-  const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
+  const batchSheet = batchOpen ? (
+    <div className="absolute inset-0 z-[120] flex items-end" onClick={() => setBatchOpen(false)}>
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200" />
+      <div
+        className="relative bg-card w-full rounded-t-[32px] p-5 max-h-[85%] flex flex-col animate-in slide-in-from-bottom duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-1">
+          <h3 className="text-base font-black text-foreground">选择要应用的日记</h3>
+          <button onClick={() => setBatchOpen(false)} className="text-muted-foreground"><X size={18} /></button>
+        </div>
+        <div className="flex justify-between items-center mb-3">
+          <p className="text-[10px] text-muted-foreground">将当前样式套用到所选日记</p>
+          <button
+            onClick={() => {
+              const others = entries.filter((e) => e.id !== selectedEntry?.id);
+              if (batchSelected.size === others.length) setBatchSelected(new Set());
+              else setBatchSelected(new Set(others.map((e) => e.id)));
+            }}
+            className="text-[11px] font-bold text-foreground underline-offset-2 hover:underline"
+          >
+            {batchSelected.size === entries.filter((e) => e.id !== selectedEntry?.id).length && batchSelected.size > 0 ? "取消全选" : "全选"}
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto scrollbar-hide space-y-1.5 mb-3">
+          {entries.filter((e) => e.id !== selectedEntry?.id).length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-8">暂无其他日记</p>
+          ) : entries.filter((e) => e.id !== selectedEntry?.id).map((e) => {
+            const checked = batchSelected.has(e.id);
+            return (
+              <button
+                key={e.id}
+                onClick={() => {
+                  setBatchSelected((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(e.id)) next.delete(e.id); else next.add(e.id);
+                    return next;
+                  });
+                }}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-colors ${checked ? "bg-secondary border-foreground" : "bg-card border-border"}`}
+              >
+                <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${checked ? "bg-primary border-primary" : "border-border"}`}>
+                  {checked && <Check size={12} className="text-primary-foreground" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold">
+                    <span>{e.date}</span>
+                    <span className="text-muted-foreground/40">·</span>
+                    <span>{e.time}</span>
+                  </div>
+                  <p className="text-xs text-foreground/80 truncate mt-0.5">{e.content}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <button
+          disabled={batchSelected.size === 0}
+          onClick={() => {
+            applyStyleToEntries(Array.from(batchSelected));
+            toast.success(`已应用到 ${batchSelected.size} 篇日记`);
+            setBatchOpen(false);
+          }}
+          className="w-full py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-30"
+        >
+          确认应用 {batchSelected.size > 0 ? `(${batchSelected.size})` : ""}
+        </button>
+      </div>
+    </div>
+  ) : null;
+
+
+
 
   const handleDeleteComment = async (entryId: string, commentId: string) => {
     await deleteComment(entryId, commentId);
@@ -334,6 +436,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold float-right disabled:opacity-30">保存记录</button>
         </div>
         {styleSheet}
+        {batchSheet}
       </div>
     );
   }
@@ -595,6 +698,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           )}
         </div>
         {styleSheet}
+        {batchSheet}
       </div>
     );
   }
