@@ -119,13 +119,18 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
   const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
 
-  const styleSheet = (
-    <Sheet open={styleOpen} onOpenChange={setStyleOpen}>
-      <SheetContent side="bottom" className="rounded-t-3xl border-0 max-h-[75vh] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle className="text-left text-base font-bold">个性化书写</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 space-y-5">
+  const styleSheet = styleOpen ? (
+    <div className="absolute inset-0 z-[110] flex items-end" onClick={() => setStyleOpen(false)}>
+      <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-in fade-in duration-200" />
+      <div
+        className="relative bg-card w-full rounded-t-[32px] p-5 max-h-[80%] overflow-y-auto scrollbar-hide animate-in slide-in-from-bottom duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-base font-black text-foreground">个性化书写</h3>
+          <button onClick={() => setStyleOpen(false)} className="text-muted-foreground"><X size={18} /></button>
+        </div>
+        <div className="space-y-5">
           <div>
             <p className="text-xs font-bold text-muted-foreground mb-2">页面背景</p>
             <div className="grid grid-cols-3 gap-2">
@@ -170,9 +175,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             </div>
           </div>
         </div>
-      </SheetContent>
-    </Sheet>
-  );
+      </div>
+    </div>
+  ) : null;
 
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
