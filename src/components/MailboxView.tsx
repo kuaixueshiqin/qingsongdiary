@@ -27,6 +27,7 @@ const timeFromIso = (iso: string) => new Date(iso).toLocaleTimeString("zh-CN", {
 const MailboxView = () => {
   const { user } = useAuth();
   const { customCompanions } = useCustomCompanions();
+  const { randomDrop } = usePinecones();
   const allCompanions = [...builtInCompanions, ...customCompanions];
 
   const [selectedChat, setSelectedChat] = useState<{ companion: Companion; conversationId: string } | null>(null);
