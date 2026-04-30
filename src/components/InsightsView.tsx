@@ -70,6 +70,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
         billingItems={allBilling}
         setBillingItems={setExtraBilling as any}
         onBack={() => setShowDetail(false)}
+        onNavigateToDiary={onNavigateToDiary}
       />
     );
   }
