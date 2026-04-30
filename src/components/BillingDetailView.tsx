@@ -1,11 +1,12 @@
-import { useState, useRef, useCallback } from "react";
-import { ChevronLeft, Plus, Pencil } from "lucide-react";
+import { useState, useRef } from "react";
+import { ChevronLeft, Plus, Pencil, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
 type BillingStatus = "toFill" | "toConfirm" | "confirmed";
 
 export interface BillingItem {
   id: number;
+  diaryId?: string;
   date: string;
   amount: number;
   category: string;
@@ -17,6 +18,7 @@ interface BillingDetailViewProps {
   billingItems: BillingItem[];
   setBillingItems: React.Dispatch<React.SetStateAction<BillingItem[]>>;
   onBack: () => void;
+  onNavigateToDiary?: (entryId: string) => void;
 }
 
 const SWIPE_THRESHOLD = 80;
