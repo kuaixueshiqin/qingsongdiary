@@ -185,9 +185,10 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                 <button
                   key={opt.id}
                   onClick={() => updateStyle({ font: opt.id })}
-                  className={`py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                  className={`relative py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
                 >
                   {opt.label}
+                  {diaryStyle.font === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground" />}
                 </button>
               ))}
             </div>
@@ -199,9 +200,10 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                 <button
                   key={opt.id}
                   onClick={() => updateStyle({ size: opt.id })}
-                  className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                  className={`relative py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
                 >
                   Aa
+                  {diaryStyle.size === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground" />}
                 </button>
               ))}
             </div>
