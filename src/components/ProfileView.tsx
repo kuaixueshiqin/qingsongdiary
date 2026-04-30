@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock, Bell, MessageCircle, Mailbox } from "lucide-react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock, Bell, MessageCircle, Mailbox, KeyRound, Eye, EyeOff } from "lucide-react";
 import { companions as builtInCompanions } from "@/lib/data";
 import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
