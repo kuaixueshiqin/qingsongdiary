@@ -436,6 +436,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold float-right disabled:opacity-30">保存记录</button>
         </div>
         {styleSheet}
+        {batchSheet}
       </div>
     );
   }
@@ -697,6 +698,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           )}
         </div>
         {styleSheet}
+        {batchSheet}
       </div>
     );
   }
