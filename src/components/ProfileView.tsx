@@ -70,7 +70,7 @@ const ProfileView = () => {
   const [pinecones, setPinecones] = useState(0);
   const [shopOpen, setShopOpen] = useState(false);
 
-  useEffect(() => {
+  const loadProfile = () => {
     if (!user) return;
     supabase
       .from("profiles")
@@ -85,6 +85,11 @@ const ProfileView = () => {
           setAiConsent(data.ai_data_consent ?? true);
         }
       });
+  };
+
+  useEffect(() => {
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleToggleConsent = async (checked: boolean) => {
