@@ -213,6 +213,11 @@ export function useDiaryEntries() {
     await supabase.from("diary_comments").delete().eq("id", commentId);
   }, []);
 
+  const deleteEntry = useCallback(async (entryId: string) => {
+    setEntries((prev) => prev.filter((e) => e.id !== entryId));
+    await supabase.from("diary_entries").delete().eq("id", entryId);
+  }, []);
+
   const addReply = useCallback(
     async (entryId: string, commentId: string, role: "user" | "assistant", companionId: string, text: string): Promise<CommentReply | null> => {
       if (!user) return null;
@@ -240,7 +245,7 @@ export function useDiaryEntries() {
     [user]
   );
 
-  return { entries, loading, createEntry, updateEntry, addComment, deleteComment, addReply, reload };
+  return { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply, reload };
 }
 
 /** Hook: custom companions stored in DB; merged with built-in. */
