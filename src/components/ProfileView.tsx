@@ -28,9 +28,35 @@ const ProfileView = () => {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [changingPwd, setChangingPwd] = useState(false);
   const [aiConsent, setAiConsent] = useState(true);
   const [savingConsent, setSavingConsent] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast({ title: "密码至少 6 位", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "两次输入不一致", variant: "destructive" });
+      return;
+    }
+    setChangingPwd(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setChangingPwd(false);
+    if (error) {
+      toast({ title: "修改失败", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "密码已更新" });
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  };
 
   const saveAvatar = async (newAvatar: string) => {
     if (!user) return;
