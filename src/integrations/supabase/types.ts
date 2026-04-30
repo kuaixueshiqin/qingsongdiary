@@ -289,6 +289,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_data_consent: boolean
           avatar_url: string | null
           created_at: string
           id: string
@@ -297,6 +298,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_data_consent?: boolean
           avatar_url?: string | null
           created_at?: string
           id: string
@@ -305,6 +307,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_data_consent?: boolean
           avatar_url?: string | null
           created_at?: string
           id?: string
