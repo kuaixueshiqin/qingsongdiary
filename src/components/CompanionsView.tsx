@@ -65,52 +65,39 @@ const CompanionsView = () => {
     setLikedAgents((prev) => prev.includes(agentId) ? prev.filter((id) => id !== agentId) : [...prev, agentId]);
   };
 
-  const handleCreateCompanion = () => {
+  const handleCreateCompanion = async () => {
     if (!newName.trim()) { toast.error("请输入伙伴名称"); return; }
     if (!newRole.trim()) { toast.error("请输入伙伴角色"); return; }
-    const comp: Companion = {
-      id: `custom-${Date.now()}`,
+    const created = await createCompanion({
       name: newName.trim(),
-      avatar: newAvatar,
-      colorClass: newColor,
-      textColorClass: "text-foreground",
       role: newRole.trim(),
       bio: newBio.trim() || "自定义伙伴",
-      intimacy: 0,
-      level: 1,
-      lastMsg: "你好呀，很高兴认识你！",
-      delay: "随机",
-    };
-    setMyCompanions((prev) => [...prev, comp]);
+      avatar: newAvatar,
+      colorClass: newColor,
+    });
+    if (!created) { toast.error("创建失败"); return; }
     setShowCreate(false);
     setNewName(""); setNewRole(""); setNewBio(""); setNewAvatar("🤖"); setNewColor("bg-companion-green");
-    toast.success(`${comp.name} 已创建并加入伙伴列表！`);
+    toast.success(`${newName.trim()} 已创建并加入伙伴列表！`);
   };
 
   const handleToggleCompanion = (id: string, enabled: boolean) => {
     toast.success(enabled ? "已启用该伙伴的互动" : "已暂停该伙伴的互动");
   };
 
-  const handleAddAgent = (agent: typeof squareAgents[0]) => {
+  const handleAddAgent = async (agent: typeof squareAgents[0]) => {
     if (addedAgents.includes(agent.id)) {
       toast("已经添加过了哦");
       return;
     }
     setAddedAgents((prev) => [...prev, agent.id]);
-    const newComp: Companion = {
-      id: agent.id,
+    await createCompanion({
       name: agent.name,
-      avatar: agent.avatar,
-      colorClass: "bg-secondary",
-      textColorClass: "text-foreground",
       role: agent.role,
       bio: `来自广场 · by ${agent.creator}`,
-      intimacy: 0,
-      level: 1,
-      lastMsg: "你好呀，我是新来的！",
-      delay: "随机",
-    };
-    setMyCompanions((prev) => [...prev, newComp]);
+      avatar: agent.avatar,
+      colorClass: "bg-secondary",
+    });
     toast.success(`${agent.name} 已加入你的伙伴列表！`);
   };
 
