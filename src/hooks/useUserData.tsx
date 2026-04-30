@@ -245,7 +245,7 @@ export function useDiaryEntries() {
     [user]
   );
 
-  return { entries, loading, createEntry, updateEntry, addComment, deleteComment, addReply, reload };
+  return { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply, reload };
 }
 
 /** Hook: custom companions stored in DB; merged with built-in. */
