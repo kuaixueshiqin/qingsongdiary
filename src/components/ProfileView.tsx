@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from "react";
-import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock } from "lucide-react";
-import { companions } from "@/lib/data";
-import { useDiaryEntries } from "@/hooks/useUserData";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut, Upload, Loader2, Shield, Lock, Bell, MessageCircle, Mailbox } from "lucide-react";
+import { companions as builtInCompanions } from "@/lib/data";
+import { useDiaryEntries, useCustomCompanions } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -10,6 +10,13 @@ import { Switch } from "@/components/ui/switch";
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
 const isImageUrl = (s: string) => !!s && (s.startsWith("http") || s.startsWith("blob:"));
+
+type NotifPrefs = {
+  enabled: boolean;
+  comments: Record<string, boolean>;
+  mailbox: Record<string, boolean>;
+};
+const DEFAULT_PREFS: NotifPrefs = { enabled: true, comments: {}, mailbox: {} };
 
 const ProfileView = () => {
   const { user, signOut } = useAuth();
