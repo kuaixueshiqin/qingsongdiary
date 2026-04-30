@@ -402,6 +402,70 @@ const ProfileView = () => {
               )}
             </div>
           )}
+          <button
+            onClick={() => setShowAccount(!showAccount)}
+            className="w-full flex items-center justify-between px-5 py-3.5 border-b border-border hover:bg-secondary/30 transition-colors"
+          >
+            <span className="text-sm text-foreground flex items-center gap-2">
+              <KeyRound size={14} className="text-muted-foreground" />
+              账号设置
+            </span>
+            <ChevronRight size={14} className={`text-muted-foreground/40 transition-transform ${showAccount ? "rotate-90" : ""}`} />
+          </button>
+
+          {showAccount && (
+            <div className="px-5 py-4 bg-secondary/20 border-b border-border space-y-4 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div>
+                <p className="text-[11px] text-muted-foreground/60 mb-1">登录邮箱</p>
+                <p className="text-sm text-foreground font-medium break-all">{user?.email ?? "—"}</p>
+              </div>
+
+              <div className="space-y-2.5">
+                <p className="text-sm font-bold text-foreground">修改密码</p>
+
+                <div className="relative">
+                  <input
+                    type={showPwd ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="新密码（至少 6 位）"
+                    maxLength={72}
+                    className="w-full bg-card border border-border rounded-xl px-3 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50"
+                    aria-label={showPwd ? "隐藏密码" : "显示密码"}
+                  >
+                    {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+
+                <input
+                  type={showPwd ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="再次输入新密码"
+                  maxLength={72}
+                  className="w-full bg-card border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50"
+                />
+
+                <button
+                  onClick={handleChangePassword}
+                  disabled={changingPwd || !newPassword || !confirmPassword}
+                  className="w-full bg-primary text-primary-foreground rounded-xl py-2.5 text-sm font-bold disabled:opacity-50 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                >
+                  {changingPwd ? <><Loader2 size={14} className="animate-spin" />更新中...</> : "更新密码"}
+                </button>
+
+                <p className="text-[10px] text-muted-foreground/50 leading-relaxed">
+                  修改成功后，其他设备上的登录状态仍会保留，下次登录时使用新密码即可。
+                </p>
+              </div>
+            </div>
+          )}
+
           <SettingLink label="关于我们" />
         </div>
 
