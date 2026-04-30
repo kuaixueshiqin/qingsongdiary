@@ -102,7 +102,7 @@ const CompanionsView = () => {
   };
 
   const handleAddAgent = async (agent: typeof squareAgents[0]) => {
-    if (addedAgents.includes(agent.id)) {
+    if (isAgentOwned(agent)) {
       toast("已经添加过了哦");
       return;
     }
