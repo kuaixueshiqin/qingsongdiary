@@ -68,6 +68,7 @@ const ProfileView = () => {
     }
   };
   const [pinecones, setPinecones] = useState(0);
+  const [shopOpen, setShopOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
