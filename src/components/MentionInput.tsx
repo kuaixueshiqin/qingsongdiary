@@ -36,13 +36,26 @@ const MentionInput = ({ value, mentions, onChange, placeholder, onSubmit, autoFo
   const getTextContent = useCallback(() => {
     if (!inputRef.current) return "";
     let text = "";
-    inputRef.current.childNodes.forEach((node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        text += node.textContent || "";
-      } else if (node instanceof HTMLElement && node.dataset.mentionId) {
-        text += `@${node.dataset.mentionName}`;
-      }
-    });
+    const walk = (node: Node) => {
+      node.childNodes.forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          text += (child.textContent || "").replace(/\u200B/g, "");
+        } else if (child instanceof HTMLElement) {
+          if (child.dataset.mentionId) {
+            text += `@${child.dataset.mentionName}`;
+          } else if (child.tagName === "BR") {
+            text += "\n";
+          } else if (child.tagName === "DIV") {
+            // Some browsers wrap new lines in <div>
+            if (text && !text.endsWith("\n")) text += "\n";
+            walk(child);
+          } else {
+            walk(child);
+          }
+        }
+      });
+    };
+    walk(inputRef.current);
     return text;
   }, []);
 
