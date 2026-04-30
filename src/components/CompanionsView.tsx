@@ -342,7 +342,7 @@ const CompanionsView = () => {
                         <span className="font-bold text-foreground">{comp.name}</span>
                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${comp.colorClass} ${comp.textColorClass}`}>{comp.role}</span>
                       </div>
-                      <span className="text-[10px] font-bold text-muted-foreground/30">Lv.{comp.level}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground/30 mr-6">Lv.{comp.level}</span>
                     </div>
                     <p className="text-xs text-muted-foreground/50 mt-1">{comp.bio}</p>
                     <p className="text-[10px] text-muted-foreground/30 mt-0.5">回复时长: {comp.delay}</p>
