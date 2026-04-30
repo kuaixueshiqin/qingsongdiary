@@ -86,12 +86,12 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
   // Diary writing customization
   const BG_OPTIONS = [
-    { id: "cream", label: "奶油米白", className: "bg-background" },
+    { id: "cream", label: "奶油米白", className: "bg-brand-cream" },
+    { id: "olive", label: "橄榄绿", className: "bg-brand-olive/20" },
+    { id: "lilac", label: "淡紫", className: "bg-brand-lilac/40" },
+    { id: "butter", label: "暖黄", className: "bg-brand-butter/40" },
+    { id: "sky", label: "浅蓝", className: "bg-brand-sky/40" },
     { id: "warm", label: "暖米", className: "surface-warm" },
-    { id: "mint", label: "薄荷", className: "bg-companion-green" },
-    { id: "sky", label: "晴空", className: "bg-companion-indigo" },
-    { id: "butter", label: "暖黄", className: "bg-companion-amber" },
-    { id: "rose", label: "胭脂", className: "bg-companion-red" },
   ];
   const FONT_OPTIONS = [
     { id: "sans", label: "清新黑体", className: "font-sans" },
