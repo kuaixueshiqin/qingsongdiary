@@ -381,6 +381,10 @@ export type Database = {
         Returns: number
       }
       claim_daily_checkin: { Args: never; Returns: Json }
+      spend_pinecones: {
+        Args: { _amount: number; _note?: string; _source: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
