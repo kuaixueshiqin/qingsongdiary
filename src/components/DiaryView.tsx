@@ -328,6 +328,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
 
     // Save user reply to cloud
     await addReply(entryId, comment.id, "user", comment.companionId, savedText);
+    randomDrop("reply");
 
     const respondingIds = new Set<string>();
     savedMentions.forEach((m) => respondingIds.add(m.id));
