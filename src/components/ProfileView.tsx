@@ -1,17 +1,52 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut } from "lucide-react";
 import { companions, diaryEntries } from "@/lib/data";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
 const ProfileView = () => {
+  const { user, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState("小叶");
+  const [name, setName] = useState("");
   const [bio, setBio] = useState("记录生活，温柔前行 🌿");
   const [avatar, setAvatar] = useState("🌿");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [pinecones, setPinecones] = useState(0);
 
-  const acorns = 128;
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("nickname, avatar_url, pinecones")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          if (data.nickname) setName(data.nickname);
+          if (data.avatar_url) setAvatar(data.avatar_url);
+          setPinecones(data.pinecones ?? 0);
+        }
+      });
+  }, [user]);
+
+  const handleToggleEdit = async () => {
+    if (editing && user) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ nickname: name.trim() || null, avatar_url: avatar })
+        .eq("id", user.id);
+      if (error) {
+        toast({ title: "保存失败", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "已保存" });
+    }
+    setEditing(!editing);
+  };
+
   const notesCount = diaryEntries.length;
   const lettersCount = 7;
 
