@@ -1,17 +1,52 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut } from "lucide-react";
 import { companions, diaryEntries } from "@/lib/data";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
 const ProfileView = () => {
+  const { user, signOut } = useAuth();
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState("小叶");
+  const [name, setName] = useState("");
   const [bio, setBio] = useState("记录生活，温柔前行 🌿");
   const [avatar, setAvatar] = useState("🌿");
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [pinecones, setPinecones] = useState(0);
 
-  const acorns = 128;
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("profiles")
+      .select("nickname, avatar_url, pinecones")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          if (data.nickname) setName(data.nickname);
+          if (data.avatar_url) setAvatar(data.avatar_url);
+          setPinecones(data.pinecones ?? 0);
+        }
+      });
+  }, [user]);
+
+  const handleToggleEdit = async () => {
+    if (editing && user) {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ nickname: name.trim() || null, avatar_url: avatar })
+        .eq("id", user.id);
+      if (error) {
+        toast({ title: "保存失败", description: error.message, variant: "destructive" });
+        return;
+      }
+      toast({ title: "已保存" });
+    }
+    setEditing(!editing);
+  };
+
   const notesCount = diaryEntries.length;
   const lettersCount = 7;
 
@@ -68,7 +103,7 @@ const ProfileView = () => {
               )}
             </div>
             <button
-              onClick={() => setEditing(!editing)}
+              onClick={handleToggleEdit}
               className="shrink-0 w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
               {editing ? <Check size={14} /> : <Edit2 size={14} />}
@@ -95,7 +130,7 @@ const ProfileView = () => {
         <div className="grid grid-cols-3 gap-2">
           <StatCard icon={<BookOpen size={16} />} label="笔记" value={notesCount} color="text-companion-green-text" bg="bg-companion-green" />
           <StatCard icon={<Mail size={16} />} label="书信" value={lettersCount} color="text-companion-indigo-text" bg="bg-companion-indigo" />
-          <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={acorns} color="text-companion-amber-text" bg="bg-companion-amber" />
+          <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={pinecones} color="text-companion-amber-text" bg="bg-companion-amber" />
         </div>
 
         {/* Recent visitors */}
@@ -125,6 +160,19 @@ const ProfileView = () => {
           <SettingLink label="通知偏好" />
           <SettingLink label="关于我们" />
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={signOut}
+          className="w-full bg-card border border-border rounded-2xl shadow-sm py-3.5 px-5 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
+        >
+          <LogOut size={14} />
+          退出登录
+        </button>
+
+        {user?.email && (
+          <p className="text-center text-[10px] text-muted-foreground/50 pt-2">{user.email}</p>
+        )}
       </div>
     </div>
   );
