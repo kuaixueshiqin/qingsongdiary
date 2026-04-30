@@ -119,6 +119,61 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const fontClass = FONT_OPTIONS.find(f => f.id === diaryStyle.font)?.className ?? "font-sans";
   const sizeClass = SIZE_OPTIONS.find(s => s.id === diaryStyle.size)?.className ?? "text-lg";
 
+  const styleSheet = (
+    <Sheet open={styleOpen} onOpenChange={setStyleOpen}>
+      <SheetContent side="bottom" className="rounded-t-3xl border-0 max-h-[75vh] overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="text-left text-base font-bold">个性化书写</SheetTitle>
+        </SheetHeader>
+        <div className="mt-4 space-y-5">
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">页面背景</p>
+            <div className="grid grid-cols-3 gap-2">
+              {BG_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setDiaryStyle((s: any) => ({ ...s, bg: opt.id }))}
+                  className={`relative h-14 rounded-xl border-2 transition-all ${opt.className} ${diaryStyle.bg === opt.id ? "border-foreground" : "border-border"}`}
+                >
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70">{opt.label}</span>
+                  {diaryStyle.bg === opt.id && <Check size={14} className="absolute top-1 right-1 text-foreground" />}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">字体</p>
+            <div className="grid grid-cols-3 gap-2">
+              {FONT_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setDiaryStyle((s: any) => ({ ...s, font: opt.id }))}
+                  className={`py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-muted-foreground mb-2">字号</p>
+            <div className="grid grid-cols-4 gap-2">
+              {SIZE_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => setDiaryStyle((s: any) => ({ ...s, size: opt.id }))}
+                  className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
+                >
+                  Aa
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
   const selectedEntry = entries.find((e) => e.id === selectedEntryId) ?? null;
 
   const handleDeleteComment = async (entryId: string, commentId: string) => {
@@ -255,65 +310,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             <ChevronLeft size={24} />
           </button>
           <span className="text-sm font-bold text-muted-foreground">新日志 · {new Date().toLocaleDateString("zh-CN", { month: "numeric", day: "numeric" }).replace(/(\d+)\/(\d+)/, "$1月$2日")}</span>
-          <Sheet open={styleOpen} onOpenChange={setStyleOpen}>
-            <SheetTrigger asChild>
-              <button className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" aria-label="个性化设置">
-                <Settings2 size={18} />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl border-0 max-h-[75vh] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle className="text-left text-base font-bold">个性化书写</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 space-y-5">
-                <div>
-                  <p className="text-xs font-bold text-muted-foreground mb-2">页面背景</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {BG_OPTIONS.map(opt => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setDiaryStyle((s: any) => ({ ...s, bg: opt.id }))}
-                        className={`relative h-14 rounded-xl border-2 transition-all ${opt.className} ${diaryStyle.bg === opt.id ? "border-foreground" : "border-border"}`}
-                      >
-                        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-medium text-foreground/70">{opt.label}</span>
-                        {diaryStyle.bg === opt.id && (
-                          <Check size={14} className="absolute top-1 right-1 text-foreground" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-muted-foreground mb-2">字体</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {FONT_OPTIONS.map(opt => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setDiaryStyle((s: any) => ({ ...s, font: opt.id }))}
-                        className={`py-3 rounded-xl border-2 text-sm ${opt.className} ${diaryStyle.font === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-muted-foreground mb-2">字号</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {SIZE_OPTIONS.map(opt => (
-                      <button
-                        key={opt.id}
-                        onClick={() => setDiaryStyle((s: any) => ({ ...s, size: opt.id }))}
-                        className={`py-3 rounded-xl border-2 ${opt.className} ${diaryStyle.size === opt.id ? "border-foreground bg-secondary" : "border-border"}`}
-                      >
-                        Aa
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <button onClick={() => setStyleOpen(true)} className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors" aria-label="个性化设置">
+            <Settings2 size={18} />
+          </button>
         </div>
         <div className="flex-1 px-6">
           <MentionInput
@@ -329,13 +328,14 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         <div className="px-6 pb-4">
           <button onClick={handleSaveDiary} disabled={!newContent.trim()} className="bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold float-right disabled:opacity-30">保存记录</button>
         </div>
+        {styleSheet}
       </div>
     );
   }
 
   if (selectedEntry) {
     return (
-      <div className="pb-4 animate-in slide-in-from-right duration-300">
+      <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} min-h-full`}>
         <div className="px-5 pt-14 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
@@ -345,7 +345,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               <span className="text-sm font-bold text-foreground">{selectedEntry.date}</span>
               <span className="text-xs text-muted-foreground">{selectedEntry.time}</span>
               {selectedEntry.moodScore && (
-                <span className="flex items-center gap-1 ml-auto">
+                <span className="flex items-center gap-1">
                   {getMoodIcon(selectedEntry.moodScore)}
                   {selectedEntry.moodLabel && <span className="text-[10px] text-muted-foreground">{selectedEntry.moodLabel}</span>}
                 </span>
@@ -361,6 +361,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
               </div>
             )}
           </div>
+          <button onClick={() => setStyleOpen(true)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors flex-shrink-0" aria-label="个性化设置">
+            <Settings2 size={18} />
+          </button>
         </div>
 
         <div className="px-6 space-y-6">
@@ -586,6 +589,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
             </div>
           )}
         </div>
+        {styleSheet}
       </div>
     );
   }
