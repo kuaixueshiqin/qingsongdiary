@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import PineconeShop from "@/components/PineconeShop";
+import PineconeTransactionsView from "@/components/PineconeTransactionsView";
 
 const AVATAR_OPTIONS = ["😊", "🧑‍💻", "🌻", "🐼", "🦁", "🌊", "🎨", "🚀"];
 
@@ -95,6 +96,7 @@ const ProfileView = () => {
   };
   const [pinecones, setPinecones] = useState(0);
   const [shopOpen, setShopOpen] = useState(false);
+  const [showTxs, setShowTxs] = useState(false);
 
   const loadProfile = () => {
     if (!user) return;
@@ -195,6 +197,19 @@ const ProfileView = () => {
     persistPrefs({ ...notifPrefs, [kind]: map });
   };
 
+  if (showTxs) {
+    return (
+      <>
+        <PineconeTransactionsView
+          balance={pinecones}
+          onBack={() => { setShowTxs(false); loadProfile(); }}
+          onOpenShop={() => setShopOpen(true)}
+        />
+        <PineconeShop open={shopOpen} onClose={() => { setShopOpen(false); loadProfile(); }} />
+      </>
+    );
+  }
+
   return (
     <div className="pb-4">
       {/* Header */}
@@ -288,7 +303,7 @@ const ProfileView = () => {
         <div className="grid grid-cols-3 gap-2">
           <StatCard icon={<BookOpen size={16} />} label="笔记" value={notesCount} color="text-companion-green-text" bg="bg-companion-green" />
           <StatCard icon={<Mail size={16} />} label="书信" value={lettersCount} color="text-companion-indigo-text" bg="bg-companion-indigo" />
-          <button onClick={() => setShopOpen(true)} className="text-left active:scale-[0.98] transition-transform">
+          <button onClick={() => setShowTxs(true)} className="text-left active:scale-[0.98] transition-transform">
             <StatCard icon={<span className="text-sm">🌰</span>} label="松果" value={pinecones} color="text-companion-amber-text" bg="bg-companion-amber" />
           </button>
         </div>
