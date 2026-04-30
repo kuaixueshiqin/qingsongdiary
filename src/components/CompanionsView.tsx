@@ -312,6 +312,60 @@ const CompanionsView = () => {
     );
   }
 
+  // Square as a secondary page
+  if (view === "square") {
+    return (
+      <div className="pb-4">
+        <div className="px-6 pt-14 pb-4 flex items-center gap-3">
+          <button onClick={() => setView("my")} className="text-muted-foreground active:scale-90 transition-transform">
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-black text-foreground">发现广场</h1>
+        </div>
+        <div className="px-4 space-y-3">
+          <div className="relative mb-1">
+            <input placeholder="搜索全球智能体..." className="w-full bg-secondary border-none rounded-2xl py-3 px-10 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none" />
+            <Search className="absolute left-3 top-3 text-muted-foreground/30" size={18} />
+          </div>
+          {squareAgents.map((agent) => {
+            const isAdded = addedAgents.includes(agent.id);
+            const isLiked = likedAgents.includes(agent.id);
+            return (
+              <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm cursor-pointer active:scale-[0.98] transition-transform">
+                <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center text-2xl">{agent.avatar}</div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-bold text-sm text-foreground">{agent.name}</h4>
+                      <p className="text-[10px] text-muted-foreground/40">by {agent.creator}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <button onClick={(e) => { e.stopPropagation(); handleToggleLike(agent.id); }} className="flex items-center gap-1 transition-transform active:scale-90">
+                        <Heart size={12} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
+                        <span className="text-[10px] text-muted-foreground/40 font-medium">{agent.likes}</span>
+                      </button>
+                      <span className="text-[10px] text-muted-foreground/40 flex items-center gap-0.5">🌰 {agent.pinecones}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-[9px] bg-companion-indigo text-companion-indigo-text px-2 py-0.5 rounded-full font-bold">{agent.role}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleAddAgent(agent); }}
+                      disabled={isAdded}
+                      className={`ml-auto text-[10px] px-3 py-1 rounded-lg font-bold transition-all ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
+                    >
+                      {isAdded ? <span className="flex items-center gap-1"><Check size={10} />已添加</span> : "带TA回家"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-center">
@@ -319,98 +373,53 @@ const CompanionsView = () => {
           <h1 className="text-2xl font-black text-foreground">伙伴</h1>
         </div>
         <button
-          onClick={() => setView(view === "my" ? "square" : "my")}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all ${view === "square" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}
+          onClick={() => setView("square")}
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all bg-secondary text-muted-foreground active:scale-95"
         >
-          {view === "my" ? <Compass size={14} /> : <Users size={14} />}
-          {view === "my" ? "发现广场" : "我的伙伴"}
+          <Compass size={14} />
+          发现广场
         </button>
       </div>
 
       <div className="px-4 space-y-3">
-        {view === "my" ? (
-          <>
-            {myCompanions.map((comp) => (
-              <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden`}>
-                    {isImageAvatar(comp.avatar) ? <img src={comp.avatar} alt="" className="w-full h-full object-cover" /> : comp.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-foreground">{comp.name}</span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${comp.colorClass} ${comp.textColorClass}`}>{comp.role}</span>
-                      </div>
-                      <span className="text-[10px] font-bold text-muted-foreground/30 mr-6">Lv.{comp.level}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground/50 mt-1">{comp.bio}</p>
-                    <p className="text-[10px] text-muted-foreground/30 mt-0.5">回复时长: {comp.delay}</p>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between items-center text-[10px] font-bold">
-                    <div className="flex items-center gap-1 text-intimacy"><Heart size={10} fill="currentColor" /> 亲密度</div>
-                    <span className="text-muted-foreground/40">{comp.intimacy}/100</span>
-                  </div>
-                  <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
-                  </div>
-                </div>
-                <button onClick={() => setSettingsFor(comp)} className="absolute top-4 right-4 text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
-                  <Settings size={14} />
-                </button>
+        {myCompanions.map((comp) => (
+          <div key={comp.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm relative">
+            <div className="flex items-start gap-3 mb-4">
+              <div className={`w-14 h-14 ${comp.colorClass} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden`}>
+                {isImageAvatar(comp.avatar) ? <img src={comp.avatar} alt="" className="w-full h-full object-cover" /> : comp.avatar}
               </div>
-            ))}
-            {/* Create custom companion card */}
-            <button onClick={() => setShowCreate(true)}
-              className="w-full border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-muted-foreground/40 hover:text-muted-foreground hover:border-muted-foreground/40 active:scale-[0.98] transition-all">
-              <Plus size={24} />
-              <span className="text-xs font-bold">自定义伙伴</span>
-            </button>
-          </>
-        ) : (
-          <>
-            <div className="relative mb-1">
-              <input placeholder="搜索全球智能体..." className="w-full bg-secondary border-none rounded-2xl py-3 px-10 text-sm text-foreground placeholder:text-muted-foreground/30 focus:outline-none" />
-              <Search className="absolute left-3 top-3 text-muted-foreground/30" size={18} />
-            </div>
-            {squareAgents.map((agent) => {
-              const isAdded = addedAgents.includes(agent.id);
-              const isLiked = likedAgents.includes(agent.id);
-              return (
-                <div key={agent.id} onClick={() => setViewingAgent(agent)} className="bg-card border border-border rounded-2xl p-4 flex items-center gap-3 shadow-sm cursor-pointer active:scale-[0.98] transition-transform">
-                  <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center text-2xl">{agent.avatar}</div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-bold text-sm text-foreground">{agent.name}</h4>
-                        <p className="text-[10px] text-muted-foreground/40">by {agent.creator}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <button onClick={(e) => { e.stopPropagation(); handleToggleLike(agent.id); }} className="flex items-center gap-1 transition-transform active:scale-90">
-                          <Heart size={12} className={isLiked ? "text-intimacy" : "text-muted-foreground/30"} fill={isLiked ? "currentColor" : "none"} />
-                          <span className="text-[10px] text-muted-foreground/40 font-medium">{agent.likes}</span>
-                        </button>
-                        <span className="text-[10px] text-muted-foreground/40 flex items-center gap-0.5">🌰 {agent.pinecones}</span>
-                      </div>
-                    </div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-[9px] bg-companion-indigo text-companion-indigo-text px-2 py-0.5 rounded-full font-bold">{agent.role}</span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleAddAgent(agent); }}
-                        disabled={isAdded}
-                        className={`ml-auto text-[10px] px-3 py-1 rounded-lg font-bold transition-all ${isAdded ? "bg-companion-green text-companion-green-text" : "bg-primary text-primary-foreground active:scale-95"}`}
-                      >
-                        {isAdded ? <span className="flex items-center gap-1"><Check size={10} />已添加</span> : "带TA回家"}
-                      </button>
-                    </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-foreground">{comp.name}</span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${comp.colorClass} ${comp.textColorClass}`}>{comp.role}</span>
                   </div>
+                  <span className="text-[10px] font-bold text-muted-foreground/30 mr-6">Lv.{comp.level}</span>
                 </div>
-              );
-            })}
-          </>
-        )}
+                <p className="text-xs text-muted-foreground/50 mt-1">{comp.bio}</p>
+                <p className="text-[10px] text-muted-foreground/30 mt-0.5">回复时长: {comp.delay}</p>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[10px] font-bold">
+                <div className="flex items-center gap-1 text-intimacy"><Heart size={10} fill="currentColor" /> 亲密度</div>
+                <span className="text-muted-foreground/40">{comp.intimacy}/100</span>
+              </div>
+              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
+              </div>
+            </div>
+            <button onClick={() => setSettingsFor(comp)} className="absolute top-4 right-4 text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
+              <Settings size={14} />
+            </button>
+          </div>
+        ))}
+        {/* Create custom companion card */}
+        <button onClick={() => setShowCreate(true)}
+          className="w-full border-2 border-dashed border-border rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-muted-foreground/40 hover:text-muted-foreground hover:border-muted-foreground/40 active:scale-[0.98] transition-all">
+          <Plus size={24} />
+          <span className="text-xs font-bold">自定义伙伴</span>
+        </button>
       </div>
     </div>
   );
