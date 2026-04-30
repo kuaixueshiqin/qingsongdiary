@@ -123,6 +123,15 @@ const CompanionsView = () => {
   const confirmAddAgent = async () => {
     if (!confirmAgent) return;
     const agent = confirmAgent;
+    // Re-check funds atomically and deduct
+    const result = await spend(agent.pinecones, "companion_unlock", `解锁伙伴 ${agent.name}`);
+    if (!result.ok) {
+      setConfirmAgent(null);
+      if (result.insufficient) {
+        openShop(`差一点～购买 ${agent.name} 需要 ${agent.pinecones} 松果，去补充一下吧`);
+      }
+      return;
+    }
     setConfirmAgent(null);
     await handleAddAgent(agent);
   };
