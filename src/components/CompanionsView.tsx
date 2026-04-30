@@ -20,7 +20,8 @@ const COLOR_OPTIONS = [
 
 const CompanionsView = () => {
   const { customCompanions, createCompanion, updateCompanion, deleteCompanion } = useCustomCompanions();
-  const [view, setView] = useState<"my" | "square">("my");
+  const [view, setView] = useState<"my" | "square" | "publish">("my");
+  const [publishedIds, setPublishedIds] = useState<string[]>([]);
   const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<Companion | null>(null);
