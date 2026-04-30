@@ -427,17 +427,19 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
         <div className="px-4 mb-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-3">
             <h3 className="text-xs font-bold text-foreground">手动添加</h3>
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
-                <input type="number" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} placeholder="0" className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
-              </div>
-              <div className="flex-1">
-                <label className="text-[10px] text-muted-foreground block mb-1">分类</label>
-                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground">
-                  <option>餐饮</option><option>交通</option><option>娱乐</option><option>购物</option><option>生活</option><option>其他</option>
-                </select>
-              </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground block mb-1">金额</label>
+              <input type="number" value={newAmount} onChange={(e) => setNewAmount(e.target.value)} placeholder="0" className="w-full bg-secondary border border-border rounded-lg py-2 px-3 text-sm focus:outline-none text-foreground" autoFocus />
+            </div>
+            <div>
+              <label className="text-[10px] text-muted-foreground block mb-1.5">分类标签</label>
+              <CategoryPicker
+                value={newCategory}
+                onChange={setNewCategory}
+                customCategories={customCategories}
+                onAddCustom={addCustomCategory}
+                onRemoveCustom={removeCustomCategory}
+              />
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
