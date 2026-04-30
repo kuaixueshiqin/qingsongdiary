@@ -379,6 +379,7 @@ const CompanionsView = () => {
             );
           })}
         </div>
+        {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
       </div>
     );
   }
