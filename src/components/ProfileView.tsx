@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronRight, Edit2, Check, BookOpen, Mail, Users, Camera, LogOut } from "lucide-react";
-import { companions, diaryEntries } from "@/lib/data";
+import { companions } from "@/lib/data";
+import { useDiaryEntries } from "@/hooks/useUserData";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
@@ -47,7 +48,8 @@ const ProfileView = () => {
     setEditing(!editing);
   };
 
-  const notesCount = diaryEntries.length;
+  const { entries } = useDiaryEntries();
+  const notesCount = entries.length;
   const lettersCount = 7;
 
   const recentVisitors = companions.map((c) => ({
