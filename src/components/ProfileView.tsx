@@ -113,7 +113,7 @@ const ProfileView = () => {
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => editing && setShowAvatarPicker(!showAvatarPicker)}
+              onClick={() => setShowAvatarPicker(!showAvatarPicker)}
               className="relative w-18 h-18 rounded-2xl flex items-center justify-center text-5xl bg-secondary shrink-0 overflow-hidden"
               style={{ width: 72, height: 72 }}
             >
@@ -122,11 +122,9 @@ const ProfileView = () => {
               ) : (
                 avatar
               )}
-              {editing && (
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                  <Camera size={12} className="text-primary-foreground" />
-                </div>
-              )}
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-md">
+                <Camera size={12} className="text-primary-foreground" />
+              </div>
             </button>
             <div className="flex-1 min-w-0">
               {editing ? (
