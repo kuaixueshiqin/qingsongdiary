@@ -14,38 +14,278 @@ export type Database = {
   }
   public: {
     Tables: {
-      diary_entries: {
+      comment_replies: {
         Row: {
-          content: string
+          comment_id: string
+          companion_id: string | null
           created_at: string
           id: string
+          role: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          companion_id?: string | null
+          created_at?: string
+          id?: string
+          role: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          companion_id?: string | null
+          created_at?: string
+          id?: string
+          role?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_replies_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "diary_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_boards: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          position: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      custom_companions: {
+        Row: {
+          avatar: string | null
+          bio: string | null
+          color_class: string | null
+          created_at: string
+          id: string
+          intimacy: number
+          level: number
+          name: string
+          role: string | null
+          text_color_class: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar?: string | null
+          bio?: string | null
+          color_class?: string | null
+          created_at?: string
+          id?: string
+          intimacy?: number
+          level?: number
+          name: string
+          role?: string | null
+          text_color_class?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar?: string | null
+          bio?: string | null
+          color_class?: string | null
+          created_at?: string
+          id?: string
+          intimacy?: number
+          level?: number
+          name?: string
+          role?: string | null
+          text_color_class?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      diary_comments: {
+        Row: {
+          companion_id: string
+          created_at: string
+          diary_id: string
+          highlight_text: string | null
+          id: string
+          line_index: number
+          text: string
+          user_id: string
+        }
+        Insert: {
+          companion_id: string
+          created_at?: string
+          diary_id: string
+          highlight_text?: string | null
+          id?: string
+          line_index?: number
+          text: string
+          user_id: string
+        }
+        Update: {
+          companion_id?: string
+          created_at?: string
+          diary_id?: string
+          highlight_text?: string | null
+          id?: string
+          line_index?: number
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diary_comments_diary_id_fkey"
+            columns: ["diary_id"]
+            isOneToOne: false
+            referencedRelation: "diary_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diary_entries: {
+        Row: {
+          billing_amount: number | null
+          billing_category: string | null
+          billing_verified: boolean | null
+          content: string
+          created_at: string
+          display_date: string | null
+          entry_time: string | null
+          id: string
           mood: string | null
+          mood_label: string | null
+          mood_score: number | null
           tags: string[] | null
           title: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          billing_amount?: number | null
+          billing_category?: string | null
+          billing_verified?: boolean | null
           content?: string
           created_at?: string
+          display_date?: string | null
+          entry_time?: string | null
           id?: string
           mood?: string | null
+          mood_label?: string | null
+          mood_score?: number | null
           tags?: string[] | null
           title?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          billing_amount?: number | null
+          billing_category?: string | null
+          billing_verified?: boolean | null
           content?: string
           created_at?: string
+          display_date?: string | null
+          entry_time?: string | null
           id?: string
           mood?: string | null
+          mood_label?: string | null
+          mood_score?: number | null
           tags?: string[] | null
           title?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      mail_conversations: {
+        Row: {
+          companion_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          unread_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          companion_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          unread_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          companion_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          unread_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mail_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mail_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "mail_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
