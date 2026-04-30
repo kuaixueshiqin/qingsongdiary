@@ -292,6 +292,7 @@ const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companio
       .maybeSingle();
     if (userMsgRow) {
       setMessages((prev) => [...prev, { id: userMsgRow.id, role: "user", content: text, time: timeFromIso(userMsgRow.created_at) }]);
+      randomDrop("letter");
     }
     setIsTyping(true);
 
