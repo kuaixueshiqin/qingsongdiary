@@ -50,6 +50,14 @@ export default {
         warm: "hsl(var(--surface-warm))",
         highlight: "hsl(var(--highlight))",
         intimacy: "hsl(var(--intimacy))",
+        brand: {
+          olive: "hsl(var(--brand-olive))",
+          cream: "hsl(var(--brand-cream))",
+          brown: "hsl(var(--brand-brown))",
+          lilac: "hsl(var(--brand-lilac))",
+          butter: "hsl(var(--brand-butter))",
+          sky: "hsl(var(--brand-sky))",
+        },
         companion: {
           green: "hsl(var(--companion-green))",
           "green-text": "hsl(var(--companion-green-text))",
