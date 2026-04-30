@@ -460,7 +460,8 @@ const CompanionsView = () => {
           <span className="text-xs font-bold">自定义伙伴</span>
         </button>
       </div>
-      {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} />}
+      {confirmAgent && <ConfirmPurchaseModal agent={confirmAgent} balance={pineconeBalance} onCancel={() => setConfirmAgent(null)} onConfirm={confirmAddAgent} onTopUp={() => { const a = confirmAgent; setConfirmAgent(null); openShop(`差一点～购买 ${a.name} 需要 ${a.pinecones} 松果`); }} />}
+      <PineconeShop open={shopOpen} onClose={() => setShopOpen(false)} reason={shopReason} />
     </div>
   );
 };
