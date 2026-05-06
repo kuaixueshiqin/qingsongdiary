@@ -891,6 +891,31 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
         </div>
         {styleSheet}
         {batchSheet}
+        {paraMention && (() => {
+          const filtered = allCompanions.filter((c) =>
+            paraMention.filter === "" || c.name.includes(paraMention.filter) || c.id.includes(paraMention.filter)
+          );
+          if (filtered.length === 0) return null;
+          return (
+            <div
+              className="fixed z-[200] bg-popover border border-border rounded-lg shadow-lg py-1 min-w-[140px] animate-in fade-in slide-in-from-bottom-1 duration-150"
+              style={{ left: Math.min(paraMention.x, window.innerWidth - 160), top: paraMention.y + 4 }}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {filtered.map((c) => (
+                <button
+                  key={c.id}
+                  onMouseDown={(e) => { e.preventDefault(); insertParaMention(selectedEntry.id, paraMention.paraIdx, c); }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-accent/50 transition-colors text-left"
+                >
+                  <span className="text-base">{c.avatar}</span>
+                  <span className="font-medium text-foreground">{c.name}</span>
+                  <span className="text-muted-foreground/60 text-[10px]">{c.role}</span>
+                </button>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     );
   }
