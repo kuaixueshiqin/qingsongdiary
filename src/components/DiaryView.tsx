@@ -369,6 +369,57 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     }
   };
 
+  const handleDeleteReply = async (entryId: string, commentId: string, replyId: string) => {
+    await deleteReply(entryId, commentId, replyId);
+    setActiveReplyId(null);
+    toast.success("回复已删除");
+  };
+
+  const handleReplyToReply = async (entryId: string, comment: DiaryComment) => {
+    if (!replyToReplyText.trim() || loadingReply) return;
+    const savedText = replyToReplyText.trim();
+    const savedMentions = [...replyToReplyMentions];
+    setReplyToReplyText("");
+    setReplyToReplyMentions([]);
+    setActiveReplyId(null);
+    setLoadingReply(comment.id);
+
+    await addReply(entryId, comment.id, "user", comment.companionId, savedText);
+    randomDrop("reply");
+
+    const respondingIds = new Set<string>();
+    savedMentions.forEach((m) => respondingIds.add(m.id));
+
+    const chatMessages = [
+      { role: "assistant" as const, content: comment.text },
+      ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
+      { role: "user" as const, content: savedText },
+    ];
+
+    if (respondingIds.size === 0) {
+      setLoadingReply(null);
+      return;
+    }
+
+    try {
+      for (const compId of respondingIds) {
+        const { data, error } = await supabase.functions.invoke("companion-chat", {
+          body: { companionId: compId, messages: chatMessages },
+        });
+        if (error) throw error;
+        await addReply(entryId, comment.id, "assistant", compId, data?.reply || "...");
+      }
+    } catch (e: any) {
+      console.error("Reply-to-reply error:", e);
+      const msg = e?.message || "";
+      if (msg.includes("429")) toast.error("AI 太忙啦，请稍后再试");
+      else if (msg.includes("402")) toast.error("AI 额度已用完，请充值后再试");
+      else toast.error(msg || "AI回复失败");
+    } finally {
+      setLoadingReply(null);
+    }
+  };
+
   const handleSaveDiary = async () => {
     if (!newContent.trim()) return;
     const created = await createEntry(newContent);
