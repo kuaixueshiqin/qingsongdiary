@@ -786,8 +786,6 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                                             <Trash2 size={12} />
                                           </button>
                                         )}
-                                          </>
-                                        )}
                                       </div>
                                       {isActive && (
                                         <div className="flex gap-2 animate-in slide-in-from-top-2 duration-200">
