@@ -58,7 +58,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
       await addBoard(data);
       setTopicInput("");
       setIsCreating(false);
-      toast.success(`「${data.title}」看板已生成！`);
+      toast.success(`「${data.title}」整理已生成！`);
     } catch { toast.error("网络错误，请重试"); } finally { setIsGenerating(false); }
   };
 
@@ -80,7 +80,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
       <div className="px-6 pt-14 pb-4 flex justify-between items-end">
         <div><h1 className="text-2xl font-black text-foreground font-cangpin">整理</h1></div>
         <button onClick={() => { setIsCreating(!isCreating); if (isCreating) setTopicInput(""); }} className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform ${isCreating ? "bg-secondary text-foreground" : "bg-primary text-primary-foreground"}`}>
-          <Sparkles size={14} /><span className="text-xs font-bold">AI看板</span>
+          <Sparkles size={14} /><span className="text-xs font-bold">AI整理</span>
         </button>
       </div>
 
@@ -89,7 +89,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
           <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <div>
-                <h3 className="text-sm font-black text-foreground">AI 自动生成看板</h3>
+                <h3 className="text-sm font-black text-foreground">AI 自动生成整理</h3>
                 <p className="text-[10px] text-muted-foreground mt-0.5">输入话题，AI 将从日记中提取生成</p>
               </div>
             </div>
@@ -100,7 +100,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
               ))}
             </div>
             <button onClick={handleGenerate} disabled={!topicInput.trim() || isGenerating} className="w-full bg-primary text-primary-foreground py-3 rounded-2xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.98] transition-transform text-sm">
-              {isGenerating ? (<><Loader2 size={16} className="animate-spin" />AI 正在分析日记...</>) : (<><Sparkles size={16} />生成看板</>)}
+              {isGenerating ? (<><Loader2 size={16} className="animate-spin" />AI 正在分析日记...</>) : (<><Sparkles size={16} />生成整理</>)}
             </button>
           </div>
         </div>
@@ -177,7 +177,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
           </div>
         </div>
 
-        {/* 电影看板 - keeps as static example until user has movie tagged entries */}
+        {/* 电影整理 - keeps as static example until user has movie tagged entries */}
         <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Film size={16} className="text-accent" />
