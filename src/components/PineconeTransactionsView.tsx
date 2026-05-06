@@ -22,7 +22,7 @@ const SOURCE_LABEL: Record<string, string> = {
   comment_reply: "回复",
   letter_write: "写信",
   companion_unlock: "解锁伙伴",
-  shop_purchase: "充值松果",
+  shop_purchase: "充值",
   agent_share: "广场分成",
 };
 
