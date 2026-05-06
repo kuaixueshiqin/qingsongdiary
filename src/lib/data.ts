@@ -77,7 +77,7 @@ export const companions: Companion[] = [
     avatar: "🐙",
     colorClass: "bg-companion-red",
     textColorClass: "text-companion-red-text",
-    role: "海洋伙伴",
+    role: "读书伙伴",
     bio: "肚子里很有墨的小章鱼～",
     intimacy: 15,
     level: 1,
