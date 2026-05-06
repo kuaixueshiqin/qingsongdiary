@@ -666,7 +666,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                   className="text-foreground/85 text-[15px] leading-[1.8] rounded-lg px-1 -mx-1 focus:outline-none focus:bg-secondary/30 transition-colors"
                   contentEditable
                   suppressContentEditableWarning
+                  onInput={(e) => handleParaInput(e, pIdx)}
                   onBlur={(e) => {
+                    setTimeout(() => setParaMention(null), 150);
                     const allParas = selectedEntry.content.split("\n").filter(Boolean);
                     allParas[pIdx] = e.currentTarget.textContent || "";
                     handleContentBlur(selectedEntry.id, allParas.join("\n"));
