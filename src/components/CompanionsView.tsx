@@ -560,9 +560,18 @@ const CompanionsView = () => {
                 <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
               </div>
             </div>
-            <button onClick={() => setSettingsFor(comp)} className="absolute top-4 right-4 text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
-              <Settings size={14} />
-            </button>
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <button
+                onClick={() => toggleFavorite(comp.id)}
+                className={`active:scale-90 transition-all ${favorites.includes(comp.id) ? "text-intimacy" : "text-muted-foreground/20 hover:text-muted-foreground"}`}
+                aria-label="特别关注"
+              >
+                <Heart size={14} fill={favorites.includes(comp.id) ? "currentColor" : "none"} />
+              </button>
+              <button onClick={() => setSettingsFor(comp)} className="text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
+                <Settings size={14} />
+              </button>
+            </div>
           </div>
         ))}
         {/* Create custom companion card */}
