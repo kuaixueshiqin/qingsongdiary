@@ -181,13 +181,6 @@ export default function IntimacyLogView({ companion, onBack }: { companion: Comp
             })
           )}
         </div>
-
-        <div className="mt-4 bg-secondary/40 rounded-2xl p-4 text-[10px] text-muted-foreground/60 leading-relaxed">
-          <p className="font-bold text-foreground mb-1">如何提升亲密度？</p>
-          <p>· 回复 TA 在日记中的评论：+1</p>
-          <p>· 给 TA 回信：+3</p>
-          <p>· TA 主动留下评论：+1</p>
-        </div>
       </div>
 
       {showHelp && (
