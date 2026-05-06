@@ -673,21 +673,52 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                               <div className="pl-5 border-l-2 border-border ml-3 space-y-1.5">
                                 {comment.replies.map((reply) => {
                                   const replyComp = allCompanions.find((c) => c.id === reply.companionId);
+                                  const isActive = activeReplyId === reply.id;
                                   return (
-                                    <div key={reply.id} className="flex items-start gap-2 animate-in fade-in duration-300">
-                                      {reply.role === "user" ? (
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-primary/10 text-foreground max-w-[80%]">
-                                          <span className="flex-shrink-0">🧑</span>
-                                          <span className="font-medium flex-shrink-0">我</span>
-                                          <span className="opacity-70">{reply.text}</span>
-                                          <span className="text-[9px] text-muted-foreground/40 ml-1 flex-shrink-0">{reply.time}</span>
-                                        </div>
-                                      ) : (
-                                        <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"} max-w-[80%]`}>
-                                          <span className="flex-shrink-0">{replyComp?.avatar ?? "🤖"}</span>
-                                          <span className="font-medium flex-shrink-0">{replyComp?.name ?? "AI"}</span>
-                                          <span className="opacity-70">{reply.text}</span>
-                                          <span className="text-[9px] opacity-40 ml-1 flex-shrink-0">{reply.time}</span>
+                                    <div key={reply.id} className="space-y-1 animate-in fade-in duration-300">
+                                      <div className="flex items-center gap-1.5">
+                                        <button
+                                          onClick={() => setActiveReplyId(isActive ? null : reply.id)}
+                                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs max-w-[80%] transition-all ${
+                                            isActive
+                                              ? "bg-foreground text-primary-foreground"
+                                              : reply.role === "user"
+                                              ? "bg-primary/10 text-foreground"
+                                              : `${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"}`
+                                          }`}
+                                        >
+                                          <span className="flex-shrink-0">{reply.role === "user" ? "🧑" : (replyComp?.avatar ?? "🤖")}</span>
+                                          <span className="font-medium flex-shrink-0">{reply.role === "user" ? "我" : (replyComp?.name ?? "AI")}</span>
+                                          <span className={isActive ? "text-primary-foreground/80" : "opacity-70"}>{reply.text}</span>
+                                          <span className={`text-[9px] ml-1 flex-shrink-0 ${isActive ? "text-primary-foreground/50" : "opacity-40"}`}>{reply.time}</span>
+                                        </button>
+                                        {isActive && (
+                                          <>
+                                            {reply.role === "user" && (
+                                              <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteReply(selectedEntry.id, comment.id, reply.id); }}
+                                                className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200"
+                                              >
+                                                <Trash2 size={12} />
+                                              </button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                      {isActive && (
+                                        <div className="flex gap-2 animate-in slide-in-from-top-2 duration-200">
+                                          <MentionInput
+                                            autoFocus
+                                            value={replyToReplyText}
+                                            mentions={replyToReplyMentions}
+                                            onChange={(text, mentions) => { setReplyToReplyText(text); setReplyToReplyMentions(mentions); }}
+                                            onSubmit={() => handleReplyToReply(selectedEntry.id, comment)}
+                                            placeholder={`回复 ${reply.role === "user" ? "我" : (replyComp?.name ?? "AI")}... 输入@可呼叫伙伴`}
+                                            companions={allCompanions}
+                                          />
+                                          <button onClick={() => handleReplyToReply(selectedEntry.id, comment)} disabled={!replyToReplyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30 self-end">
+                                            <Send size={12} />
+                                          </button>
                                         </div>
                                       )}
                                     </div>
