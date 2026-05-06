@@ -78,7 +78,7 @@ const InsightsView = ({ onNavigateToDiary }: InsightsViewProps) => {
   return (
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-end">
-        <div><h1 className="text-2xl font-black text-foreground">看板</h1></div>
+        <div><h1 className="text-2xl font-black text-foreground font-cangpin">看板</h1></div>
         <button onClick={() => { setIsCreating(!isCreating); if (isCreating) setTopicInput(""); }} className={`px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform ${isCreating ? "bg-secondary text-foreground" : "bg-primary text-primary-foreground"}`}>
           <Sparkles size={14} /><span className="text-xs font-bold">AI看板</span>
         </button>
