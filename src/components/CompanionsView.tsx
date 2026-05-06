@@ -210,6 +210,10 @@ const CompanionsView = () => {
   }
 
   // Settings panel
+  if (intimacyFor) {
+    return <IntimacyLogView companion={intimacyFor} onBack={() => setIntimacyFor(null)} />;
+  }
+
   if (settingsFor) {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
