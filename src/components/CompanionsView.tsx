@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useCustomCompanions } from "@/hooks/useUserData";
 import { usePinecones } from "@/hooks/usePinecones";
 import PineconeShop from "@/components/PineconeShop";
+import IntimacyLogView from "@/components/IntimacyLogView";
 
 const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
 
