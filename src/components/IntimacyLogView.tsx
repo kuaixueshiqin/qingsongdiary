@@ -189,6 +189,31 @@ export default function IntimacyLogView({ companion, onBack }: { companion: Comp
           <p>· TA 主动留下评论：+1</p>
         </div>
       </div>
+
+      {showHelp && (
+        <div
+          className="absolute inset-0 z-50 bg-foreground/30 backdrop-blur-sm flex items-center justify-center px-6 animate-in fade-in duration-200"
+          onClick={() => setShowHelp(false)}
+        >
+          <div
+            className="w-full bg-card rounded-3xl p-6 shadow-xl animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-black text-foreground mb-3">如何提升亲密度？</h3>
+            <div className="space-y-2 text-xs text-muted-foreground/80 leading-relaxed">
+              <p>· 回复 TA 在日记中的评论：<span className="font-bold text-intimacy">+1</span></p>
+              <p>· 给 TA 回信：<span className="font-bold text-intimacy">+3</span></p>
+              <p>· TA 主动留下评论：<span className="font-bold text-intimacy">+1</span></p>
+            </div>
+            <button
+              onClick={() => setShowHelp(false)}
+              className="mt-5 w-full py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm active:scale-[0.98] transition-transform"
+            >
+              知道了
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
