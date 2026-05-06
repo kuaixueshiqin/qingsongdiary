@@ -86,6 +86,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [billingCategory, setBillingCategory] = useState("");
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
   const [collapsedReplies, setCollapsedReplies] = useState<Set<string>>(new Set());
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+  const [replyToReplyText, setReplyToReplyText] = useState("");
+  const [replyToReplyMentions, setReplyToReplyMentions] = useState<MentionTag[]>([]);
 
   // Diary writing customization
   const BG_OPTIONS = [
