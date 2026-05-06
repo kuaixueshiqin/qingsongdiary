@@ -9,7 +9,7 @@ interface BottomNavProps {
 const tabs = [
   { id: "diary", icon: BookOpen, label: "日记" },
   { id: "mailbox", icon: Mail, label: "信箱" },
-  { id: "insights", icon: BarChart3, label: "看板" },
+  { id: "insights", icon: BarChart3, label: "整理" },
   { id: "companions", icon: SquirrelIcon, label: "伙伴" },
   { id: "profile", icon: User, label: "我的" },
 ];
