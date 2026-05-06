@@ -755,7 +755,16 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                                     <div key={reply.id} className="space-y-1 animate-in fade-in duration-300">
                                       <div className="flex items-center gap-1.5">
                                         <button
-                                          onClick={() => setActiveReplyId(isActive ? null : reply.id)}
+                                          onClick={() => {
+                                            if (isActive) {
+                                              setActiveReplyId(null);
+                                            } else {
+                                              setActiveReplyId(reply.id);
+                                              setReplyingTo(null);
+                                              setActiveCommentId(null);
+                                              setExpandedComments(new Set([comment.id]));
+                                            }
+                                          }}
                                           className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs max-w-[80%] transition-all ${
                                             isActive
                                               ? "bg-foreground text-primary-foreground"
