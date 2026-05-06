@@ -126,7 +126,7 @@ export function usePinecones() {
       if (!user) return false;
       const { data, error } = await supabase.rpc("award_pinecones", {
         _amount: amount,
-        _source: "purchase",
+        _source: "充值",
         _note: label,
       });
       if (error) {
