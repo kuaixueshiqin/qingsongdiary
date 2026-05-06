@@ -245,7 +245,23 @@ export function useDiaryEntries() {
     [user]
   );
 
-  return { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply, reload };
+  const deleteReply = useCallback(async (entryId: string, commentId: string, replyId: string) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === entryId
+          ? {
+              ...e,
+              comments: e.comments.map((c) =>
+                c.id === commentId ? { ...c, replies: c.replies.filter((r) => r.id !== replyId) } : c
+              ),
+            }
+          : e
+      )
+    );
+    await supabase.from("comment_replies").delete().eq("id", replyId);
+  }, []);
+
+  return { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply, deleteReply, reload };
 }
 
 /** Hook: custom companions stored in DB; merged with built-in. */

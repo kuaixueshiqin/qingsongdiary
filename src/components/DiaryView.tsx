@@ -53,7 +53,7 @@ const tagColors: Record<string, string> = {
 };
 
 const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
-  const { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply } = useDiaryEntries();
+  const { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply, deleteReply } = useDiaryEntries();
   const { customCompanions } = useCustomCompanions();
   const { randomDrop } = usePinecones();
   const allCompanions = [...companions, ...customCompanions];
@@ -86,6 +86,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [billingCategory, setBillingCategory] = useState("");
   const [loadingReply, setLoadingReply] = useState<string | null>(null);
   const [collapsedReplies, setCollapsedReplies] = useState<Set<string>>(new Set());
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+  const [replyToReplyText, setReplyToReplyText] = useState("");
+  const [replyToReplyMentions, setReplyToReplyMentions] = useState<MentionTag[]>([]);
 
   // Diary writing customization
   const BG_OPTIONS = [
@@ -366,6 +369,57 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     }
   };
 
+  const handleDeleteReply = async (entryId: string, commentId: string, replyId: string) => {
+    await deleteReply(entryId, commentId, replyId);
+    setActiveReplyId(null);
+    toast.success("回复已删除");
+  };
+
+  const handleReplyToReply = async (entryId: string, comment: DiaryComment) => {
+    if (!replyToReplyText.trim() || loadingReply) return;
+    const savedText = replyToReplyText.trim();
+    const savedMentions = [...replyToReplyMentions];
+    setReplyToReplyText("");
+    setReplyToReplyMentions([]);
+    setActiveReplyId(null);
+    setLoadingReply(comment.id);
+
+    await addReply(entryId, comment.id, "user", comment.companionId, savedText);
+    randomDrop("reply");
+
+    const respondingIds = new Set<string>();
+    savedMentions.forEach((m) => respondingIds.add(m.id));
+
+    const chatMessages = [
+      { role: "assistant" as const, content: comment.text },
+      ...comment.replies.map((r) => ({ role: r.role, content: r.text })),
+      { role: "user" as const, content: savedText },
+    ];
+
+    if (respondingIds.size === 0) {
+      setLoadingReply(null);
+      return;
+    }
+
+    try {
+      for (const compId of respondingIds) {
+        const { data, error } = await supabase.functions.invoke("companion-chat", {
+          body: { companionId: compId, messages: chatMessages },
+        });
+        if (error) throw error;
+        await addReply(entryId, comment.id, "assistant", compId, data?.reply || "...");
+      }
+    } catch (e: any) {
+      console.error("Reply-to-reply error:", e);
+      const msg = e?.message || "";
+      if (msg.includes("429")) toast.error("AI 太忙啦，请稍后再试");
+      else if (msg.includes("402")) toast.error("AI 额度已用完，请充值后再试");
+      else toast.error(msg || "AI回复失败");
+    } finally {
+      setLoadingReply(null);
+    }
+  };
+
   const handleSaveDiary = async () => {
     if (!newContent.trim()) return;
     const created = await createEntry(newContent);
@@ -619,21 +673,52 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                               <div className="pl-5 border-l-2 border-border ml-3 space-y-1.5">
                                 {comment.replies.map((reply) => {
                                   const replyComp = allCompanions.find((c) => c.id === reply.companionId);
+                                  const isActive = activeReplyId === reply.id;
                                   return (
-                                    <div key={reply.id} className="flex items-start gap-2 animate-in fade-in duration-300">
-                                      {reply.role === "user" ? (
-                                        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-primary/10 text-foreground max-w-[80%]">
-                                          <span className="flex-shrink-0">🧑</span>
-                                          <span className="font-medium flex-shrink-0">我</span>
-                                          <span className="opacity-70">{reply.text}</span>
-                                          <span className="text-[9px] text-muted-foreground/40 ml-1 flex-shrink-0">{reply.time}</span>
-                                        </div>
-                                      ) : (
-                                        <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs ${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"} max-w-[80%]`}>
-                                          <span className="flex-shrink-0">{replyComp?.avatar ?? "🤖"}</span>
-                                          <span className="font-medium flex-shrink-0">{replyComp?.name ?? "AI"}</span>
-                                          <span className="opacity-70">{reply.text}</span>
-                                          <span className="text-[9px] opacity-40 ml-1 flex-shrink-0">{reply.time}</span>
+                                    <div key={reply.id} className="space-y-1 animate-in fade-in duration-300">
+                                      <div className="flex items-center gap-1.5">
+                                        <button
+                                          onClick={() => setActiveReplyId(isActive ? null : reply.id)}
+                                          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs max-w-[80%] transition-all ${
+                                            isActive
+                                              ? "bg-foreground text-primary-foreground"
+                                              : reply.role === "user"
+                                              ? "bg-primary/10 text-foreground"
+                                              : `${replyComp?.colorClass ?? "bg-secondary"} ${replyComp?.textColorClass ?? "text-foreground"}`
+                                          }`}
+                                        >
+                                          <span className="flex-shrink-0">{reply.role === "user" ? "🧑" : (replyComp?.avatar ?? "🤖")}</span>
+                                          <span className="font-medium flex-shrink-0">{reply.role === "user" ? "我" : (replyComp?.name ?? "AI")}</span>
+                                          <span className={isActive ? "text-primary-foreground/80" : "opacity-70"}>{reply.text}</span>
+                                          <span className={`text-[9px] ml-1 flex-shrink-0 ${isActive ? "text-primary-foreground/50" : "opacity-40"}`}>{reply.time}</span>
+                                        </button>
+                                        {isActive && (
+                                          <>
+                                            {reply.role === "user" && (
+                                              <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteReply(selectedEntry.id, comment.id, reply.id); }}
+                                                className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200"
+                                              >
+                                                <Trash2 size={12} />
+                                              </button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                      {isActive && (
+                                        <div className="flex gap-2 animate-in slide-in-from-top-2 duration-200">
+                                          <MentionInput
+                                            autoFocus
+                                            value={replyToReplyText}
+                                            mentions={replyToReplyMentions}
+                                            onChange={(text, mentions) => { setReplyToReplyText(text); setReplyToReplyMentions(mentions); }}
+                                            onSubmit={() => handleReplyToReply(selectedEntry.id, comment)}
+                                            placeholder={`回复 ${reply.role === "user" ? "我" : (replyComp?.name ?? "AI")}... 输入@可呼叫伙伴`}
+                                            companions={allCompanions}
+                                          />
+                                          <button onClick={() => handleReplyToReply(selectedEntry.id, comment)} disabled={!replyToReplyText.trim() || !!loadingReply} className="p-1.5 bg-primary text-primary-foreground rounded-lg disabled:opacity-30 self-end">
+                                            <Send size={12} />
+                                          </button>
                                         </div>
                                       )}
                                     </div>
