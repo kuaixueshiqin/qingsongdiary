@@ -383,7 +383,7 @@ const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companio
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder={`给 ${companion.name} 回信...`}
+            placeholder={`给 ${companion.name} 写信...`}
             className="flex-1 bg-secondary border border-border rounded-full py-2.5 px-5 focus:outline-none focus:border-muted-foreground/40 text-sm text-foreground placeholder:text-muted-foreground/30"
           />
           <button onClick={handleSend} disabled={!input.trim()} className="p-2.5 bg-primary text-primary-foreground rounded-full disabled:opacity-30 transition-opacity">
