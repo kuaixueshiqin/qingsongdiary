@@ -19,7 +19,7 @@ interface Props {
 const SOURCE_LABEL: Record<string, string> = {
   checkin: "每日签到",
   diary_write: "记录日记",
-  comment_reply: "回复评论",
+  comment_reply: "回复",
   letter_write: "写信",
   companion_unlock: "解锁伙伴",
   shop_purchase: "充值松果",

@@ -62,8 +62,8 @@ export function usePinecones() {
       if (typeof data === "number") setBalance(data);
       const labels: Record<string, string> = {
         diary: "日记",
-        reply: "评论",
-        letter: "书信",
+        reply: "回复",
+        letter: "回信",
       };
       toast.success(`🌰 +${amount} 松果`, { description: `${labels[source] || source}奖励` });
       return amount;

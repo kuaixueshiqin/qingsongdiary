@@ -14,7 +14,7 @@ interface LogItem {
 }
 
 const KIND_META: Record<LogItem["kind"], { label: string; icon: any; color: string }> = {
-  reply: { label: "回复评论", icon: MessageCircle, color: "bg-companion-indigo text-companion-indigo-text" },
+  reply: { label: "回复", icon: MessageCircle, color: "bg-companion-indigo text-companion-indigo-text" },
   mail: { label: "回信", icon: Mail, color: "bg-companion-amber text-companion-amber-text" },
   comment: { label: "伙伴留下评论", icon: Sparkles, color: "bg-companion-green text-companion-green-text" },
 };
