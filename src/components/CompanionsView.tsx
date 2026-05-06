@@ -38,7 +38,7 @@ const CompanionsView = () => {
     ...allCompanions.filter((c) => favorites.includes(c.id)),
     ...allCompanions.filter((c) => !favorites.includes(c.id)),
   ];
-  const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
+  const [intimacyFor, setIntimacyFor] = useState<Companion | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
   // Agent is considered owned if matched by id (this session) OR if a companion
