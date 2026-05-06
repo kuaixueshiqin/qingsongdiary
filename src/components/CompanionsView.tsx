@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useCustomCompanions } from "@/hooks/useUserData";
 import { usePinecones } from "@/hooks/usePinecones";
 import PineconeShop from "@/components/PineconeShop";
+import IntimacyLogView from "@/components/IntimacyLogView";
 
 const AVATAR_OPTIONS = ["🤖", "🦊", "🐱", "🐶", "🦉", "🌸", "🔥", "💎", "🎭", "🌈", "🍀"];
 
@@ -39,6 +40,7 @@ const CompanionsView = () => {
     ...allCompanions.filter((c) => !favorites.includes(c.id)),
   ];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
+  const [intimacyFor, setIntimacyFor] = useState<Companion | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
   // Agent is considered owned if matched by id (this session) OR if a companion
@@ -208,6 +210,10 @@ const CompanionsView = () => {
   }
 
   // Settings panel
+  if (intimacyFor) {
+    return <IntimacyLogView companion={intimacyFor} onBack={() => setIntimacyFor(null)} />;
+  }
+
   if (settingsFor) {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
@@ -551,15 +557,19 @@ const CompanionsView = () => {
                 <p className="text-[10px] text-muted-foreground/30 mt-0.5">回复时长: {comp.delay}</p>
               </div>
             </div>
-            <div className="space-y-1">
+            <button
+              onClick={() => setIntimacyFor(comp)}
+              className="w-full text-left space-y-1 active:opacity-70 transition-opacity"
+              aria-label="查看亲密度记录"
+            >
               <div className="flex justify-between items-center text-[10px] font-bold">
                 <div className="flex items-center gap-1 text-intimacy"><Heart size={10} fill="currentColor" /> 亲密度</div>
-                <span className="text-muted-foreground/40">{comp.intimacy}/100</span>
+                <span className="text-muted-foreground/40">{comp.intimacy}/100 ›</span>
               </div>
               <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                 <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
               </div>
-            </div>
+            </button>
             <div className="absolute top-4 right-4 flex items-center gap-2">
               <button
                 onClick={() => toggleFavorite(comp.id)}
