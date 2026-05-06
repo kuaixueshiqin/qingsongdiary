@@ -479,6 +479,76 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
     if (newContent.trim()) updateEntry(entryId, { content: newContent });
   };
 
+  const triggerMentionComment = async (entryId: string, paraIdx: number, paraText: string, compId: string) => {
+    const comp = allCompanions.find((c) => c.id === compId);
+    if (!comp) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("companion-chat", {
+        body: { companionId: compId, messages: [{ role: "user", content: paraText }] },
+      });
+      if (error) throw error;
+      await addComment(entryId, {
+        companionId: compId,
+        text: data?.reply || "...",
+        lineIndex: paraIdx,
+        highlightText: "",
+      });
+    } catch (e: any) {
+      console.error("Mention comment error:", e);
+      const msg = e?.message || "";
+      if (msg.includes("429")) toast.error("AI 太忙啦，请稍后再试");
+      else if (msg.includes("402")) toast.error("AI 额度已用完");
+      else toast.error("AI 评论失败");
+    }
+  };
+
+  const handleParaInput = (e: React.FormEvent<HTMLParagraphElement>, paraIdx: number) => {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) { setParaMention(null); return; }
+    const range = sel.getRangeAt(0);
+    if (range.startContainer.nodeType !== Node.TEXT_NODE) { setParaMention(null); return; }
+    const before = range.startContainer.textContent?.slice(0, range.startOffset) || "";
+    const atIdx = before.lastIndexOf("@");
+    if (atIdx === -1) { setParaMention(null); return; }
+    const afterAt = before.slice(atIdx + 1);
+    if (/\s/.test(afterAt)) { setParaMention(null); return; }
+    const rect = range.getBoundingClientRect();
+    setParaMention({ paraIdx, filter: afterAt, x: rect.left, y: rect.bottom });
+  };
+
+  const insertParaMention = (entryId: string, paraIdx: number, comp: { id: string; name: string }) => {
+    // Remove the "@filter" text from the editable paragraph and persist
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) { setParaMention(null); return; }
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent || "";
+      const before = text.slice(0, range.startOffset);
+      const after = text.slice(range.startOffset);
+      const atIdx = before.lastIndexOf("@");
+      if (atIdx !== -1) {
+        node.textContent = before.slice(0, atIdx) + after;
+        const newRange = document.createRange();
+        newRange.setStart(node, atIdx);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+    }
+    setParaMention(null);
+    // Persist current content + trigger AI comment
+    const paraEl = (sel.anchorNode as Node)?.parentElement?.closest("p");
+    const allParas = selectedEntry!.content.split("\n").filter(Boolean);
+    if (paraEl && paraEl.textContent != null) {
+      allParas[paraIdx] = paraEl.textContent;
+      handleContentBlur(entryId, allParas.join("\n"));
+    }
+    const paraText = allParas[paraIdx] || "";
+    triggerMentionComment(entryId, paraIdx, paraText, comp.id);
+    toast(`已呼叫 ${comp.name}，正在评论...`);
+  };
+
   const handleEditBilling = (entryId: string) => {
     const amount = parseFloat(billingAmount);
     if (isNaN(amount) || !billingCategory.trim()) {
