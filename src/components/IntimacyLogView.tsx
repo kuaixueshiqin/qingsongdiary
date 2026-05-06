@@ -125,7 +125,14 @@ export default function IntimacyLogView({ companion, onBack }: { companion: Comp
         <button onClick={onBack} className="text-muted-foreground active:scale-90 transition-transform">
           <ChevronLeft size={24} />
         </button>
-        <span className="text-sm font-bold text-foreground">{companion.name} · 亲密度记录</span>
+        <span className="text-sm font-bold text-foreground flex-1">{companion.name} · 亲密度记录</span>
+        <button
+          onClick={() => setShowHelp(true)}
+          className="text-muted-foreground/40 hover:text-muted-foreground active:scale-90 transition-all"
+          aria-label="如何提升亲密度"
+        >
+          <HelpCircle size={20} />
+        </button>
       </div>
 
       <div className="px-4">
