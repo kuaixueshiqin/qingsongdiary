@@ -779,16 +779,12 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                                           <span className={`text-[9px] ml-1 flex-shrink-0 ${isActive ? "text-primary-foreground/50" : "opacity-40"}`}>{reply.time}</span>
                                         </button>
                                         {isActive && (
-                                          <>
-                                            {reply.role === "user" && (
-                                              <button
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteReply(selectedEntry.id, comment.id, reply.id); }}
-                                                className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200"
-                                              >
-                                                <Trash2 size={12} />
-                                              </button>
-                                            )}
-                                          </>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteReply(selectedEntry.id, comment.id, reply.id); }}
+                                            className="p-1.5 bg-secondary rounded-lg text-destructive/60 hover:text-destructive animate-in fade-in duration-200"
+                                          >
+                                            <Trash2 size={12} />
+                                          </button>
                                         )}
                                       </div>
                                       {isActive && (
