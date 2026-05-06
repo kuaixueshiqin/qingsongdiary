@@ -167,7 +167,7 @@ const MailboxView = () => {
   return (
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-end">
-        <h1 className="text-2xl font-black text-foreground">信箱</h1>
+        <h1 className="text-2xl font-black text-foreground font-cangpin">信箱</h1>
         <button onClick={() => setShowNewChat(true)} className="bg-primary text-primary-foreground px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
           <PenLine size={14} /><span className="text-xs font-bold">写信</span>
         </button>

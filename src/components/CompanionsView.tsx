@@ -527,7 +527,7 @@ const CompanionsView = () => {
     <div className="pb-4">
       <div className="px-6 pt-14 pb-4 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-black text-foreground">伙伴</h1>
+          <h1 className="text-2xl font-black text-foreground font-cangpin">伙伴</h1>
         </div>
         <button
           onClick={() => setView("square")}
