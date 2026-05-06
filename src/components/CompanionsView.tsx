@@ -22,7 +22,22 @@ const CompanionsView = () => {
   const { customCompanions, createCompanion, updateCompanion, deleteCompanion } = useCustomCompanions();
   const [view, setView] = useState<"my" | "square" | "publish">("my");
   const [publishedIds, setPublishedIds] = useState<string[]>([]);
-  const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("companion_favorites") || "[]"); } catch { return []; }
+  });
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev];
+      localStorage.setItem("companion_favorites", JSON.stringify(next));
+      toast.success(prev.includes(id) ? "已取消特别关注" : "已加入特别关注");
+      return next;
+    });
+  };
+  const allCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
+  const myCompanions: Companion[] = [
+    ...allCompanions.filter((c) => favorites.includes(c.id)),
+    ...allCompanions.filter((c) => !favorites.includes(c.id)),
+  ];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
