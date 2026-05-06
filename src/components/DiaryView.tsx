@@ -90,6 +90,9 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   const [replyToReplyText, setReplyToReplyText] = useState("");
   const [replyToReplyMentions, setReplyToReplyMentions] = useState<MentionTag[]>([]);
 
+  // @-mention picker for paragraph editor
+  const [paraMention, setParaMention] = useState<{ paraIdx: number; filter: string; x: number; y: number } | null>(null);
+
   // Diary writing customization
   const BG_OPTIONS = [
     { id: "cream", label: "奶油米白", className: "bg-brand-cream" },
