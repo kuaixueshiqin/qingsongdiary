@@ -702,17 +702,19 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
                           <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => {
-                                setExpandedComments(prev => { const next = new Set(prev); if (next.has(comment.id)) next.delete(comment.id); else next.add(comment.id); return next; });
                                 if (isReplying) {
+                                  setExpandedComments(new Set());
                                   setReplyingTo(null);
                                   setReplyText("");
                                   setReplyMentions([]);
                                   setActiveCommentId(null);
                                 } else {
+                                  setExpandedComments(new Set([comment.id]));
                                   setActiveCommentId(comment.id);
                                   setReplyingTo(comment.id);
                                   setReplyText("");
                                   setReplyMentions([]);
+                                  setActiveReplyId(null);
                                 }
                               }}
                               className={`flex items-start gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all ${isReplying ? "bg-foreground text-primary-foreground" : `${comp.colorClass} ${comp.textColorClass}`} ${expandedComments.has(comment.id) ? "max-w-[90%]" : "max-w-[75%]"}`}
