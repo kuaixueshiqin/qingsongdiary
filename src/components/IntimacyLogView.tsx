@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { HelpCircle } from "lucide-react";
 import { ChevronLeft, Heart, MessageCircle, Mail, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
