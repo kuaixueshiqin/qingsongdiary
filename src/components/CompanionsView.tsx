@@ -22,7 +22,22 @@ const CompanionsView = () => {
   const { customCompanions, createCompanion, updateCompanion, deleteCompanion } = useCustomCompanions();
   const [view, setView] = useState<"my" | "square" | "publish">("my");
   const [publishedIds, setPublishedIds] = useState<string[]>([]);
-  const myCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("companion_favorites") || "[]"); } catch { return []; }
+  });
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [id, ...prev];
+      localStorage.setItem("companion_favorites", JSON.stringify(next));
+      toast.success(prev.includes(id) ? "已取消特别关注" : "已加入特别关注");
+      return next;
+    });
+  };
+  const allCompanions: Companion[] = [...builtInCompanions, ...customCompanions];
+  const myCompanions: Companion[] = [
+    ...allCompanions.filter((c) => favorites.includes(c.id)),
+    ...allCompanions.filter((c) => !favorites.includes(c.id)),
+  ];
   const [settingsFor, setSettingsFor] = useState<Companion | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<Companion | null>(null);
   const [addedAgents, setAddedAgents] = useState<string[]>([]);
@@ -530,7 +545,7 @@ const CompanionsView = () => {
                     <span className="font-bold text-foreground">{comp.name}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${comp.colorClass} ${comp.textColorClass}`}>{comp.role}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground/30 mr-6">Lv.{comp.level}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground/30 mr-14">Lv.{comp.level}</span>
                 </div>
                 <p className="text-xs text-muted-foreground/50 mt-1">{comp.bio}</p>
                 <p className="text-[10px] text-muted-foreground/30 mt-0.5">回复时长: {comp.delay}</p>
@@ -545,9 +560,18 @@ const CompanionsView = () => {
                 <div className="h-full bg-intimacy rounded-full transition-all duration-1000" style={{ width: `${comp.intimacy}%` }} />
               </div>
             </div>
-            <button onClick={() => setSettingsFor(comp)} className="absolute top-4 right-4 text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
-              <Settings size={14} />
-            </button>
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <button
+                onClick={() => toggleFavorite(comp.id)}
+                className={`active:scale-90 transition-all ${favorites.includes(comp.id) ? "text-intimacy" : "text-muted-foreground/20 hover:text-muted-foreground"}`}
+                aria-label="特别关注"
+              >
+                <Heart size={14} fill={favorites.includes(comp.id) ? "currentColor" : "none"} />
+              </button>
+              <button onClick={() => setSettingsFor(comp)} className="text-muted-foreground/20 hover:text-muted-foreground active:scale-90 transition-all">
+                <Settings size={14} />
+              </button>
+            </div>
           </div>
         ))}
         {/* Create custom companion card */}
