@@ -33,6 +33,7 @@ export default function IntimacyLogView({ companion, onBack }: { companion: Comp
   const { user } = useAuth();
   const [items, setItems] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     if (!user) return;
