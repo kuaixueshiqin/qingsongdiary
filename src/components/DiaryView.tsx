@@ -53,7 +53,7 @@ const tagColors: Record<string, string> = {
 };
 
 const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
-  const { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply } = useDiaryEntries();
+  const { entries, loading, createEntry, updateEntry, deleteEntry, addComment, deleteComment, addReply, deleteReply } = useDiaryEntries();
   const { customCompanions } = useCustomCompanions();
   const { randomDrop } = usePinecones();
   const allCompanions = [...companions, ...customCompanions];
