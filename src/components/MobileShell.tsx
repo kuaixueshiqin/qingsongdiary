@@ -13,8 +13,8 @@ const MobileShell = ({ children }: MobileShellProps) => {
       className="flex flex-col bg-background paper-texture overflow-hidden w-screen"
       style={{
         height: "100dvh",
-        paddingTop: "env(safe-area-inset-top)",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingTop: "max(env(safe-area-inset-top), 24px)",
+        paddingBottom: "max(env(safe-area-inset-bottom), 0px)",
       }}
     >
       {children}
