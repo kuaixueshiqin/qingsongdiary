@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { ChevronLeft, Plus, Pencil, ChevronRight, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { useEdgeSwipeBack } from "@/hooks/useEdgeSwipeBack";
 
 const DEFAULT_CATEGORIES = ["餐饮", "交通", "娱乐", "购物", "生活", "其他"];
 const CUSTOM_CATEGORIES_KEY = "billing_custom_categories";
@@ -261,6 +262,7 @@ const SwipeableItem = ({
 };
 
 const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateToDiary }: BillingDetailViewProps) => {
+  useEdgeSwipeBack(onBack);
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editCategory, setEditCategory] = useState("");
