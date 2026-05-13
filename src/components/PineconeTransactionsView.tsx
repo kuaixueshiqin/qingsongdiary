@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ShoppingBag, ArrowDownCircle, ArrowUpCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useEdgeSwipeBack } from "@/hooks/useEdgeSwipeBack";
 
 interface Tx {
   id: string;
@@ -38,6 +39,7 @@ const fmtDate = (iso: string) => {
 };
 
 const PineconeTransactionsView = ({ balance, onBack, onOpenShop }: Props) => {
+  useEdgeSwipeBack(onBack);
   const [filter, setFilter] = useState<"all" | "income" | "expense">("all");
   const [txs, setTxs] = useState<Tx[]>([]);
   const [loading, setLoading] = useState(true);

@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCustomCompanions } from "@/hooks/useUserData";
 import { usePinecones } from "@/hooks/usePinecones";
+import { useEdgeSwipeBack } from "@/hooks/useEdgeSwipeBack";
 
 interface Message {
   id: string;
@@ -255,6 +256,7 @@ const MailboxView = () => {
 };
 
 const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companion; conversationId: string; onBack: () => void }) => {
+  useEdgeSwipeBack(onBack);
   const { user } = useAuth();
   const { randomDrop } = usePinecones();
   const [messages, setMessages] = useState<Message[]>([]);

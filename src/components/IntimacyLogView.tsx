@@ -3,6 +3,7 @@ import { HelpCircle } from "lucide-react";
 import { ChevronLeft, Heart, MessageCircle, Mail, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useEdgeSwipeBack } from "@/hooks/useEdgeSwipeBack";
 import type { Companion } from "@/lib/data";
 
 interface LogItem {
@@ -30,6 +31,7 @@ const formatTime = (iso: string) => {
 const isImageAvatar = (a: string) => a.startsWith("data:image");
 
 export default function IntimacyLogView({ companion, onBack }: { companion: Companion; onBack: () => void }) {
+  useEdgeSwipeBack(onBack);
   const { user } = useAuth();
   const [items, setItems] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(true);

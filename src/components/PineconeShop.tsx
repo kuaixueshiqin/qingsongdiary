@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { usePinecones } from "@/hooks/usePinecones";
+import { useEdgeSwipeBack } from "@/hooks/useEdgeSwipeBack";
 
 interface PineconeShopProps {
   open: boolean;
@@ -19,6 +20,7 @@ const BUNDLES = [
 const PineconeShop = ({ open, onClose, reason }: PineconeShopProps) => {
   const { balance, mockTopUp } = usePinecones();
   const [buying, setBuying] = useState<string | null>(null);
+  useEdgeSwipeBack(onClose, open);
 
   if (!open) return null;
 
