@@ -17,8 +17,37 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `你是"轻松书"App的AI助手。用户会给你一个话题关键词和他们的日记内容。
-你需要从日记中提取与该话题相关的信息，生成一个精简的看板卡片数据。
+    // Step 1: pull live web context for the topic (评分、简介、推荐等)
+    let webContext = "";
+    const FIRECRAWL_API_KEY = Deno.env.get("FIRECRAWL_API_KEY");
+    if (FIRECRAWL_API_KEY) {
+      try {
+        const sRes = await fetch("https://api.firecrawl.dev/v2/search", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${FIRECRAWL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: `${topic} 推荐 评分 介绍`, limit: 5 }),
+        });
+        if (sRes.ok) {
+          const sData = await sRes.json();
+          const results = sData?.data?.web || sData?.data || [];
+          if (Array.isArray(results) && results.length > 0) {
+            webContext = results
+              .slice(0, 5)
+              .map((r: any, i: number) => `${i + 1}. ${r.title || ""} — ${r.description || r.snippet || ""}`)
+              .join("\n");
+          }
+        }
+      } catch (e) { console.error("firecrawl search error:", e); }
+    }
+
+    const systemPrompt = `你是"轻松书"App的AI助手。用户会给你一个话题关键词、他们的日记内容、以及该话题的实时联网信息。
+你需要：
+1. 优先从日记中提取与话题相关的个人经历
+2. 结合联网信息补充客观介绍、评分或推荐（用自然口吻，不要照搬）
+3. 生成一个精简的看板卡片
 
 请使用 generate_board 工具返回结构化数据。`;
 
@@ -41,7 +70,7 @@ serve(async (req) => {
 以下是我的日记内容:
 ${diaryContents}
 
-请从日记中提取与"${topic}"相关的内容，生成看板数据。如果日记中没有直接相关内容，请基于话题给出合理的推断或建议性条目。`,
+${webContext ? `以下是关于"${topic}"的实时联网信息（参考用）:\n${webContext}\n\n` : ""}请从日记中提取与"${topic}"相关的内容，结合联网信息生成看板数据。如果日记中没有直接相关内容，请基于联网信息和话题给出合理的推荐性条目。`,
             },
           ],
           tools: [
