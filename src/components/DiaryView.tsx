@@ -569,7 +569,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   if (isWriting) {
     return (
       <div className={`pb-4 animate-in slide-in-from-right duration-300 flex flex-col h-full ${bgClass} ${fontClass} ${textureClass}`}>
-        <div className="px-6 pt-14 pb-4 flex items-center gap-3">
+        <div className="px-6 pt-6 pb-4 flex items-center gap-3">
           <button onClick={() => { setIsWriting(false); setNewContent(""); setNewMentions([]); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
           </button>
@@ -602,7 +602,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
   if (selectedEntry) {
     return (
       <div className={`pb-4 animate-in slide-in-from-right duration-300 ${bgClass} ${fontClass} ${textureClass} min-h-full`}>
-        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+        <div className="px-5 pt-6 pb-4 flex items-center gap-3">
           <button onClick={() => { setSelectedEntryId(null); setActiveCommentId(null); setReplyingTo(null); setEditingBilling(false); }} className="text-muted-foreground">
             <ChevronLeft size={24} />
           </button>
@@ -937,7 +937,7 @@ const DiaryView = ({ initialEntryId, onEntryViewed }: DiaryViewProps) => {
           <div className="ripple-circle" style={{ width: 60, height: 60, top: '50%', left: '50%', marginLeft: -30, marginTop: -30, animationDelay: '0.3s' }} />
         </>
       )}
-      <div className="px-6 pt-14 pb-4 flex justify-between items-end">
+      <div className="px-6 pt-6 pb-4 flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-black text-foreground font-cangpin">日记</h1>
         </div>

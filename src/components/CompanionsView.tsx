@@ -166,7 +166,7 @@ const CompanionsView = () => {
     const isLiked = likedAgents.includes(viewingAgent.id);
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
-        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+        <div className="px-5 pt-6 pb-4 flex items-center gap-3">
           <button onClick={() => setViewingAgent(null)} className="text-muted-foreground"><ChevronLeft size={24} /></button>
           <span className="text-sm font-bold text-foreground">伙伴详情</span>
         </div>
@@ -217,7 +217,7 @@ const CompanionsView = () => {
   if (settingsFor) {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
-        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+        <div className="px-5 pt-6 pb-4 flex items-center gap-3">
           <button onClick={() => setSettingsFor(null)} className="text-muted-foreground"><ChevronLeft size={24} /></button>
           <span className="text-sm font-bold text-foreground">{settingsFor.name} · 设置</span>
         </div>
@@ -320,7 +320,7 @@ const CompanionsView = () => {
   if (showCreate) {
     return (
       <div className="pb-4 animate-in slide-in-from-right duration-300">
-        <div className="px-5 pt-14 pb-4 flex items-center gap-3">
+        <div className="px-5 pt-6 pb-4 flex items-center gap-3">
           <button onClick={() => setShowCreate(false)} className="text-muted-foreground"><ChevronLeft size={24} /></button>
           <span className="text-sm font-bold text-foreground">自定义伙伴</span>
         </div>
@@ -396,7 +396,7 @@ const CompanionsView = () => {
     );
     return (
       <div className="pb-4">
-        <div className="px-6 pt-14 pb-4 flex items-center gap-3">
+        <div className="px-6 pt-6 pb-4 flex items-center gap-3">
           <button onClick={() => setView("square")} className="text-muted-foreground active:scale-90 transition-transform">
             <ChevronLeft size={24} />
           </button>
@@ -462,7 +462,7 @@ const CompanionsView = () => {
   if (view === "square") {
     return (
       <div className="pb-4">
-        <div className="px-6 pt-14 pb-4 flex items-center justify-between gap-3">
+        <div className="px-6 pt-6 pb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <button onClick={() => setView("my")} className="text-muted-foreground active:scale-90 transition-transform">
               <ChevronLeft size={24} />
@@ -525,7 +525,7 @@ const CompanionsView = () => {
 
   return (
     <div className="pb-4">
-      <div className="px-6 pt-14 pb-4 flex justify-between items-center">
+      <div className="px-6 pt-6 pb-4 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-black text-foreground font-cangpin">伙伴</h1>
         </div>

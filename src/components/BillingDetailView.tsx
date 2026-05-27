@@ -409,7 +409,7 @@ const BillingDetailView = ({ billingItems, setBillingItems, onBack, onNavigateTo
 
   return (
     <div className="pb-4 animate-in slide-in-from-right duration-300">
-      <div className="px-5 pt-14 pb-4 flex items-center justify-between">
+      <div className="px-5 pt-6 pb-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="text-muted-foreground"><ChevronLeft size={24} /></button>
           <div>
