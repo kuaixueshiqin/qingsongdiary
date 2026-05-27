@@ -167,7 +167,7 @@ const MailboxView = () => {
 
   return (
     <div className="pb-4">
-      <div className="px-6 pt-14 pb-4 flex justify-between items-end">
+      <div className="px-6 pt-6 pb-4 flex justify-between items-end">
         <h1 className="text-2xl font-black text-foreground font-cangpin">信箱</h1>
         <button onClick={() => setShowNewChat(true)} className="bg-primary text-primary-foreground px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
           <PenLine size={14} /><span className="text-xs font-bold">写信</span>
@@ -332,7 +332,7 @@ const ChatDetail = ({ companion, conversationId, onBack }: { companion: Companio
 
   return (
     <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
-      <div className="px-4 pt-14 pb-3 flex items-center justify-between border-b border-border">
+      <div className="px-4 pt-6 pb-3 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
           <button onClick={onBack} className="text-muted-foreground"><ChevronLeft size={22} /></button>
           <div className={`w-8 h-8 ${companion.colorClass} rounded-lg flex items-center justify-center text-lg`}>{companion.avatar}</div>

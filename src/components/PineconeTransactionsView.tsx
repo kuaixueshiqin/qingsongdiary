@@ -71,7 +71,7 @@ const PineconeTransactionsView = ({ balance, onBack, onOpenShop }: Props) => {
   return (
     <div className="pb-4 animate-in slide-in-from-right duration-300">
       {/* Header */}
-      <div className="px-5 pt-14 pb-3 flex items-center justify-between gap-3">
+      <div className="px-5 pt-6 pb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <button onClick={onBack} className="text-muted-foreground active:scale-90 transition-transform">
             <ChevronLeft size={24} />

@@ -213,7 +213,7 @@ const ProfileView = () => {
   return (
     <div className="pb-4">
       {/* Header */}
-      <div className="px-6 pt-14 pb-2">
+      <div className="px-6 pt-6 pb-2">
         <h1 className="text-2xl font-black text-foreground font-cangpin">我的</h1>
         
       </div>
