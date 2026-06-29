@@ -111,6 +111,19 @@ const Auth = () => {
           </button>
         </form>
 
+        {/* Guest entry */}
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => {
+              localStorage.setItem("guest_mode", "1");
+              navigate("/");
+            }}
+            className="text-xs text-muted-foreground underline underline-offset-2"
+          >
+            暂不登录，直接进入
+          </button>
+        </div>
+
         {/* Switch mode */}
         <div className="mt-6 text-center">
           <button

@@ -12,14 +12,15 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const { user, loading } = useAuth();
-  if (loading) {
+  const isGuest = localStorage.getItem("guest_mode") === "1";
+  if (loading && !isGuest) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-muted">
         <div className="text-muted-foreground text-sm">载入松果林...</div>
       </div>
     );
   }
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user && !isGuest) return <Navigate to="/auth" replace />;
   return children;
 };
 
