@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+
 import MobileShell from "@/components/MobileShell";
 import BottomNav from "@/components/BottomNav";
 import DiaryView from "@/components/DiaryView";
